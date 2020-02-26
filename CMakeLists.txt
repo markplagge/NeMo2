@@ -61,10 +61,15 @@ set(CODES_BIN_FOLDER ${CMAKE_BINARY_DIR}/codes_build)
 message("PKG_CONFIG_PATH: ${ROSS_BIN_FOLDER}/lib/pkgconfig")
 set(CODES_ENV_ARGS "PKG_CONFIG_PATH:${ROSS_BIN_FOLDER}/lib/pkgconfig,${CODES_BISON_ARG},CC:${MPI_C_COMPILER},CXX:${MPI_CXX_COMPILER},CFLAGS:${CMAKE_C_FLAGS},CXXFLAGS:${CMAKE_CXX_FLAGS}")
 list(APPEND CODES_CONFIG_OPTS "prefix:${CODES_BIN_FOLDER}")
+message("Current CPP FLAGS: ${CMAKE_CXX_FLAGS}")
+list(APPEND CODES_AUTOCONF_OPTS "D_IO_FILE:FILE")
+list(APPEND CODES_CONFIG_OPTS "D_IO_FILE:FILE")
 
 message(${CODES_ENV_ARGS})
+message("${CODES_CONFIG_OPTS}")
 message(${CODES_CONFIG_OPTS})
-
+string(REPLACE ";" "," CODES_CONFIG_OPT_STR "${CODES_CONFIG_OPTS}")
+message(${CODES_CONFIG_OPT_STR})
 #### ROSSS EXTERNAL PROJECT
 list(APPEND R_CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX:path=${ROSS_BIN_FOLDER} " )
 list(APPEND R_CMAKE_ARGS "-DROSS_BUILD_SHARED_LIBS=ON ")
@@ -86,7 +91,7 @@ ExternalProject_Add(project_CODES
 
         CONFIGURE_COMMAND   autoreconf ${CMAKE_SOURCE_DIR}/external/codes/ -fi -Im4
         COMMAND             ls
-        COMMAND   python3   ${CMAKE_SOURCE_DIR}/codes_config.py --env_vars=${CODES_ENV_ARGS} --codes_path=${CMAKE_SOURCE_DIR}/external/codes "-a ${CODES_CONFIG_OPTS}"
+        COMMAND   python3   ${CMAKE_SOURCE_DIR}/codes_config.py --env_vars=${CODES_ENV_ARGS} --codes_path=${CMAKE_SOURCE_DIR}/external/codes --autoconfig_opts="${CODES_CONFIG_OPT_STR}"
 
         BUILD_COMMAND make
         INSTALL_COMMAND make install

@@ -32,16 +32,9 @@
  *
  * Also implements basic heartbeat code.
  */
-struct INeuroCoreBase{
+class INeuroCoreBase{
 
     INeuroCoreBase();
-
-    virtual void core_init(tw_lp *lp) = 0;
-    virtual void pre_run(tw_lp *lp) = 0;
-    virtual void forward_event(tw_bf *bf, nemo_message *m, tw_lp *lp) = 0;
-    virtual void reverse_event(tw_bf *bf, nemo_message *m, tw_lp *lp) = 0;
-    virtual void core_commit(tw_bf *bf, nemo_message *m, tw_lp *lp) = 0;
-    virtual void core_finish(tw_lp *lp) = 0;
 
     /**
      * forward_loop_handler(). Neurosynaptic generally have common functionality - there
@@ -57,16 +50,8 @@ struct INeuroCoreBase{
     virtual void reverse_heartbeat_handler();
     virtual void send_heartbeat();
     void save_spike(nemo_message *m,long dest_core, long neuron_id);
-    void cleanup_output();
 
     NemoCoreOutput *spike_output;
-    /**
-     * output_mode - sets the spike output mode of this core.
-     * Mode 0 is no output,
-     * Mode 1 is output spikes only
-     * Mode 2 is all spikes output
-     */
-    int output_mode = 2;
     /**
  * The last time that this core had activity. This refers to any  message.
  */
@@ -114,8 +99,30 @@ struct INeuroCoreBase{
     BF_Event_Status evt_stat;
 
 
+public:
+    virtual void core_init(tw_lp *lp) = 0;
 
+    virtual void forward_event(tw_bf *bf, nemo_message *m, tw_lp *lp) = 0;
+
+    virtual void reverse_event(tw_bf *bf, nemo_message *m, tw_lp *lp) = 0;
+
+    virtual void core_commit(tw_bf *bf, nemo_message *m, tw_lp *lp) = 0;
+
+    virtual void pre_run(tw_lp *lp) = 0;
+
+    virtual void core_finish(tw_lp *lp) = 0;
+
+    void cleanup_output();
+
+/**
+ * output_mode - sets the spike output mode of this core.
+ * Mode 0 is no output,
+ * Mode 1 is output spikes only
+ * Mode 2 is all spikes output
+ */
+int output_mode = 2;
 };
 
 
 #endif //NEMOTNG_NEMONEUROCOREBASE_H
+

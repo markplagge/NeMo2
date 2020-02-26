@@ -6,6 +6,7 @@ import argparse
 import logging
 import subprocess as sp
 import os
+import sys
 
 codes_env_args = {
     "BISON":"",
@@ -79,6 +80,9 @@ def split_dict(arg, pair_delim=":",kv_delim=":"):
 def split_dict_pairs(arg, pair_delim=",", kv_delim=":"):
     print(arg)
     result_dict = {}
+    if ";" in arg:
+        pair_delim = ";"
+
     for item in arg.split(pair_delim):
         k,v = item.split(kv_delim)
         k = k.lstrip()
@@ -101,6 +105,7 @@ def list_type(arg, delim=","):
     return v
 
 if __name__ == '__main__':
+    print(sys.argv)
     parser = argparse.ArgumentParser()
     parser.add_argument("--autoreconf_path",type=str)
     parser.add_argument("--paths","-p",type=list_type,help="Path entry overrides for the codes config env. In the "
@@ -108,7 +113,7 @@ if __name__ == '__main__':
     parser.add_argument("--env_vars","-e", type=split_dict_pairs,help="env. variables to pass to CODES config. Form of 'ENV_VAR_NAME:VALUE,ENV_VAR_2:VALUE2'")
     parser.add_argument("--codes_path", "-c", type=base_path)
     parser.add_argument("--autoconfig_opts","-a", type=split_dict_pairs, help="Config options for CODES. Form of "
-                                                                              "'arg_name:val,arg_name:val")
+                                                                              "'arg_name:val,arg_name:val" or "'arg_name:val;arg_name:val")
     parser.add_argument("--flat_namespace", type=bool, help="Add flat namespace")
 
     print(os.getcwd())

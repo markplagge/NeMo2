@@ -2,3 +2,6 @@
 cmake-build-debug/
 external/ROSS
 external/codes
+
+src/.DS_Store
+*.DS_Store
