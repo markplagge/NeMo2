@@ -55,9 +55,15 @@ def run_codes_config(autoreconf = None, codes_path=None,
     codes_config_exe = [codes_path + "/configure"]
     #codes_config_arg = f"{' '.join(['--'+pname + '=' + pval for pname,pval in config_args.items()])}"
     codes_config_arg = ['--'+pname + '=' + pval for pname,pval in config_args.items()]
-    codes_config = codes_config_exe + codes_config_arg
+    codes_config_x = codes_config_exe + codes_config_arg
     print("-" * 100)
     print("-" * 20)
+    codes_config = []
+    for s in codes_config_x:
+        s = s.replace('"','')
+        print(s)
+        codes_config.append(s)
+
     print(codes_config)
     print("-" * 20)
 
