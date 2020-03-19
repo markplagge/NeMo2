@@ -5,3 +5,6 @@ external/codes
 
 src/.DS_Store
 *.DS_Store
+*.vpp
+*.vpp.*
+*.bak_000f
