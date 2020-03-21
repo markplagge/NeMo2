@@ -3,7 +3,7 @@
 #include <iostream>
 #include <nemo.h>
 #include <NemoConfig.h>
-#include "../NemoNeuroCoreBase.h"
+#include "../nemo/neuron_models/NemoNeuroCoreBase.h"
 #include "codes/model-net.h"
 #include "codes/lp-io.h"
 #include "codes/codes.h"

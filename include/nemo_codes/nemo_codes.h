@@ -1,6 +1,6 @@
 #ifndef CODES_NEMO_LIBRARY_H
 #define CODES_NEMO_LIBRARY_H
-#include <ross.h>
+
 #include <codes/model-net.h>
 #include <codes/lp-io.h>
 #include <codes/codes.h>

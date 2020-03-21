@@ -5,11 +5,12 @@
 #ifndef NEMOTNG_NEMOCOREOUTPUT_H
 #define NEMOTNG_NEMOCOREOUTPUT_H
 
+namespace nemo {
+    class NemoCoreOutput {
 
-class NemoCoreOutput {
 
-
-};
+    };
+}
 
 
 #endif //NEMOTNG_NEMOCOREOUTPUT_H

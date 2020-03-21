@@ -7,21 +7,26 @@
 #include <map>
 #include <string>
 #include "nemo.h"
+#include "../nemo_globals.h"
 //#include <rapidjson/rapidjson.h>
-class NemoConfig {
-    int number_of_cores = 4096;
-    std::vector<core_types> core_map;
-    core_types get_core_type(std::string core_type){
-    }
-    std::map<core_types, INeuroCoreBase> core_type_map;
+namespace nemo {
+    class NemoConfig {
+        int number_of_cores = 4096;
+        ::std::vector<core_types> core_map;
+
+        core_types get_core_type(::std::string core_type) {
+        }
+
+        ::std::map<core_types, neuro_system::INeuroCoreBase> core_type_map;
 
 
-};
+    };
 
-const tw_optdef nemo_tw_options [] =
-        {
-                TWOPT_GROUP("NeMo 2 - TNG Runtime Options" ),
+    const tw_optdef nemo_tw_options[] =
+            {
+                    TWOPT_GROUP("NeMo 2 - TNG Runtime Options"),
 
-                TWOPT_END()
-        };
+                    TWOPT_END()
+            };
+}
 #endif //NEMOTNG_NEMOCONFIG_H

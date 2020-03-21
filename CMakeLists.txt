@@ -8,9 +8,9 @@ cmake_minimum_required(VERSION 3.15)
 set (PROJECT_NAME "NeMoTNG")
 set (PROJECT_DESCRIPTION "A parallel discrete even simulation based model of neuromorphic hardware - as a CODES workload")
 set (PROJECT_AUTHOR "Mark Plagge")
-project(${PROJECT_NAME} VERSION 0.0.1 LANGUAGES C CXX)
+project(${PROJECT_NAME} VERSION 0.0.1 LANGUAGES  CXX)
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_C_STANDARD 11)
+#set(CMAKE_C_STANDARD 11)
 
 include(ExternalProject)
 include("cmake/HunterGate.cmake")
@@ -107,7 +107,14 @@ add_dependencies(CODES project_CODES)
 include_directories(${CODES_BIN_FOLDER}/include)
 link_directories(${CODES_BIN_FOLDER}/lib)
 
+
+###### ROSS EXTERNAL PROJECT
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/ROSS)
+
+
+### EIGEN Matrix Vector Library
+#add_subdirectory(${CMAKE_SOURCE_DIR}/external/Eigen)
+set(EIGEN_INCLUDE_FLDR ${CMAKE_SOURCE_DIR}/external/eigen/)
 
 set(ENV{PKG_CONFIG_PATH}  "/Users/markplagge/dev/codes-nemo/cmake-build-debug/codes_build/lib/pkgconfig")
 find_package(PkgConfig REQUIRED)
@@ -121,6 +128,7 @@ message(" !@!!!!${LIBCODES_LDFLAGS}" )
 # LDFLAGS="-L/usr/local/opt/libevent/lib -L/usr/local/Cellar/open-mpi/4.0.2/lib" LIBS="-lmpi"
 #BUILD CODES and install to external/codes_build
 add_subdirectory(src/nemo)
+set_property(TARGET ROSS PROPERTY CXX_STANDARD 14)
 add_subdirectory(src/nemo_codes)
 
 

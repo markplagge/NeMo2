@@ -3,5 +3,5 @@
 set(CATCH_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/test/catch)
 add_library(Catch INTERFACE)
 target_include_directories(Catch INTERFACE ${CATCH_INCLUDE_DIR})
-add_executable(base_tests base_tests.cpp)
+add_executable(base_tests base_tests.cpp test_heartbeat_core.cpp)
 target_include_directories(base_tests PRIVATE Catch)
