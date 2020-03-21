@@ -9,9 +9,9 @@
 #ifndef NEMOTNG_NEMONEUROCOREBASE_H
 #define NEMOTNG_NEMONEUROCOREBASE_H
 #include <ross.h>
-#include "nemo_globals.h"
-#include "neuron_models/NemoNeuronGeneric.h"
-#include "nemo_io/NemoCoreOutput.h"
+#include "../nemo_globals.h"
+#include "neural_models/NemoNeuronGeneric.h"
+#include "../nemo_io/NemoCoreOutput.h"
 
 #define RNG_START(lp) auto rng_count = lp->rng->count
 #define RNG_END(lp)  msg->random_call_count = (lp->rng->count - rng_count)

@@ -4,3 +4,6 @@
 [submodule "external/codes"]
 	path = external/codes
 	url = git@github.com:codes-org/codes.git
+[submodule "external/eigen"]
+	path = external/eigen
+	url = https://gitlab.com/libeigen/eigen.git
