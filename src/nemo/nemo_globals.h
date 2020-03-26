@@ -339,9 +339,9 @@ namespace nemo {
  * @{
  */
 //Todo: implement these functions based on CODES mapping
-    static nemo_id_type get_core_id_from_gid(tw_lpid id);
+     nemo_id_type get_core_id_from_gid(tw_lpid id);
 
-    static nemo_id_type get_local_id_from_gid(tw_lpid id);
+     nemo_id_type get_local_id_from_gid(tw_lpid id);
 /**@}**/
 }
 

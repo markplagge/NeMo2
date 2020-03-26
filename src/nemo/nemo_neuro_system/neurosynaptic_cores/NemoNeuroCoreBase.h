@@ -107,6 +107,8 @@ namespace nemo {
 
 
         public:
+            virtual ~INeuroCoreBase() =default;
+
             INeuroCoreBase(std::shared_ptr<NemoCoreOutput> spikeOutput, long lastActiveTime,
                            long currentNeuroTick, long previousNeuroTick, long lastLeakTime, long leakNeededCount,
                            bool heartbeatSent, int coreLocalId, tw_lp *myLp, tw_bf *myBf,
@@ -115,6 +117,8 @@ namespace nemo {
 
 
             INeuroCoreBase(int coreLocalId, tw_lp *myLp, tw_bf *myBf, BF_Event_Status evtStat, int outputMode);
+
+            INeuroCoreBase();
 
             virtual void core_init(tw_lp *lp) = 0;
 

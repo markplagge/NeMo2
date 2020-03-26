@@ -28,10 +28,12 @@ set(nemo_lib_srcs
         nemo_neuro_system/neurosynaptic_cores/LIFCore.cpp
         NemoConfig.cpp
         CoreLP.cpp
-        nemo_neuro_system/neurosynaptic_cores/HeartbeatTestCore.cpp nemo_ross.h)
+        nemo_neuro_system/neurosynaptic_cores/HeartbeatTestCore.cpp
+        nemo_ross.h mapping_functions.cpp)
 
 add_library(nemo2_lib ${nemo_lib_hdrs} ${nemo_lib_srcs})
 set_property(TARGET nemo2_lib PROPERTY CXX_STANDARD 14)
 message("-------------------------------- ${EIGEN_INCLUDE_FLDR}")
 target_include_directories(nemo2_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/nemo.h ${EIGEN_INCLUDE_FLDR})
+target_link_libraries(nemo2_lib ROSS m)
 #target_link_libraries(nemo2_lib Eigen3::Eigen)

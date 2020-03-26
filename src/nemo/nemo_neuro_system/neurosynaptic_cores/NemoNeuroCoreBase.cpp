@@ -211,6 +211,10 @@ namespace nemo {
                   my_lp(myLp), my_bf(myBf), cur_message(curMessage), cur_rng_count(curRngCount), evt_stat(evtStat),
                   output_mode(outputMode) {}
 
+        INeuroCoreBase::INeuroCoreBase() = default;
+
+
+
 
     }
 
