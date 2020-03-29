@@ -41,10 +41,14 @@ namespace nemo{
              * nc:
              *
              */
-            Matrix<int,Dynamic,Dynamic> neuron_connectivity;
-            Matrix<int,Dynamic,Dynamic> neuron_weights;
-            Vector<int,Dynamic> thresholds;
-            Vector<int,Dynamic> current_membrane_pots;
+            Vector<u_long,Dynamic> output;
+
+            Array<int,Dynamic,Dynamic> neuron_connectivity;
+            Array<int,Dynamic,Dynamic> neuron_weights;
+            Array<int,Dynamic,1> thresholds;
+            Array<int,1,Dynamic> current_membrane_pots;
+            int neurons_per_core=32;
+            int core_id = 0;
 
         };
     }

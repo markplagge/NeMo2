@@ -2,7 +2,10 @@
 // Created by Mark Plagge on 3/19/20.
 //
 
+#include <tiffio.h>
 #include "HeartbeatTestCore.h"
+#include <Eigen/src/Core/Array.h>
+#include <Eigen/src/Core/EigenBase.h>
 
 void nemo::neuro_system::HeartbeatTestCore::forward_event(tw_bf *bf, nemo::nemo_message *m, tw_lp *lp) {
     evt_stat = BF_Event_Status::None;
@@ -10,21 +13,32 @@ void nemo::neuro_system::HeartbeatTestCore::forward_event(tw_bf *bf, nemo::nemo_
     my_lp = lp;
     my_bf = bf;
     if (m->message_type == HEARTBEAT){
-        this->forward_heartbeat_handler();
+        forward_heartbeat_handler();
     }
     if(m->message_type == NEURON_SPIKE){
         //current_membrane_pots(m->dest_axon) = (current_membrane_pots(m->dest_axon) * (neuron_connectivity(m->dest_axon)) * neuron_weights)
-
-
+        auto mc = neuron_connectivity.row(m->dest_axon) * neuron_weights(m->dest_axon);
+        current_membrane_pots.row(m->dest_axon) += mc;
     }
     if (evt_stat == BF_Event_Status::Heartbeat_Rec){
         //heartbeat_recvd
+        for(int i = 0; i < neurons_per_core; i ++){
+            if(current_membrane_pots(i) > thresholds(i)){
+                current_membrane_pots(i) = 0;
+                auto evt = tw_event_new(output(i),0.0001,lp);
+                nemo_message *m = (nemo_message *) tw_event_data(evt);
+                m->message_type = NEURON_SPIKE;
+                m->source_core = core_id;
+                m->intended_neuro_tick = tw_now(lp) + 0.0001;
+                tw_event_send(evt);
+            }
+        }
     }
 
 }
 
 void nemo::neuro_system::HeartbeatTestCore::reverse_event(tw_bf *bf, nemo::nemo_message *m, tw_lp *lp) {
-
+//freaking reverse not implemented
 }
 
 void nemo::neuro_system::HeartbeatTestCore::core_commit(tw_bf *bf, nemo::nemo_message *m, tw_lp *lp) {
@@ -89,8 +103,14 @@ nemo::neuro_system::HeartbeatTestCore::~HeartbeatTestCore() = default;
 
 nemo::neuro_system::HeartbeatTestCore::HeartbeatTestCore() {
     using namespace Eigen;
-     MatrixXi nc (10,10);
+     MatrixXi nc = Eigen::MatrixXi::Constant(neurons_per_core,neurons_per_core,1);
+     MatrixXi nv =Eigen::MatrixXi::Constant(neurons_per_core,neurons_per_core,1);
+     Array<int,Dynamic,1> th(neurons_per_core);
+     VectorXi tb = VectorXi::Constant(neurons_per_core,0);
      neuron_connectivity = nc;
+     neuron_weights = nv;
+     thresholds = th;
+     current_membrane_pots = tb;
 
 
 }
