@@ -8,7 +8,7 @@
 
 #ifndef NEMOTNG_NEMO_GLOBALS_H
 #define NEMOTNG_NEMO_GLOBALS_H
-#include "../../external/eigen/Eigen/Dense"
+//#include "../../external/eigen/Eigen/Dense"
 
 #include <cstdint>
 #include <vector>

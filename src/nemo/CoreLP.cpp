@@ -47,7 +47,7 @@ namespace nemo {
 
     }
 
-    void CoreLP::setCore(neuro_system::INeuroCoreBase *core) {
+    void CoreLP::setCore(neuro_system::NemoNeuroCoreBase *core) {
         CoreLP::core = core;
     }
 }

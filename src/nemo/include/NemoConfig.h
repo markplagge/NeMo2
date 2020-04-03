@@ -17,7 +17,7 @@ namespace nemo {
         core_types get_core_type(::std::string core_type) {
         }
 
-        ::std::map<core_types, neuro_system::INeuroCoreBase> core_type_map;
+        ::std::map<core_types, neuro_system::NemoNeuroCoreBase> core_type_map;
 
 
     };

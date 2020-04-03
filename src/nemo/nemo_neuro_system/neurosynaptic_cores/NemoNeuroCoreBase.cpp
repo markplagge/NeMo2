@@ -30,7 +30,8 @@ namespace nemo {
  * C sets the
  * C runs fire/reset function
  */
-        void INeuroCoreBase::forward_heartbeat_handler() {
+        template<typename NEURO_WEIGHT_TYPE>
+        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::forward_heartbeat_handler() {
 
             // Generic error checking:
 
@@ -139,12 +140,14 @@ namespace nemo {
 /**
  * reverse_heartbeat_handler - reverse computation for heartbeat messages.
  */
-        void INeuroCoreBase::reverse_heartbeat_handler() {
+        template<typename NEURO_WEIGHT_TYPE>
+        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::reverse_heartbeat_handler() {
 
 
         }
 
-        void INeuroCoreBase::send_heartbeat() {
+        template<typename NEURO_WEIGHT_TYPE>
+        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::send_heartbeat() {
 
             RNG_START(my_lp);
 
@@ -168,7 +171,8 @@ namespace nemo {
 
         }
 
-        void INeuroCoreBase::save_spike(nemo_message *m, long dest_core, long neuron_id) {
+        template<typename NEURO_WEIGHT_TYPE>
+        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::save_spike(nemo_message *m, long dest_core, long neuron_id) {
 
 //    SpikeData s = {0};
 //    s.source_core = core_local_id;
@@ -182,38 +186,43 @@ namespace nemo {
 //    this->spike_output->save_spike(s);
         }
 
-        void INeuroCoreBase::cleanup_output() {
-            if (output_mode){}
-
-
-        }
-
-
-
-        INeuroCoreBase::INeuroCoreBase(int coreLocalId, tw_lp *myLp, tw_bf *myBf, BF_Event_Status evtStat,
-                                       int outputMode) : core_local_id(coreLocalId), my_lp(myLp), my_bf(myBf),
-                                                         evt_stat(evtStat), output_mode(outputMode) {
-            spike_output = ::std::shared_ptr<NemoCoreOutput>();
-            my_lp = nullptr;
-            my_bf = nullptr;
-
+        template<typename NEURO_WEIGHT_TYPE>
+        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::core_init(tw_lp *lp) {
+            for (int i = 0; i < NEURONS_PER_CORE; i++) {
+                auto new_neu =
+            }
 
         }
 
-        INeuroCoreBase::INeuroCoreBase(std::shared_ptr<NemoCoreOutput> spikeOutput, long lastActiveTime,
-                                       long currentNeuroTick, long previousNeuroTick, long lastLeakTime,
-                                       long leakNeededCount, bool heartbeatSent, int coreLocalId, tw_lp *myLp,
-                                       tw_bf *myBf, const std::shared_ptr<nemo_message> &curMessage,
-                                       unsigned long curRngCount, BF_Event_Status evtStat, int outputMode)
-                : spike_output(std::move(spikeOutput)), last_active_time(lastActiveTime), current_neuro_tick(currentNeuroTick),
-                  previous_neuro_tick(previousNeuroTick), last_leak_time(lastLeakTime),
-                  leak_needed_count(leakNeededCount), heartbeat_sent(heartbeatSent), core_local_id(coreLocalId),
-                  my_lp(myLp), my_bf(myBf), cur_message(curMessage), cur_rng_count(curRngCount), evt_stat(evtStat),
-                  output_mode(outputMode) {}
+        template<typename NEURO_WEIGHT_TYPE>
+        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::forward_event(tw_bf *bf, nemo_message *m, tw_lp *lp) {
 
-        INeuroCoreBase::INeuroCoreBase() = default;
+        }
 
+        template<typename NEURO_WEIGHT_TYPE>
+        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::reverse_event(tw_bf *bf, nemo_message *m, tw_lp *lp) {
 
+        }
+
+        template<typename NEURO_WEIGHT_TYPE>
+        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::core_commit(tw_bf *bf, nemo_message *m, tw_lp *lp) {
+
+        }
+
+        template<typename NEURO_WEIGHT_TYPE>
+        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::pre_run(tw_lp *lp) {
+
+        }
+
+        template<typename NEURO_WEIGHT_TYPE>
+        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::core_finish(tw_lp *lp) {
+
+        }
+
+        template<typename NEURO_WEIGHT_TYPE>
+        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::cleanup_output() {
+
+        }
 
 
     }

@@ -11,7 +11,7 @@
 #include "../nemo_globals.h"
 #include "../nemo_io/NemoCoreOutput.h"
 #include "../nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreBase.h"
-#include "../nemo_neuro_system/neurosynaptic_cores/HeartbeatTestCore.h"
-#include "../nemo_neuro_system/neurosynaptic_cores/LIFCore.h"
+
+
 #include "../nemo_ross.h"
 #endif //NEMOTNG_NEMO_H

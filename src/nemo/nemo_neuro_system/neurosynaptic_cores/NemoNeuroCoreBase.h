@@ -38,7 +38,8 @@ namespace nemo {
  *
  * Also implements basic heartbeat code.
  */
-        class INeuroCoreBase {
+        template<typename NEURO_WEIGHT_TYPE>
+        class NemoNeuroCoreBase {
 
             //INeuroCoreBase();
         protected:
@@ -60,7 +61,7 @@ namespace nemo {
 
             void save_spike(nemo_message *m, long dest_core, long neuron_id);
 
-            std::shared_ptr<NemoCoreOutput> spike_output;
+            ::std::shared_ptr<NemoCoreOutput> spike_output;
             /**
          * The last time that this core had activity. This refers to any  message.
          */
@@ -107,34 +108,25 @@ namespace nemo {
 
 
         public:
-            virtual ~INeuroCoreBase() =default;
+            NemoNeuronGeneric<NEURO_WEIGHT_TYPE> neuron_template;
 
-            INeuroCoreBase(std::shared_ptr<NemoCoreOutput> spikeOutput, long lastActiveTime,
-                           long currentNeuroTick, long previousNeuroTick, long lastLeakTime, long leakNeededCount,
-                           bool heartbeatSent, int coreLocalId, tw_lp *myLp, tw_bf *myBf,
-                           const std::shared_ptr<nemo_message> &curMessage, unsigned long curRngCount,
-                           BF_Event_Status evtStat, int outputMode);
+            void core_init(tw_lp *lp);
 
+            void forward_event(tw_bf *bf, nemo_message *m, tw_lp *lp);
 
-            INeuroCoreBase(int coreLocalId, tw_lp *myLp, tw_bf *myBf, BF_Event_Status evtStat, int outputMode);
+            void reverse_event(tw_bf *bf, nemo_message *m, tw_lp *lp);
 
-            INeuroCoreBase();
+            void core_commit(tw_bf *bf, nemo_message *m, tw_lp *lp);
 
-            virtual void core_init(tw_lp *lp) = 0;
+            void pre_run(tw_lp *lp);
 
-            virtual void forward_event(tw_bf *bf, nemo_message *m, tw_lp *lp) = 0;
-
-            virtual void reverse_event(tw_bf *bf, nemo_message *m, tw_lp *lp) = 0;
-
-            virtual void core_commit(tw_bf *bf, nemo_message *m, tw_lp *lp) = 0;
-
-
-
-            virtual void pre_run(tw_lp *lp) = 0;
-
-            virtual void core_finish(tw_lp *lp) = 0;
+            void core_finish(tw_lp *lp);
 
             void cleanup_output();
+
+            /** NemoNeuroCoreBase contains neurons and neuron states in a structure */
+            std::vector<NemoNeuronGeneric<NEURO_WEIGHT_TYPE> *> neuron_array;
+
 
 /**
  * output_mode - sets the spike output mode of this core.

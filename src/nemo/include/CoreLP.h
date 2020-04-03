@@ -103,15 +103,15 @@ namespace nemo {
 
         void create_core(tw_lp *lp);
 
-        neuro_system::INeuroCoreBase *get_core() {
+        neuro_system::NemoNeuroCoreBase *get_core() {
             return core;
         }
 
-        void setCore(neuro_system::INeuroCoreBase *core);
+        void setCore(neuro_system::NemoNeuroCoreBase *core);
 
         ::std::vector<int> heartbeat_schedule;
     private:
-        neuro_system::INeuroCoreBase *core;
+        neuro_system::NemoNeuroCoreBase *core;
         int active;
         core_types core_type;
     };

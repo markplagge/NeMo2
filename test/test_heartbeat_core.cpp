@@ -4,14 +4,10 @@
 #include <iostream>
 #include "./catch/catch.hpp"
 #include "../src/nemo/include/nemo.h"
-#include "../src/nemo/nemo_neuro_system/neurosynaptic_cores/HeartbeatTestCore.h"
+
 #include "../external/eigen/Eigen/Dense"
 #include "../external/eigen/Eigen/Eigen"
 TEST_CASE("NeMo Heartbeat Cores Tests"){
-    using namespace nemo;
-    auto hbc = neuro_system::HeartbeatTestCore();
-    nemo_message *m = (nemo_message *) calloc(sizeof(nemo_message),1);
-    hbc.forward_event(0,m,NULL);
 
 
 }
