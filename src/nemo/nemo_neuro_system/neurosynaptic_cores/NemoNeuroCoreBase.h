@@ -38,7 +38,7 @@ namespace nemo {
  *
  * Also implements basic heartbeat code.
  */
-        template<typename NEURO_WEIGHT_TYPE>
+
         class NemoNeuroCoreBase {
 
             //INeuroCoreBase();
@@ -84,6 +84,8 @@ namespace nemo {
          */
 
             int core_local_id = 0;
+
+            bool has_self_firing_neuron=false;
             /**
              * my_lp -> current lp state, holds the lp state given to us from the calling function.
              */
@@ -99,6 +101,8 @@ namespace nemo {
             unsigned long cur_rng_count = 0;
 
 
+
+
             /**
          * evt_stat holds the event status for the current event. This is used to compute
          * reverse computation. BF_Event_Stats is used instead of the tw_bf as it allows
@@ -108,7 +112,7 @@ namespace nemo {
 
 
         public:
-            NemoNeuronGeneric<NEURO_WEIGHT_TYPE> neuron_template;
+            NemoNeuronGeneric<double> neuron_template;
 
             void core_init(tw_lp *lp);
 
@@ -125,7 +129,7 @@ namespace nemo {
             void cleanup_output();
 
             /** NemoNeuroCoreBase contains neurons and neuron states in a structure */
-            std::vector<NemoNeuronGeneric<NEURO_WEIGHT_TYPE> *> neuron_array;
+            std::vector<NemoNeuronGeneric<double> *> neuron_array;
 
 
 /**

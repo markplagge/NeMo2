@@ -16,7 +16,7 @@ set(nemo_lib_hdrs
         nemo_io/NemoCoreOutput.h
         nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreBase.h
         include/NemoConfig.h
-        include/CoreLP.h
+
         )
 set(nemo_lib_srcs
 
@@ -25,8 +25,7 @@ set(nemo_lib_srcs
         nemo_io/NemoCoreOutput.cpp
         nemo_globals.cpp
         NemoConfig.cpp
-        CoreLP.cpp
-        nemo_ross.h mapping_functions.cpp nemo_neuro_system/neuron_models/NemoNeuronFactory.cpp nemo_neuro_system/neuron_models/NemoNeuronFactory.h nemo_io/NemoNeuroInitState.cpp nemo_io/NemoNeuroInitState.h nemo_io/NemoModelInput.cpp nemo_io/NemoModelInput.h)
+        nemo_ross.h mapping_functions.cpp nemo_neuro_system/neuron_models/NemoNeuronFactory.cpp nemo_neuro_system/neuron_models/NemoNeuronFactory.h nemo_io/NemoNeuroInitState.cpp nemo_io/NemoNeuroInitState.h nemo_io/NemoModelInput.cpp nemo_io/NemoModelInput.h nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreSimple.cpp nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreSimple.h)
 
 add_library(nemo2_lib ${nemo_lib_hdrs} ${nemo_lib_srcs})
 set_property(TARGET nemo2_lib PROPERTY CXX_STANDARD 14)

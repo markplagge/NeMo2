@@ -30,8 +30,8 @@ namespace nemo {
  * C sets the
  * C runs fire/reset function
  */
-        template<typename NEURO_WEIGHT_TYPE>
-        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::forward_heartbeat_handler() {
+
+        void NemoNeuroCoreBase::forward_heartbeat_handler() {
 
             // Generic error checking:
 
@@ -140,14 +140,14 @@ namespace nemo {
 /**
  * reverse_heartbeat_handler - reverse computation for heartbeat messages.
  */
-        template<typename NEURO_WEIGHT_TYPE>
-        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::reverse_heartbeat_handler() {
+
+        void NemoNeuroCoreBase::reverse_heartbeat_handler() {
 
 
         }
 
-        template<typename NEURO_WEIGHT_TYPE>
-        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::send_heartbeat() {
+
+        void NemoNeuroCoreBase::send_heartbeat() {
 
             RNG_START(my_lp);
 
@@ -171,8 +171,8 @@ namespace nemo {
 
         }
 
-        template<typename NEURO_WEIGHT_TYPE>
-        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::save_spike(nemo_message *m, long dest_core, long neuron_id) {
+
+        void NemoNeuroCoreBase::save_spike(nemo_message *m, long dest_core, long neuron_id) {
 
 //    SpikeData s = {0};
 //    s.source_core = core_local_id;
@@ -186,41 +186,41 @@ namespace nemo {
 //    this->spike_output->save_spike(s);
         }
 
-        template<typename NEURO_WEIGHT_TYPE>
-        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::core_init(tw_lp *lp) {
-            for (int i = 0; i < NEURONS_PER_CORE; i++) {
-                auto new_neu =
-            }
+
+        void NemoNeuroCoreBase::core_init(tw_lp *lp) {
+            this->core_local_id = get_core_id_from_gid(lp->gid);
+            this->has_self_firing_neuron = false;
 
         }
 
-        template<typename NEURO_WEIGHT_TYPE>
-        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::forward_event(tw_bf *bf, nemo_message *m, tw_lp *lp) {
+
+        void NemoNeuroCoreBase::forward_event(tw_bf *bf, nemo_message *m, tw_lp *lp) {
 
         }
 
-        template<typename NEURO_WEIGHT_TYPE>
-        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::reverse_event(tw_bf *bf, nemo_message *m, tw_lp *lp) {
+
+        void NemoNeuroCoreBase::reverse_event(tw_bf *bf, nemo_message *m, tw_lp *lp) {
 
         }
 
-        template<typename NEURO_WEIGHT_TYPE>
-        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::core_commit(tw_bf *bf, nemo_message *m, tw_lp *lp) {
+
+        void NemoNeuroCoreBase::core_commit(tw_bf *bf, nemo_message *m, tw_lp *lp) {
 
         }
 
-        template<typename NEURO_WEIGHT_TYPE>
-        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::pre_run(tw_lp *lp) {
+
+        void NemoNeuroCoreBase::pre_run(tw_lp *lp) {
+
 
         }
 
-        template<typename NEURO_WEIGHT_TYPE>
-        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::core_finish(tw_lp *lp) {
+
+        void NemoNeuroCoreBase::core_finish(tw_lp *lp) {
 
         }
 
-        template<typename NEURO_WEIGHT_TYPE>
-        void NemoNeuroCoreBase<NEURO_WEIGHT_TYPE>::cleanup_output() {
+
+        void NemoNeuroCoreBase::cleanup_output() {
 
         }
 
