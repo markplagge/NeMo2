@@ -14,9 +14,8 @@ namespace nemo
 {
 class Nemo {
 
-  NemoConfig nemo_config;
-  void
-  init_nemo ();
+  config::NemoConfig nemo_config;
+
 };
 
 }// namespace nemo

@@ -1,0 +1,2 @@
+add_subdirectory(neuro_os)
+add_subdirectory(neuro_os_config)

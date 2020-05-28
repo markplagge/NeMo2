@@ -27,7 +27,7 @@ set(nemo_lib_srcs
         nemo_config/NemoConfig.cpp
         nemo_ross.h mapping_functions.cpp
         nemo_io/NemoNeuroInitState.cpp
-        nemo_io/NemoNeuroInitState.h nemo_io/NemoModelInput.cpp nemo_io/NemoModelInput.h
+        nemo_io/NemoNeuroInitState.h
         nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreSimple.cpp nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreSimple.h nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.cpp nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.h nemo_io/ModelFile.cpp nemo_io/ModelFile.h)
 
 add_library(nemo2_lib ${nemo_lib_hdrs} ${nemo_lib_srcs})
