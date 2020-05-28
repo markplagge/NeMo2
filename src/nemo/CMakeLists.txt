@@ -15,7 +15,7 @@ set(nemo_lib_hdrs
         nemo_neuro_system/neuron_models/NemoNeuronGeneric.h
         nemo_io/NemoCoreOutput.h
         nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreBase.h
-        include/NemoConfig.h
+        nemo_config/NemoConfig.h
 
         )
 set(nemo_lib_srcs
@@ -24,12 +24,19 @@ set(nemo_lib_srcs
         nemo_neuro_system/neuron_models/NemoNeuronGeneric.cpp
         nemo_io/NemoCoreOutput.cpp
         nemo_globals.cpp
-        NemoConfig.cpp
-        nemo_ross.h mapping_functions.cpp nemo_neuro_system/neuron_models/NemoNeuronFactory.cpp nemo_neuro_system/neuron_models/NemoNeuronFactory.h nemo_io/NemoNeuroInitState.cpp nemo_io/NemoNeuroInitState.h nemo_io/NemoModelInput.cpp nemo_io/NemoModelInput.h nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreSimple.cpp nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreSimple.h)
+        nemo_config/NemoConfig.cpp
+        nemo_ross.h mapping_functions.cpp
+        nemo_io/NemoNeuroInitState.cpp
+        nemo_io/NemoNeuroInitState.h nemo_io/NemoModelInput.cpp nemo_io/NemoModelInput.h
+        nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreSimple.cpp nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreSimple.h nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.cpp nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.h nemo_io/ModelFile.cpp nemo_io/ModelFile.h)
 
 add_library(nemo2_lib ${nemo_lib_hdrs} ${nemo_lib_srcs})
+add_executable(nemo2 nemo_ross_main.cpp)
+
 set_property(TARGET nemo2_lib PROPERTY CXX_STANDARD 14)
 message("-------------------------------- ${EIGEN_INCLUDE_FLDR}")
-target_include_directories(nemo2_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/nemo.h ${EIGEN_INCLUDE_FLDR})
-target_link_libraries(nemo2_lib ROSS m)
+target_include_directories(nemo2_lib PUBLIC ${EIGEN_INCLUDE_FLDR} ${SQL_FOLDER})
+target_link_libraries(nemo2_lib ROSS SQLITE3 m)
+target_include_directories(nemo2 PUBLIC nemo2_lib ${SQL_FOLDER})
+target_link_libraries(nemo2 nemo2_lib ROSS m)
 #target_link_libraries(nemo2_lib Eigen3::Eigen)

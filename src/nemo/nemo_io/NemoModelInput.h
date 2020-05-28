@@ -5,16 +5,14 @@
 #ifndef NEMOTNG_NEMOMODELINPUT_H
 #define NEMOTNG_NEMOMODELINPUT_H
 
-#include <string>
 #include "NemoNeuroInitState.h"
+#include <string>
 
-namespace nemo {
-    class NemoModelInput {
-        std::string model_path;
+namespace nemo
+{
+class NemoModelInput {
+  std::string model_path;
+};
+}// namespace nemo
 
-
-    };
-}
-
-
-#endif //NEMOTNG_NEMOMODELINPUT_H
+#endif//NEMOTNG_NEMOMODELINPUT_H

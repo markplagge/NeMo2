@@ -5,13 +5,14 @@
 #ifndef NEMOTNG_NEMONEUROCORESIMPLE_H
 #define NEMOTNG_NEMONEUROCORESIMPLE_H
 #include "NemoNeuroCoreBase.h"
-namespace nemo {
-    namespace neuro_system {
-        class NemoNeuroCoreSimple : NemoNeuroCoreBase {
+namespace nemo
+{
+namespace neuro_system
+{
+class NemoNeuroCoreSimple: NemoNeuroCoreBase {
+};
 
-        };
+}// namespace neuro_system
+}// namespace nemo
 
-    }
-}
-
-#endif //NEMOTNG_NEMONEUROCORESIMPLE_H
+#endif//NEMOTNG_NEMONEUROCORESIMPLE_H

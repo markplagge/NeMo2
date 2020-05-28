@@ -127,6 +127,13 @@ message(" !@!!!!${LIBCODES_LDFLAGS}" )
 #CFLAGS=-g CXXFLAGS="-g -I/usr/local/Cellar/open-mpi/4.0.2/include"
 # LDFLAGS="-L/usr/local/opt/libevent/lib -L/usr/local/Cellar/open-mpi/4.0.2/lib" LIBS="-lmpi"
 #BUILD CODES and install to external/codes_build
+
+#SQLITE3 Project
+add_subdirectory(external/sqlite)
+set(SQL_FOLDER ${CMAKE_SOURCE_DIR}/external/sqlite)
+
+
+## Nemo / NemoCODES projects
 add_subdirectory(src/nemo)
 set_property(TARGET ROSS PROPERTY CXX_STANDARD 14)
 add_subdirectory(src/nemo_codes)
