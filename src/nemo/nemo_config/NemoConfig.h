@@ -39,21 +39,16 @@ namespace nemo {
 			//const tw_petype* get_main_pe() const {};
 			static bool DEBUG_FLAG;
 			static tw_optdef nemo_tw_options[];
-			static u_long mean;
-			static std::string _model_file_path;
-			static char* primary_config_file;
+			static u_long test;
+
 			NemoConfig();
 			void init_from_tw_opts();
 
 			std::string get_settings();
 		};
-		void nemo_post_lp_init(tw_pe* pe);
+		extern char * primary_config_file;
 		tw_peid nemo_map_linear(tw_lpid gid);
-		extern tw_lptype ne_lps[8];
-		int number_of_cores;
-		bool DEBUG_FLAG;
-		bool SAVE_MEMBRANE_POTS;
-		bool SAVE_SPIKE_EVTS;
+
 
 	}// namespace config
 }// namespace nemo

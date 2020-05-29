@@ -10,6 +10,7 @@ set(NeMo_NEURONS_IN_CORE 256 CACHE STRING "The number of neurons in each simulat
 set(NeMo_NUM_WEIGHTS_IN_NEURON 4 CACHE STRING "How many weights does a neuron have? (4 is TN default)")
 set(NeMo_DEBUG 0 CACHE BOOL "Enable debug messages")
 set(nemo_lib_hdrs
+        ../../external/configuru/configuru.hpp
         nemo_globals.h
         include/nemo.h
         nemo_neuro_system/neuron_models/NemoNeuronGeneric.h
@@ -35,7 +36,7 @@ add_executable(nemo2 nemo_ross_main.cpp)
 
 set_property(TARGET nemo2_lib PROPERTY CXX_STANDARD 14)
 message("-------------------------------- ${EIGEN_INCLUDE_FLDR}")
-target_include_directories(nemo2_lib PUBLIC ${EIGEN_INCLUDE_FLDR} ${SQL_FOLDER})
+target_include_directories(nemo2_lib PUBLIC ${EIGEN_INCLUDE_FLDR} ${SQL_FOLDER} ../../external/configuru)
 target_link_libraries(nemo2_lib ROSS SQLITE3 m)
 target_include_directories(nemo2 PUBLIC nemo2_lib ${SQL_FOLDER})
 target_link_libraries(nemo2 nemo2_lib ROSS m)

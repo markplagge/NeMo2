@@ -11,6 +11,7 @@ set (PROJECT_AUTHOR "Mark Plagge")
 project(${PROJECT_NAME} VERSION 0.0.1 LANGUAGES  CXX)
 set(CMAKE_CXX_STANDARD 14)
 #set(CMAKE_C_STANDARD 11)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 include(ExternalProject)
 include("cmake/HunterGate.cmake")
@@ -63,6 +64,9 @@ message(${CMAKE_MODULE_PATH})
 include(ParseAndAddCatchTests)
 include(Catch)
 
+## configuru JSON parser
+include_directories(${CMAKE_SOURCE_DIR}/external/configuru/configuru.hpp)
+configure_file(config/example_config.json config/example_config.json COPYONLY)
 ###### ROSS EXTERNAL PROJECT
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/ROSS)
 

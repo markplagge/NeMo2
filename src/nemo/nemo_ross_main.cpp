@@ -25,6 +25,7 @@ int main (int argc, char *argv[]){
 
 	main_config->init_from_tw_opts();
 
+
 	//main_config -> load network defs
 	//main_config -> init
 

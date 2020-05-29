@@ -1,0 +1,31 @@
+
+
+{
+    "benchmark_models" : [
+        "IDENTITY",
+        "SAT",
+        "TONIC"
+    ],
+    "nemo_global": {
+        "ns_cores_per_chip": 4096,
+        "total_chips" : 2,
+        "do_neuro_os" : true,
+        "sched_type" : "FCFS"
+    },
+    "models": [ {
+            "id" : 0,
+            "needed_cores" : 0,
+            "model_file_path": "../models/cifar100.json",
+            "requested_time" : 1024,
+            "benchmark_model_name" : "NONE"
+        },
+         {
+            "id" : 1,
+            "needed_cores" : 2048,
+            "model_file_path": "",
+            "requested_time" : 1024,
+            "benchmark_model_name" : "IDENTITY"
+        }
+    ]
+
+}

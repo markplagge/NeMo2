@@ -3,10 +3,14 @@
 //
 
 #include "NemoConfig.h"
+#define CONFIGURU_IMPLEMENTATION 1
+#include <configuru.hpp>
 #include <iostream>
 #include <ross.h>
 namespace nemo {
 	namespace config {
+		char * primary_config_file = (char *) calloc(sizeof(char), 1024);
+
 		std::string NemoConfig::get_settings() {
 			std::stringstream output;
 			output << "Cores per chip: " << ns_cores_per_chip << "\n";
@@ -48,8 +52,8 @@ namespace nemo {
 		tw_optdef NemoConfig::nemo_tw_options[] = {
 				TWOPT_GROUP("NeMo 2 - TNG Runtime Options"),
 				TWOPT_FLAG("debug", NemoConfig::DEBUG_FLAG, "Debug mode?"),
-				TWOPT_ULONG("mean", NemoConfig::mean, "test_value"),
-				TWOPT_CHAR("cfg",NemoConfig::main_config_file, "Main configuration file"),
+				TWOPT_ULONG("mean", NemoConfig::test, "test_value"),
+				TWOPT_CHAR("cfg",primary_config_file, "Main configuration file"),
 				TWOPT_END()};
 
 		tw_peid nemo_map_linear(tw_lpid gid)
@@ -57,14 +61,34 @@ namespace nemo {
 
 			return 1;
 		}
-
+		/**
+		 * Main configuration function - reads the nemo config file specified by the CLI flag,
+		 * parses it, and sets up the NeMo simulation.
+		 * Uses configuru
+		 */
 		void NemoConfig::init_from_tw_opts()
 		{
+
+			auto cli_cfg_file = std::string(primary_config_file);
+			if (cli_cfg_file.length() > 0){
+				NemoConfig::main_config_file =  cli_cfg_file;
+			}else{
+				NemoConfig::main_config_file = std::string("../config/example_config.json");
+			}
+			using namespace configuru;
+			Config cfg = configuru::parse_file(main_config_file,JSON);
+			auto c1 = cfg["nemo_global"]["ns_cores_per_chip"];
+			std::cout << "Test config: " << c1 << "\n";
 
 
 		}
 		NemoConfig::NemoConfig()
 		{
 		}
+		bool NemoConfig::DEBUG_FLAG;
+		std::string NemoConfig::main_config_file = "../config/example_config.json";
+		u_long NemoConfig::test = 0;
+
+
 	}
 }// namespace nemo
