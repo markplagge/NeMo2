@@ -200,11 +200,12 @@ void NemoNeuroCoreBase::save_spike (nemo_message *m, long dest_core, long neuron
 
 void NemoNeuroCoreBase::core_init (tw_lp *lp)
 {
-  this->core_local_id = get_core_id_from_gid (lp->gid);
-  this->has_self_firing_neuron = false;
-  auto x = new NeMoPOSIXOut ();
-  auto out = new NemoCoreOutput (core_local_id, x);
-  this->output_system = out;
+	this->core_local_id = get_core_id_from_gid(lp->gid);
+	this->has_self_firing_neuron = false;
+	auto x = new NeMoPOSIXOut();
+	auto out = new NemoCoreOutput(core_local_id, x);
+	this->output_system = out;
+	// Use the nemo global config to set up this core
 }
 
 void NemoNeuroCoreBase::forward_event (tw_bf *bf, nemo_message *m, tw_lp *lp)
