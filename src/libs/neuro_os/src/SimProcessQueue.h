@@ -34,7 +34,7 @@ namespace neuro_os { namespace sim_proc {
 
 			void enqueue(SimProcess<int>& p)
 			{
-				if (p.getScheduledStartTime() >= current_time) {
+				if (p.get_scheduled_start_time() >= current_time) {
 					waiting_processes.push_back(p);
 				}
 				else {

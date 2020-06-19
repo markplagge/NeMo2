@@ -9,6 +9,7 @@ ExternalProject_Add(ROSS_EXT
 
         )
 add_subdirectory(catch2)
+add_subdirectory(sqlite)
 
 #ExternalProject_Add(project_CODES
 #        SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/CODES

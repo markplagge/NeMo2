@@ -15,6 +15,7 @@ namespace nemo {
 using namespace nemo;
 
 tw_lptype ne_lps[8] = {
+		{0},
 		{(init_f)neuro_system::NemoCoreLPWrapper::core_init,
 		 (pre_run_f)neuro_system::NemoCoreLPWrapper::pre_run,
 		 (event_f)neuro_system::NemoCoreLPWrapper::forward_event,

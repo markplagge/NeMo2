@@ -58,7 +58,7 @@ set_property(TARGET nemo2_lib PROPERTY CXX_STANDARD 14)
 # The SQLITE library is used to store spikes - but eventually will be replaced with JSON
 message("-------------------------------- ${EIGEN_INCLUDE_FLDR}")
 target_include_directories(nemo2_lib PUBLIC ${EIGEN_INCLUDE_FLDR} ${SQL_FOLDER} ../../external/configuru ../../external/visit_struct/include ../libs/neuro_os/include)
-target_link_libraries(nemo2_lib ROSS SQLITE3 neuro_os m)
+target_link_libraries(nemo2_lib ROSS SQLite3 neuro_os m)
 target_include_directories(nemo2 PUBLIC nemo2_lib ${SQL_FOLDER})
 target_link_libraries(nemo2 nemo2_lib ROSS m)
 #Would like to avoid using yet another library for the math. Currently neuromorphic matrix math is implemented in loops.

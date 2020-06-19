@@ -2,14 +2,19 @@
 // Created by Mark Plagge on 12/6/19.
 //
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedMacroInspection"
 #include "NemoConfig.h"
-#define CONFIGURU_IMPLEMENTATION 1
-#include <configuru.hpp>
+
 #include <iostream>
 #include <ross.h>
 #include <sstream>
 #include <strstream>
 #include <utility>
+#define CONFIGURU_IMPLEMENTATION 1
+#include <configuru.hpp>
+#include <visit_struct/visit_struct.hpp>
+
 namespace nemo {
 	namespace config {
 		void error_reporter(std::string str)
@@ -76,7 +81,7 @@ namespace nemo {
 			std::cout << "NeMo config file loading from  " << NemoConfig::main_config_file << "\n";
 
 			using namespace configuru;
-			Config cfg = configuru::parse_file(main_config_file, JSON);
+			Config cfg = configuru::parse_file(main_config_file, FORGIVING);
 			auto cgbl = cfg["nemo_global"];
 			std::cout << cgbl << "\n";
 			this->ns_cores_per_chip = (u_long)cgbl["ns_cores_per_chip"];
@@ -106,9 +111,9 @@ namespace nemo {
 		std::string NemoConfig::main_config_file = "../config/example_config.json";
 		u_long NemoConfig::test = 0;
 
-		NemoModel create_model_from_cfg(const configuru::Config& c)
+		std::unique_ptr<NemoModel> create_model_from_cfg(const configuru::Config& c)
 		{
-			auto nm = new NemoModel();
+			auto nm = std::make_unique<NemoModel>();
 
 			nm->id = (int)c["id"];
 			nm->needed_cores = (int)c["needed_cores"];
@@ -116,7 +121,10 @@ namespace nemo {
 			nm->spike_file_path = (std::string)c["spike_file_path"];
 			nm->requested_time = (int)c["requested_time"];
 			nm->benchmark_model_name = (std::string)c["benchmark_model_name"];
+			return nm;
 		}
 
 	}// namespace config
 }// namespace nemo
+
+#pragma clang diagnostic pop
