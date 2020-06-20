@@ -4,11 +4,20 @@
 
 #ifndef NEMOTNG_NEMOCORELPWRAPPER_H
 #define NEMOTNG_NEMOCORELPWRAPPER_H
+#include "../../nemo_globals.h"
 #include "NemoNeuroCoreBase.h"
 
 namespace nemo {
+	namespace config {
+		class NemoConfig;
+
+	}
+	extern config::NemoConfig* global_config;
+
 	namespace neuro_system {
+
 		class NemoCoreLPWrapper {
+
 		public:
 			static void core_init(NemoCoreLPWrapper* s, tw_lp* lp)
 			{

@@ -4,6 +4,7 @@ OPTION(NOS_ENABLE_UNIT_TESTS  "Enable FCFS unit tests (uses Catch2)" ON )
 
 
 set(NEURO_OS_LIB
+        include/neuro_os.h
         lib/json.hpp
         src/SimProcess.cpp
         src/SimProcess.h

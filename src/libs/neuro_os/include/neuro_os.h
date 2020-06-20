@@ -15,15 +15,15 @@
 namespace neuro_os {
 	namespace sim_proc {
 
-
-//simulated_processor defs
+		//simulated_processor defs
 
 		template<class T>
 		struct SimProcess;
+		struct SimProc : SimProcess<int> {};
 		struct SimProcessQueue;
 		struct SimProcessSerial;
-	}
 
+	}// namespace sim_proc
 }
 
 #endif//NEMOTNG_NEURO_OS_H

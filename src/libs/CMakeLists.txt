@@ -1,2 +1,2 @@
 add_subdirectory(neuro_os)
-add_subdirectory(neuro_os_config)
+add_subdirectory(nemo_config_old)

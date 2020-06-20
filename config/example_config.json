@@ -1,0 +1,55 @@
+{
+  "nemo_global": {
+    "ns_cores_per_chip": 4096,
+    "total_chips": 2,
+    "do_neuro_os": true,
+    "sched_type": "FCFS",
+    "save_spikes": true,
+    "save_all_spikes": false,
+    "save_membrane_pots": false,
+    "neurons_per_core": 256,
+    "core_type_ids": [
+      0,
+      1
+    ]
+  },
+  "models": [
+    {
+      "id": 0,
+      "needed_cores": 0,
+      "model_file_path": "../models/cifar100_model.json",
+      "spike_file_path": "../models/cifar100_spk.sqlite",
+      "requested_time": 1024,
+      "benchmark_model_name": "NONE"
+    },
+    {
+      "id": 1,
+      "needed_cores": 2048,
+      "model_file_path": "",
+      "requested_time": 1024,
+      "benchmark_model_name": "IDENTITY"
+    },
+    {
+      "id": 2,
+      "needed_cores": 0,
+      "model_file_path": "../models/demo_model.json",
+      "spike_file_path": "../models/demo_model.sqlite",
+      "requested_time": 1024,
+      "benchmark_model_name": "NONE"
+    }
+  ],
+  "scheduler_inputs": [
+    {
+      "start_time": 0,
+      "task_id": 0
+    },
+    {
+      "start_time": 0,
+      "task_id": 1
+    },
+    {
+      "start_time": 1024,
+      "task_id": 2
+    }
+  ]
+}
