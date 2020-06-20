@@ -255,8 +255,9 @@ void NemoNeuroCoreBase::core_finish (tw_lp *lp)
 {
 }
 
-void NemoNeuroCoreBase::cleanup_output ()
-{
+void NemoNeuroCoreBase::cleanup_output() {
+}
+NemoNeuroCoreBase::NemoNeuroCoreBase() {
 }
 
 }// namespace neuro_system

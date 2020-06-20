@@ -15,18 +15,18 @@ namespace neuro_os { namespace sim_proc{
             process.system_tick();
         }
         for (auto it = pre_waiting_processes.begin();it != pre_waiting_processes.end();){
-			if (it->get_scheduled_start_time() >= current_time) {
-				waiting_processes.push_back(*it);
-				pre_waiting_processes.erase(it);
-			}
-		}
+            if (it->get_scheduled_start_time() >= current_time){
+                waiting_processes.push_back(*it);
+                pre_waiting_processes.erase(it);
+            }
+        }
     }
 
 
     int SimProcessQueue::get_next_process_size() {
         if (waiting_processes.size() > 0){
-			return waiting_processes.front().get_needed_cores();
-		}else{
+            return waiting_processes.front().get_needed_cores();
+        }else{
             return -1;
         }
     }
@@ -43,25 +43,25 @@ namespace neuro_os { namespace sim_proc{
 
 
     long SimProcessQueue::get_total_process_wait_times() {
-		long total_wait_time = 0;
-		for (const auto& process : waiting_processes) {
-			total_wait_time += process.get_total_wait_time();
-		}
-		for (const auto& process : running_processes) {
-			total_wait_time += process.get_total_wait_time();
-		}
-		return total_wait_time;
-	}
+        long total_wait_time = 0;
+        for (const auto &process : waiting_processes) {
+            total_wait_time += process.get_total_wait_time();
+        }
+        for (const auto &process : running_processes) {
+            total_wait_time += process.get_total_wait_time();
+        }
+        return total_wait_time;
+    }
 
-	//	nlohmann::json SimProcessQueue::to_json_obj()
-	//	{
-	//		using nlohmann::json;
-	//		auto j = json({{"current_time", current_time},
-	//					   {"waiting", waiting_processes},
-	//					   {"running", running_processes},
-	//					   {"pre_waiting", pre_waiting_processes}});
-	//		return j;
-	//	}
+//	nlohmann::json SimProcessQueue::to_json_obj()
+//	{
+//		using nlohmann::json;
+//		auto j = json({{"current_time", current_time},
+//					   {"waiting", waiting_processes},
+//					   {"running", running_processes},
+//					   {"pre_waiting", pre_waiting_processes}});
+//		return j;
+//	}
 
 	const std::deque<SimProcess<int>>& SimProcessQueue::get_waiting_processes()
 	{
@@ -88,28 +88,29 @@ namespace neuro_os { namespace sim_proc{
 		current_time = time;
 	}
 
-	//	void SimProcessQueue::from_json_obj(const json& j)
-	//	{
-	//
-	//		current_time = j.at("current_time").get<double>();
-	//		if (j.find("waiting") != j.end()) {
-	//			waiting_processes = j.at("waiting").get<std::deque<SimProcess<int>>>();
-	//		}
-	//		if (j.find("running") != j.end()) {
-	//			running_processes = j.at("running").get<std::vector<SimProcess<int>>>();
-	//		}
-	//		pre_waiting_processes = j.at("pre_waiting").get<std::deque<SimProcess<int>>>();
-	//	}
+//	void SimProcessQueue::from_json_obj(const json& j)
+//	{
+//
+//		current_time = j.at("current_time").get<double>();
+//		if (j.find("waiting") != j.end()) {
+//			waiting_processes = j.at("waiting").get<std::deque<SimProcess<int>>>();
+//		}
+//		if (j.find("running") != j.end()) {
+//			running_processes = j.at("running").get<std::vector<SimProcess<int>>>();
+//		}
+//		pre_waiting_processes = j.at("pre_waiting").get<std::deque<SimProcess<int>>>();
+//	}
 
-	bool SimProcessQueue::operator==(const SimProcessQueue& rhs) const
-	{
-		return current_time == rhs.current_time && (waiting_processes == rhs.waiting_processes) && (running_processes == rhs.running_processes) && (pre_waiting_processes == rhs.pre_waiting_processes);
-	}
+	bool SimProcessQueue::operator==(const SimProcessQueue &rhs) const {
+            return current_time == rhs.current_time &&
+                    (waiting_processes == rhs.waiting_processes) &&
+                    (running_processes == rhs.running_processes) &&
+                    (pre_waiting_processes == rhs.pre_waiting_processes);
+        }
 
-	bool SimProcessQueue::operator!=(const SimProcessQueue& rhs) const
-	{
-		return !(rhs == *this);
-	}
+        bool SimProcessQueue::operator!=(const SimProcessQueue &rhs) const {
+            return !(rhs == *this);
+        }
 
 
     }}

@@ -23,11 +23,12 @@ namespace neuro_os { namespace sim_proc {
         int total_wait_time;
         int total_run_time;
         PROC_STATE current_state;
-		//T neuron_state_system;
+        //T neuron_state_system;
 
-		SimProcess(int pid, int neededCores, int neededRunTime, double scheduledStartTime);
 
-		SimProcess() {
+        SimProcess(int pid, int neededCores, int neededRunTime, double scheduledStartTime);
+
+        SimProcess() {
             PID = 0;
             needed_cores = 0;
             needed_run_time = 0;
@@ -35,25 +36,26 @@ namespace neuro_os { namespace sim_proc {
             total_wait_time = 0;
             total_run_time = 0;
             current_state = WAITING;
-		}
 
-		PROC_STATE get_current_state() const;
+        }
 
-		void set_current_state(PROC_STATE current_state);
+        PROC_STATE get_current_state() const;
 
-		int get_pid() const;
+        void set_current_state(PROC_STATE current_state);
 
-		int get_needed_cores() const;
+        int get_pid() const;
 
-		int get_needed_run_time() const;
+        int get_needed_cores() const;
 
-		double get_scheduled_start_time() const;
+        int get_needed_run_time() const;
 
-		int get_total_wait_time() const;
+        double get_scheduled_start_time() const;
 
-		int get_total_run_time() const;
+        int get_total_wait_time() const;
 
-		void system_tick();
+        int get_total_run_time() const;
+
+        void system_tick();
 
         friend std::ostream &operator<<(std::ostream &os, const SimProcess<T> &process);
 

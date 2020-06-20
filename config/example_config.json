@@ -7,6 +7,7 @@
     "save_spikes": true,
     "save_all_spikes": false,
     "save_membrane_pots": false,
+    "neurons_per_core": 256,
     "core_type_ids": [
       0,
       1

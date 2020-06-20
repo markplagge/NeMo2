@@ -18,25 +18,24 @@ namespace nemo {
  * See NeMoNeuroCoreMat for matrix based integration
  *
  */
-		template<typename PRC>
+
 		class NemoNeuronGeneric {
-			PRC membrane_pot = 0;
-			std::vector<PRC> weights;
-			PRC leak_v = -1;
-			PRC threshold = 1;
-			PRC reset_val = 0;
+			double membrane_pot = 0;
+			std::vector<double> weights;
+			double leak_v = -1;
+			double threshold = 1;
+			double reset_val = 0;
 
 		public:
-			NemoNeuronGeneric(PRC membranePot, const std::vector<PRC>& weights, PRC leakV, PRC threshold, PRC resetVal);
+			NemoNeuronGeneric(double membrane_pot, const std::vector<double>& weights, double leak_v, double threshold, double reset_val) : membrane_pot(membrane_pot), weights(weights), leak_v(leak_v), threshold(threshold), reset_val(reset_val) {}
+			NemoNeuronGeneric() {}
 
 			virtual void
-			integrate(PRC source_id)
-			{
+			integrate(double source_id) {
 				membrane_pot = membrane_pot + weights[source_id];
 			}
 
-			virtual void leak(int n_leaks)
-			{
+			virtual void leak(int n_leaks) {
 				for (int i = 0; i < n_leaks; i++) {
 					membrane_pot += leak_v;
 				}
@@ -53,14 +52,12 @@ namespace nemo {
 				}
 			}
 
-			virtual bool recv_hb(int n_leaks)
-			{
+			virtual bool recv_hb(int n_leaks) {
 				leak(n_leaks);
 				return fire();
 			}
 
-			virtual void recv_spk(PRC source_id)
-			{
+			virtual void recv_spk(double source_id) {
 				integrate(source_id);
 			}
 		};

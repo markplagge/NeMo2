@@ -19,8 +19,7 @@ namespace neuro_os {
 
 		template<class T>
 		struct SimProcess;
-		struct SimProc : SimProcess<int> {
-		};
+		struct SimProc : SimProcess<int> {};
 		struct SimProcessQueue;
 		struct SimProcessSerial;
 

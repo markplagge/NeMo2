@@ -12,9 +12,10 @@
 #include <strstream>
 #include <utility>
 #define CONFIGURU_IMPLEMENTATION 1
+#include <codecvt>
 #include <configuru.hpp>
+#include <iosfwd>
 #include <visit_struct/visit_struct.hpp>
-
 namespace nemo {
 	namespace config {
 		void error_reporter(std::string str)
@@ -87,6 +88,7 @@ namespace nemo {
 			this->ns_cores_per_chip = (u_long)cgbl["ns_cores_per_chip"];
 			this->total_chips = (u_int)cgbl["total_chips"];
 			this->do_neuro_os = (bool)cgbl["do_neuro_os"];
+			this->neurons_per_core = (u_int64_t)cgbl["neurons_per_core"];
 			if (this->do_neuro_os) {
 				auto sched_type = (std::string)cgbl["sched_type"];
 				if ("FCFS" == sched_type) {
@@ -105,6 +107,8 @@ namespace nemo {
 			configuru::deserialize(&this->scheduler_inputs, cfg["scheduler_inputs"], error_reporter);
 
 			std::cout << "models\n";
+
+			total_sim_size = total_chips * ns_cores_per_chip * neurons_per_core;
 		}
 		NemoConfig::NemoConfig() = default;
 		bool NemoConfig::DEBUG_FLAG;
@@ -124,6 +128,31 @@ namespace nemo {
 			return nm;
 		}
 
+		//template<>
+		//std::ostream& operator<<(std::ostream& output_stream, const NemoModel& p) {
+
+		const std::string NemoModel::to_string() const {
+			char fmtp[90] = {'\0'};
+			char idf[30] = {'\0'};
+			char bdf[30] = {'\0'};
+			snprintf(idf, 20, "id: %d nid: %d ", this->id, this->needed_cores);
+			snprintf(bdf, 20, "Time: %.1f", this->requested_time);
+			//snprintf(fmtp,80,"%-10s%-10s Benchmark: %-10s",idf,bdf,p.benchmark_model_name.c_str());
+			snprintf(fmtp, 80, "%-10s%-10s", idf, bdf);
+			return std::string(fmtp);
+			//return output_stream << "id:" << p.id << "nc:" << p.needed_cores << "\npaths:" << p.model_file_path << "\n" << p.spike_file_path << "\n";
+		}
+		std::ostream& operator<<(std::ostream& os, const NemoModel& model) {
+
+			os << model.to_string();
+			return os;
+		}
+
+		std::ostream& operator<<(std::ostream& os, const ScheduledTask& task) {
+			os << "*"
+			   << "start_time: " << task.start_time << " task_id: " << task.task_id;
+			return os;
+		}
 	}// namespace config
 }// namespace nemo
 

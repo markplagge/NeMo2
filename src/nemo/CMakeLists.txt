@@ -33,7 +33,8 @@ set(nemo_lib_hdrs
         nemo_io/NemoNeuroInitState.h
         nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreSimple.h
         nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.h
-        nemo_io/ModelFile.h)
+        nemo_io/ModelFile.h
+        nemo_formatted_print.h)
 set(nemo_lib_srcs
 
         nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreBase.cpp
@@ -43,9 +44,10 @@ set(nemo_lib_srcs
         nemo_config/NemoConfig.cpp
         nemo_ross.h mapping_functions.cpp
         nemo_io/NemoNeuroInitState.cpp
+        nemo_formatted_print.cpp
         nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreSimple.cpp
         nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.cpp
-        nemo_io/ModelFile.cpp nemo_config/NemoModel.cpp nemo_config/NemoModel.h nemo_neuro_system/neurosynaptic_cores/NemoCoreScheduler.cpp nemo_neuro_system/neurosynaptic_cores/NemoCoreScheduler.h)
+        nemo_io/ModelFile.cpp nemo_config/NemoModel.cpp nemo_config/NemoModel.h nemo_neuro_system/neurosynaptic_cores/NemoCoreScheduler.cpp nemo_neuro_system/neurosynaptic_cores/NemoCoreScheduler.h nemo_neuro_system/neurosynaptic_cores/NemoCoreDefs.h)
 
 add_library(nemo2_lib ${nemo_lib_hdrs} ${nemo_lib_srcs})
 #nemo_ross_main.cpp contains main().

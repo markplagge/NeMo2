@@ -9,7 +9,8 @@
 #include "../../nemo_globals.h"
 #include "../../nemo_io/NemoCoreOutput.h"
 #include "../neuron_models/NemoNeuronGeneric.h"
-
+#include <configuru.hpp>
+#include <neuro_os.h>
 #include <ross.h>
 
 #define RNG_START(lp) auto rng_count = lp->rng->count
@@ -40,6 +41,7 @@ namespace nemo {
 
 			//INeuroCoreBase();
 		public:
+			NemoNeuroCoreBase();
 			/**
    * forward_loop_handler(). Neurosynaptic generally have common functionality - there
    * is a neurosynaptic tick (handled by heartbeat messages), integration, and leak functions.
@@ -112,7 +114,7 @@ namespace nemo {
 			BF_Event_Status evt_stat;
 
 		public:
-			NemoNeuronGeneric<double> neuron_template;
+			NemoNeuronGeneric neuron_template;
 
 			void core_init(tw_lp* lp);
 
@@ -129,7 +131,7 @@ namespace nemo {
 			void cleanup_output();
 
 			/** NemoNeuroCoreBase contains neurons and neuron states in a structure */
-			std::vector<NemoNeuronGeneric<double>*> neuron_array;
+			std::vector<NemoNeuronGeneric *> neuron_array;
 
 			/**
  * output_mode - sets the spike output mode of this core.
