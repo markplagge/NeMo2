@@ -1,2 +1,14 @@
 
 cmake-build-debug/
+external/ROSS
+external/codes
+
+src/.DS_Store
+*.DS_Store
+*.vpp
+*.vpp.*
+*.bak_000f
+
+config/models/dask-worker-space/
+
+config/models/cifar_100_local_model.json
