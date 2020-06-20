@@ -14,7 +14,9 @@ set(NEURO_OS_LIB
         src/SimProcessQueue.cpp
         src/SimProcessQueue.h)
 
-add_library(neuro_os  ${NEURO_OS_LIB})
+add_library(neuro_os STATIC ${NEURO_OS_LIB} )
+add_executable(neuro_os_bin main.cpp)
+target_link_libraries(neuro_os_bin neuro_os)
 #target_link_libraries(fcfs_logic_system simclist)
 set_property(TARGET neuro_os PROPERTY CXX_STANDARD 14)
 enable_testing()

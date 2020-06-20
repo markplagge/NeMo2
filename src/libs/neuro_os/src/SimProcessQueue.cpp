@@ -63,17 +63,17 @@ namespace neuro_os { namespace sim_proc{
 //		return j;
 //	}
 
-	const std::deque<SimProcess<int>>& SimProcessQueue::get_waiting_processes()
+	const std::deque<SimProcess>& SimProcessQueue::get_waiting_processes()
 	{
 		return waiting_processes;
 	}
 
-	const std::vector<SimProcess<int>>& SimProcessQueue::get_running_processes()
+	const std::vector<SimProcess>& SimProcessQueue::get_running_processes()
 	{
 		return running_processes;
 	}
 
-	const std::deque<SimProcess<int>>& SimProcessQueue::get_pre_waiting_processes()
+	const std::deque<SimProcess>& SimProcessQueue::get_pre_waiting_processes()
 	{
 		return pre_waiting_processes;
 	}
@@ -93,12 +93,12 @@ namespace neuro_os { namespace sim_proc{
 //
 //		current_time = j.at("current_time").get<double>();
 //		if (j.find("waiting") != j.end()) {
-//			waiting_processes = j.at("waiting").get<std::deque<SimProcess<int>>>();
+//			waiting_processes = j.at("waiting").get<std::deque<SimProcess>>();
 //		}
 //		if (j.find("running") != j.end()) {
-//			running_processes = j.at("running").get<std::vector<SimProcess<int>>>();
+//			running_processes = j.at("running").get<std::vector<SimProcess>>();
 //		}
-//		pre_waiting_processes = j.at("pre_waiting").get<std::deque<SimProcess<int>>>();
+//		pre_waiting_processes = j.at("pre_waiting").get<std::deque<SimProcess>>();
 //	}
 
 	bool SimProcessQueue::operator==(const SimProcessQueue &rhs) const {

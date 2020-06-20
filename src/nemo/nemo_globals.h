@@ -84,6 +84,7 @@ enum nemo_message_type {
   NEURON_SPIKE,
   HEARTBEAT,
 	NOS_LOAD_MODEL,
+	NOS_TICK,
 	NOS_START,
 	NOS_STOP,
 	NOS_STATUS
@@ -282,12 +283,14 @@ sgn (T1 x)
  */
 typedef struct Nemo_Message {
   int message_type;
-  int source_core;
-  int dest_axon;
-  unsigned long intended_neuro_tick;
-  uint32_t nemo_event_status;
-  unsigned int random_call_count;
-  double debug_time;
+
+		  int source_core;
+		  int dest_axon;
+		  unsigned long intended_neuro_tick;
+		  uint32_t nemo_event_status;
+		  unsigned int random_call_count;
+		  double debug_time;
+
 
   ::std::string
   to_string ();

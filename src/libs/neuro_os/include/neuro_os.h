@@ -17,9 +17,9 @@ namespace neuro_os {
 
 		//simulated_processor defs
 
-		template<class T>
+
 		struct SimProcess;
-		struct SimProc : SimProcess<int> {};
+		struct SimProc : SimProcess {};
 		struct SimProcessQueue;
 		struct SimProcessSerial;
 

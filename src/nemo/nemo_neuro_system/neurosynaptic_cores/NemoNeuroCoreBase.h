@@ -94,11 +94,7 @@ namespace nemo {
 			int core_local_id = 0;
 
 			bool has_self_firing_neuron = false;
-			/**
-   * my_lp -> current lp state, holds the lp state given to us from the calling function.
-   */
-			tw_lp* my_lp;
-			tw_bf* my_bf;
+
 			/**
    * Current message holder - @todo: may not need this.
    */
@@ -116,8 +112,13 @@ namespace nemo {
 			BF_Event_Status evt_stat;
 
 		public:
+			/**
+* my_lp -> current lp state, holds the lp state given to us from the calling function.
+*/
+			tw_lp* my_lp;
+			tw_bf* my_bf;
 			NemoNeuronGeneric neuron_template;
-
+			std::map<int,nemo::config::NemoModel> models;
 			void core_init(tw_lp* lp);
 
 			void forward_event(tw_bf* bf, nemo_message* m, tw_lp* lp);

@@ -13,7 +13,7 @@
 
 namespace neuro_os { namespace sim_proc {
         using nlohmann::json;
-    template<class T>
+
     struct SimProcess {
 
         int PID;
@@ -57,7 +57,7 @@ namespace neuro_os { namespace sim_proc {
 
         void system_tick();
 
-        friend std::ostream &operator<<(std::ostream &os, const SimProcess<T> &process);
+        friend std::ostream &operator<<(std::ostream &os, const SimProcess &process);
 
         bool operator==(const SimProcess &rhs) const;
 

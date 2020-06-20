@@ -71,7 +71,7 @@ configure_file(config/example_config.json config/example_config.json COPYONLY)
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/ROSS)
 
 ##### NEMO OS EXTERNAL PROJECT
-add_subdirectory(${CMAKE_SOURCE_DIR}/src/libs)
+
 
 ### EIGEN Matrix Vector Library
 #add_subdirectory(${CMAKE_SOURCE_DIR}/external/Eigen)

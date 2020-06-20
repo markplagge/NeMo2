@@ -144,7 +144,7 @@ namespace nemo {
 
 			bool fire_floor_ceiling_reset();
 
-			bool stochastic_integrate(int weight);
+			void stochastic_integrate(int weight);
 
 			void numeric_leak_calc(tw_stime now);
 

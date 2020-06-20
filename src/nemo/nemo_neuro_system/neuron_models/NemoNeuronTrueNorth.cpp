@@ -79,11 +79,15 @@ bool nemo::neuro_system::NemoNeuronTrueNorth::fire() {
 		}
 	}
 
+	return will_fire;
+
 }
 
 //return NemoNeuronGeneric::fire();
 
 void nemo::neuro_system::NemoNeuronTrueNorth::tn_fire(){
+		// Managed by core - now just a function stub
+		// Managed by core - now just a function stub
 
 };
 /**
@@ -175,7 +179,7 @@ bool nemo::neuro_system::NemoNeuronTrueNorth::fire_floor_ceiling_reset() {
  *  @param weight weight of selected leak or synapse
  *  @param st     the neuron state
  */
-bool nemo::neuro_system::NemoNeuronTrueNorth::stochastic_integrate(int weight) {
+void nemo::neuro_system::NemoNeuronTrueNorth::stochastic_integrate(int weight) {
 	auto st = ns;
 	if (BINCOMP(weight, st->drawn_random_number)) {
 		st->membrane_potential += 1;
