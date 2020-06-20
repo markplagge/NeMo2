@@ -12,3 +12,15 @@ src/.DS_Store
 config/models/dask-worker-space/
 
 config/models/cifar_100_local_model.json
+
+config/models/cifar_100_local_model.json.xz
+
+config/models/cifar_100_model.sqlite
+
+config/models/cifar_100_spike.sqlite
+
+config/models/cifar_100.sqlite
+
+config/models/converted.sqlite
+
+external/visit_struct/IMPLEMENTATION_NOTES.md
