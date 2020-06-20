@@ -9,6 +9,8 @@
 #include "../../nemo_globals.h"
 #include "../../nemo_io/NemoCoreOutput.h"
 #include "../neuron_models/NemoNeuronGeneric.h"
+#include <visit_struct/visit_struct.hpp>
+#include <visit_struct/visit_struct_intrusive.hpp>
 #include <configuru.hpp>
 #include <neuro_os.h>
 #include <ross.h>
@@ -130,8 +132,16 @@ namespace nemo {
 
 			void cleanup_output();
 
+			void run_leaks();
+			void run_fires();
+			void run_resets();
+
+			bool is_dest_interchip(int neuron_id);
 			/** NemoNeuroCoreBase contains neurons and neuron states in a structure */
 			std::vector<NemoNeuronGeneric *> neuron_array;
+			std::vector<unsigned int> neuron_dest_cores;
+			std::vector<unsigned int> neuron_dest_axons;
+
 
 			/**
  * output_mode - sets the spike output mode of this core.

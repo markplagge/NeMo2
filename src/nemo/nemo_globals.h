@@ -82,7 +82,11 @@ typedef enum CoreTypes {
 
 enum nemo_message_type {
   NEURON_SPIKE,
-  HEARTBEAT
+  HEARTBEAT,
+	NOS_LOAD_MODEL,
+	NOS_START,
+	NOS_STOP,
+	NOS_STATUS
 };
 /** @} */
 

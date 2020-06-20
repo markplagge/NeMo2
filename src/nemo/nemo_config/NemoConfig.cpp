@@ -11,11 +11,13 @@
 #include <sstream>
 #include <strstream>
 #include <utility>
-#define CONFIGURU_IMPLEMENTATION 1
+
 #include <codecvt>
+#include <visit_struct/visit_struct.hpp>
+#define CONFIGURU_IMPLEMENTATION 1
 #include <configuru.hpp>
 #include <iosfwd>
-#include <visit_struct/visit_struct.hpp>
+
 namespace nemo {
 	namespace config {
 		void error_reporter(std::string str)

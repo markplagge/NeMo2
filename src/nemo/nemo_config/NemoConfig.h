@@ -5,9 +5,10 @@
 #ifndef NEMOTNG_NEMOCONFIG_H
 #define NEMOTNG_NEMOCONFIG_H
 #include "../nemo_globals.h"
-#include <configuru.hpp>
 #include <visit_struct/visit_struct.hpp>
 #include <visit_struct/visit_struct_intrusive.hpp>
+#include <configuru.hpp>
+
 
 //#include "../nemo_io/ModelFile.h"
 //#include "../nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.h"

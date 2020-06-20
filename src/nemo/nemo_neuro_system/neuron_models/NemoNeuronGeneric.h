@@ -6,6 +6,7 @@
 #define NEMOTNG_NEMONEURONGENERIC_H
 
 #include "../../nemo_config/NemoConfig.h"
+#include <utility>
 #include <vector>
 
 namespace nemo {
@@ -25,41 +26,35 @@ namespace nemo {
 			double leak_v = -1;
 			double threshold = 1;
 			double reset_val = 0;
+			bool self_manage_spike_events = false;
+			tw_lp *cur_lp{};
+
+
+			
 
 		public:
-			NemoNeuronGeneric(double membrane_pot, const std::vector<double>& weights, double leak_v, double threshold, double reset_val) : membrane_pot(membrane_pot), weights(weights), leak_v(leak_v), threshold(threshold), reset_val(reset_val) {}
-			NemoNeuronGeneric() {}
+			unsigned  int dest_core;
+			unsigned  int dest_axon;
+
+			bool is_self_manage_spike_events() const;
+			void set_self_manage_spike_events(bool self_manage_spike_events);
+			tw_lp* get_cur_lp() const;
+			/** @todo: Use this to get LP info for this neuron - Will be pointers to the same LP?*/
+			void set_cur_lp(tw_lp* new_lp);
+
+			NemoNeuronGeneric(double membrane_pot, std::vector<double> weights, double leak_v, double threshold, double reset_val, tw_lp *lp) : membrane_pot(membrane_pot), weights(std::move(weights)), leak_v(leak_v), threshold(threshold), reset_val(reset_val),cur_lp(lp) {}
+			NemoNeuronGeneric() = default;
 
 			virtual void
-			integrate(double source_id) {
-				membrane_pot = membrane_pot + weights[source_id];
-			}
+			integrate(unsigned int source_id);
 
-			virtual void leak(int n_leaks) {
-				for (int i = 0; i < n_leaks; i++) {
-					membrane_pot += leak_v;
-				}
-			}
+			virtual void leak();
+			virtual void leak_n(int n_leaks);
 
-			virtual bool fire()
-			{
-				if (membrane_pot >= threshold) {
-					membrane_pot = reset_val;
-					return true;
-				}
-				else {
-					return false;
-				}
-			}
+			virtual bool fire();
+			virtual void reset();
 
-			virtual bool recv_hb(int n_leaks) {
-				leak(n_leaks);
-				return fire();
-			}
 
-			virtual void recv_spk(double source_id) {
-				integrate(source_id);
-			}
 		};
 
 	}// namespace neuro_system

@@ -6,6 +6,8 @@
 #define NEMOTNG_NEMOCORESCHEDULER_H
 #include "NemoNeuroCoreBase.h"
 #include <neuro_os.h>
+#include <visit_struct/visit_struct.hpp>
+#include <visit_struct/visit_struct_intrusive.hpp>
 #include <configuru.hpp>
 namespace nemo {
 	namespace neuro_system {

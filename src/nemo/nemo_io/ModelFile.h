@@ -4,7 +4,8 @@
 
 #ifndef NEMOTNG_MODELFILE_H
 #define NEMOTNG_MODELFILE_H
-
+#include <visit_struct/visit_struct.hpp>
+#include <visit_struct/visit_struct_intrusive.hpp>
 #include <configuru.hpp>
 #include <string>
 class ModelFile {
