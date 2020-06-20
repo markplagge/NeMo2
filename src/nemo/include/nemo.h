@@ -10,13 +10,12 @@
 #include "../nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreBase.h"
 #include "../nemo_ross.h"
 
-namespace nemo
-{
-class Nemo {
+namespace nemo {
+	extern config::NemoConfig* global_config;
+	class Nemo {
 
-  config::NemoConfig nemo_config;
-
-};
+		config::NemoConfig nemo_config;
+	};
 
 }// namespace nemo
 #endif//NEMOTNG_NEMO_H

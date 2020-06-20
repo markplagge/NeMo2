@@ -5,12 +5,13 @@ cmake_minimum_required(VERSION 3.15)
 # For all your neuromorphic hardware simulation needs
 # Developed by Mark Plagge
 
-set (PROJECT_NAME "NeMoTNG")
-set (PROJECT_DESCRIPTION "A parallel discrete even simulation based model of neuromorphic hardware - as a CODES workload")
-set (PROJECT_AUTHOR "Mark Plagge")
-project(${PROJECT_NAME} VERSION 0.0.1 LANGUAGES  CXX)
-set(CMAKE_CXX_STANDARD 14)
-#set(CMAKE_C_STANDARD 11)
+set(PROJECT_NAME "NeMoTNG")
+set(PROJECT_DESCRIPTION "A parallel discrete even simulation based model of neuromorphic hardware - as a CODES workload")
+set(PROJECT_AUTHOR "Mark Plagge")
+project(${PROJECT_NAME} VERSION 0.0.1 LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 include(ExternalProject)
 include("cmake/HunterGate.cmake")
@@ -18,7 +19,7 @@ include("cmake/HunterGate.cmake")
 # ===========================
 # CMake Modules and required packages config
 # ===========================
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" )
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/catch2/contrib")
 message(${CMAKE_MODULE_PATH})
 include(CTest)
@@ -63,6 +64,9 @@ message(${CMAKE_MODULE_PATH})
 include(ParseAndAddCatchTests)
 include(Catch)
 
+## configuru JSON parser
+include_directories(${CMAKE_SOURCE_DIR}/external/configuru/configuru.hpp)
+configure_file(config/example_config.json config/example_config.json COPYONLY)
 ###### ROSS EXTERNAL PROJECT
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/ROSS)
 
