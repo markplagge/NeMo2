@@ -193,11 +193,17 @@ namespace nemo {
 			auto out = new NemoCoreOutput(core_local_id, x);
 			this->output_system = out;
 			// Use the nemo global config to set up this core
+			if (!global_config->do_neuro_os) {
+				current_model = models[0];
+			}
 		}
 
 		void NemoNeuroCoreBase::forward_event(tw_bf* bf, nemo_message* m, tw_lp* lp) {
 			this->cur_message = m;
 			this->forward_heartbeat_handler();
+			if (m->message_type == NOS_LOAD_MODEL) {
+				current_model = models[m->model_id];
+			}
 			if (m->message_type == NEURON_SPIKE) {
 				for (const auto& item : neuron_array) {
 					item->integrate(m->dest_axon);

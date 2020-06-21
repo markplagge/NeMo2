@@ -1,10 +1,11 @@
 {
   "nemo_global": {
+    "GLOBAL_DEBUG": true,
     "ns_cores_per_chip": 4096,
     "total_chips": 2,
     "do_neuro_os": true,
     "sched_type": "FCFS",
-    "save_spikes": true,
+    "save_nos_stats": true,
     "save_all_spikes": false,
     "save_membrane_pots": false,
     "neurons_per_core": 256,
@@ -41,15 +42,23 @@
   "scheduler_inputs": [
     {
       "start_time": 0,
-      "task_id": 0
+      "task_id": 0,
+      "model_id": 0
     },
     {
       "start_time": 0,
-      "task_id": 1
+      "task_id": 1,
+      "model_id": 0
     },
     {
       "start_time": 1024,
-      "task_id": 2
+      "task_id": 2,
+      "model_id": 1
+    },
+    {
+      "start_time": 1024,
+      "task_id": 3,
+      "model_id": 1
     }
   ]
 }

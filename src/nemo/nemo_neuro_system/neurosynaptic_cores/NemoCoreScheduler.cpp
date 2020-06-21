@@ -7,20 +7,20 @@
 void nemo::neuro_system::NemoCoreScheduler::forward_scheduler_event(tw_bf* bf, nemo::nemo_message* m, tw_lp* lp) {
 	//Scheduler events are only once per global tick
 	//first queue up next scheduler event
+	if (global_config->do_neuro_os) {
+		auto sched_time = JITTER(lp->rng) + 1;
+		struct tw_event* os_tick = tw_event_new(lp->gid, sched_time, my_lp);
+		nemo_message* msg = (nemo_message*)tw_event_data(os_tick);
+		msg->message_type = NOS_TICK;
+		msg->debug_time = tw_now(lp);
+		msg->random_call_count = lp->rng->count;
+		tw_event_send(os_tick);
+		//update state
+		this->current_neuro_tick = floor(tw_now(lp));
 
-	auto sched_time =  JITTER(lp->rng) + 1;
-	struct tw_event* os_tick = tw_event_new(lp->gid, sched_time, my_lp);
-	nemo_message* msg = (nemo_message*)tw_event_data(os_tick);
-	msg->message_type = NOS_TICK;
-	msg->debug_time = tw_now(lp);
-	msg->random_call_count = lp->rng->count;
-	tw_event_send(os_tick);
-	//update state
-	this->current_neuro_tick = floor(tw_now(lp));
-	this->process_queue.system_tick();
-
+		this->process_queue.system_tick();
+	}
 	//check the current list of processes:
-
 }
 void nemo::neuro_system::NemoCoreScheduler::reverse_scheduler_event(tw_bf* bf, nemo::nemo_message* m, tw_lp* lp){
 
@@ -70,7 +70,6 @@ void nemo::neuro_system::sched_core_init(nemo::neuro_system::NemoCoreScheduler* 
 	msg->debug_time = tw_now(lp);
 	msg->random_call_count = lp->rng->count;
 	tw_event_send(os_tick);
-
 	s->init_process_models();
 
 }

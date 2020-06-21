@@ -20,19 +20,25 @@
 
 namespace nemo {
 	namespace config {
-		void error_reporter(std::string str)
-		{
+		void error_reporter(std::string str) {
 			std::cerr << str << std::endl;// or throw or ignore
 		}
 		char* primary_config_file = (char*)calloc(sizeof(char), 1024);
 
-		std::string NemoConfig::get_settings()
-		{
+		std::string NemoConfig::get_settings() {
 			std::stringstream output;
+			output << "Main config file location: " << main_config_file << "\n";
 			output << "Cores per chip: " << ns_cores_per_chip << "\n";
-			output << "Total Chips" << total_chips << "\n";
-			output << "Sim size (total NS CORES)" << total_sim_size << "\n";
+			output << "Total Chips: " << total_chips << "\n";
+			output << "Sim size (total NS CORES): " << total_sim_size << "\n";
 			output << "Scheduler in use? " << do_neuro_os << "\n";
+			output << sched_mode_to_string() << "\n";
+
+			return output.str();
+		}
+
+		std::string NemoConfig::sched_mode_to_string() {
+			std::stringstream output;
 			if (do_neuro_os) {
 				output << "Scheduler Type ";
 				switch (scheduler_type) {
@@ -46,10 +52,7 @@ namespace nemo {
 					output << "Fair Share";
 					break;
 				}
-				output << "\n";
 			}
-			output << "Main config file location: " << main_config_file << "\n";
-
 			return output.str();
 		}
 
@@ -81,16 +84,19 @@ namespace nemo {
 			else {
 				NemoConfig::main_config_file = std::string("../config/example_config.json");
 			}
-			std::cout << "NeMo config file loading from  " << NemoConfig::main_config_file << "\n";
 
 			using namespace configuru;
 			Config cfg = configuru::parse_file(main_config_file, FORGIVING);
 			auto cgbl = cfg["nemo_global"];
-			std::cout << cgbl << "\n";
 			this->ns_cores_per_chip = (u_long)cgbl["ns_cores_per_chip"];
 			this->total_chips = (u_int)cgbl["total_chips"];
 			this->do_neuro_os = (bool)cgbl["do_neuro_os"];
 			this->neurons_per_core = (u_int64_t)cgbl["neurons_per_core"];
+			this->save_all_spikes = (bool)cgbl["save_all_spikes"];
+			this->save_membrane_pots = (bool)cgbl["save_membrane_pots"];
+			this->save_nos_stats = (bool)cgbl["save_nos_stats"];
+			DEBUG_FLAG = ((bool)cgbl["GLOBAL_DEBUG"]);
+
 			if (this->do_neuro_os) {
 				auto sched_type = (std::string)cgbl["sched_type"];
 				if ("FCFS" == sched_type) {
@@ -111,6 +117,9 @@ namespace nemo {
 			std::cout << "models\n";
 
 			total_sim_size = total_chips * ns_cores_per_chip * neurons_per_core;
+			est_events_per_pe = total_sim_size / world_size;
+			//Does not include the scheduler LP which runs on PE 0
+			lps_per_pe = (ns_cores_per_chip * total_chips) / world_size;
 		}
 		NemoConfig::NemoConfig() = default;
 		bool NemoConfig::DEBUG_FLAG;

@@ -282,18 +282,18 @@ sgn (T1 x)
  *
  */
 typedef struct Nemo_Message {
-  int message_type;
+	int message_type;
 
-		  int source_core;
-		  int dest_axon;
-		  unsigned long intended_neuro_tick;
-		  uint32_t nemo_event_status;
-		  unsigned int random_call_count;
-		  double debug_time;
+	int source_core;
+	int dest_axon;
+	unsigned long intended_neuro_tick;
+	uint32_t nemo_event_status;
+	unsigned int random_call_count;
+	double debug_time;
+	int model_id;
 
-
-  ::std::string
-  to_string ();
+	::std::string
+	to_string();
 } nemo_message;
 
 // Helper functon for BF logic:

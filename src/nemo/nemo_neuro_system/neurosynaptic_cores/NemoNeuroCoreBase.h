@@ -49,11 +49,8 @@ namespace nemo {
    * is a neurosynaptic tick (handled by heartbeat messages), integration, and leak functions.
    * Common code for forward events is here - this function handles basic versions of:
    * - the heartbeat / neurosnaptic tick sync
-   * -
-   *
-   *
-   *
    */
+
 			virtual void
 			forward_heartbeat_handler();
 
@@ -111,14 +108,16 @@ namespace nemo {
 */
 			BF_Event_Status evt_stat;
 
-		public:
 			/**
 * my_lp -> current lp state, holds the lp state given to us from the calling function.
 */
 			tw_lp* my_lp;
 			tw_bf* my_bf;
 			NemoNeuronGeneric neuron_template;
-			std::map<int,nemo::config::NemoModel> models;
+			std::map<int, nemo::config::NemoModel> models;
+			nemo::config::NemoModel current_model;
+			std::vector<NemoNeuroCoreBase> state_stack;
+
 			void core_init(tw_lp* lp);
 
 			void forward_event(tw_bf* bf, nemo_message* m, tw_lp* lp);
@@ -137,12 +136,15 @@ namespace nemo {
 			void run_fires();
 			void run_resets();
 
+			void init_current_model();
+			void interrupt_run();
+			void resume_run();
+
 			bool is_dest_interchip(int neuron_id);
 			/** NemoNeuroCoreBase contains neurons and neuron states in a structure */
-			std::vector<NemoNeuronGeneric *> neuron_array;
+			std::vector<NemoNeuronGeneric*> neuron_array;
 			std::vector<unsigned int> neuron_dest_cores;
 			std::vector<unsigned int> neuron_dest_axons;
-
 
 			/**
  * output_mode - sets the spike output mode of this core.

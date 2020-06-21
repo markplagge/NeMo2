@@ -20,72 +20,69 @@ namespace nemo {
 	namespace p {
 
 		extern int VERBOSE;
-		template<>
-		void pr_e(std::string desc, config::ScheduledTask elm) {
-			std::stringstream elx;
-			elx << elm;
 
-			pr_e(desc, elx.str());
-		}
-		template<>
-		void print_config_element<config::NemoModel>(config::NemoModel const& elm) {
-			ss << rowstar << elm << rowstar << endl;
-		}
-		template<typename T>
-		void pr_loc_h(T hdr_msg) {
-			char str_buffer[200] = {'\0'};
-
-			snprintf(str_buffer, 99, "%s%20s%s%38s\n", rowstar.c_str(), " ",
-					 print_as_color(hdr_msg, ansi_color_code::bright_green).c_str(), rowstar.c_str());
-			ss << print_as_color(vx, ansi_color_code::cyan) << endl
-			   << str_buffer;
-		}
 
 		template<>
 		void print_vector_limit<>(std::vector<config::ScheduledTask> elms) {
 			int chk = 0;
-
-			chk += 1;
-			if (VERBOSE != 0 && VERBOSE == chk) {
-				//break;
+		std:
+			stringstream sb;
+			for (const auto& elm : elms) {
+				if (VERBOSE == 0 || VERBOSE != chk) {
+					sb << tbstop << pr_emph("Scheduler Entry:") << endl
+					   << tbstop << elm;
+					for (const auto& item : global_config->models) {
+						if (item.id == elm.model_id) {
+							sb << " MF: ";
+							if (item.benchmark_model_name.compare("NONE")) {
+								sb << item.benchmark_model_name << endl;
+							}
+							else {
+								sb << item.model_file_path << endl;
+							}
+						}
+					}
+				}
+				chk += 1;
 			}
+			print_vec_nlines(chk, "Scheduled Tasks: ");
+			ss << sb.str();
+			ss << star_line << endl;
 		}
 		template<>
 		void print_vector_limit<config::NemoModel>(std::vector<config::NemoModel> elms) {
-			pr_loc_h("Models in Sim:");
-			//			snprintf(vmh,99,"%s%20s%s%38s\n",rowstar.c_str()," ",
-			//					 print_as_color("Models In Sim:",ansi_color_code::bright_green).c_str(),rowstar.c_str());
 
-			//ss << vmh;
-			//ss << print_as_color(vx, ansi_color_code::cyan) << endl;
-			//			pr_e("Models in Sim:"," ");
 			int chk = 0;
-
+			std::stringstream sb;
 			for (auto& e : elms) {
-
-				//print_config_element(e);
-				ss << tbstop << pr_emph("Model: ") << endl
-				   << tbstop << e;
-				//ss << setw(22) << rowstar  <<endl;
-				std::string nm("NONE");
-				if (e.benchmark_model_name.compare("NONE")) {
-					ss << endl;
-					ss << tbstop << tbstop << setw(4) << "SPK: " << setw(30) << e.spike_file_path << endl;
-					ss << tbstop << tbstop << setw(4) << "MDL: " << setw(30) << e.model_file_path << endl;
+				if (VERBOSE != 0 && VERBOSE == chk) {
 				}
 				else {
-					ss << endl;
-					ss << tbstop << tbstop << pr_emph(" Benchmark Model: ") << endl;
-					ss << tbstop << tbstop << tbstop << e.benchmark_model_name << endl;
+
+					//print_config_element(e);
+					sb << tbstop << pr_emph("Model: ") << chk << endl
+					   << tbstop << e;
+					//ss << setw(22) << rowstar  <<endl;
+					std::string nm("NONE");
+					if (not e.benchmark_model_name.compare("NONE")) {
+						sb << endl;
+						sb << tbstop << tbstop << setw(4) << "SPK: " << setw(30) << e.spike_file_path << endl;
+						sb << tbstop << tbstop << setw(4) << "MDL: " << setw(30) << e.model_file_path << endl;
+					}
+					else {
+						sb << endl;
+						sb << tbstop << tbstop << pr_emph(" Benchmark Model: ") << endl;
+						sb << tbstop << tbstop << tbstop << e.benchmark_model_name << endl;
+					}
+
+					sb << line << endl;
 				}
 
-				ss << line << endl;
 				chk += 1;
-				if (VERBOSE != 0 && VERBOSE == chk) {
-					break;
-				}
 			}
-			ss << print_as_color(vx, ansi_color_code::cyan) << endl;
+			ss << pr_loc_h("Models in Sim", chk);
+			ss << sb.str();
+			ss << star_line << endl;
 		}
 		template<>
 		void print_config_vector<config::NemoModel>(std::vector<config::NemoModel> elms) {
@@ -93,7 +90,7 @@ namespace nemo {
 		}
 		template<>
 		void print_config_vector<config::ScheduledTask>(std::vector<config::ScheduledTask> elms) {
-			pr_e("NeuroOS Task Schedule:", " ");
+			//pr_e("NeuroOS Task Schedule:", " ");
 			print_vector_limit(elms);
 		}
 		template<>
@@ -103,6 +100,7 @@ namespace nemo {
 
 	}// namespace p
 }// namespace nemo
+
 using namespace nemo;
 
 /*
@@ -134,12 +132,21 @@ tw_lptype ne_lps[8] = {
 		{0},
 };
 
-void init_nemo(nemo::config::NemoConfig cfg) {
+void init_nemo(nemo::config::NemoConfig* cfg) {
 	using namespace config;
-	CORE_SIZE = cfg.ns_cores_per_chip;
-	SIM_SIZE = cfg.total_chips * CORE_SIZE;
-	LPS_PER_PE = cfg.world_size / LPS_PER_PE;
+	CORE_SIZE = cfg->ns_cores_per_chip * cfg->neurons_per_core;
+	SIM_SIZE = cfg->total_chips * CORE_SIZE;
+	LPS_PER_PE = g_tw_nlp;
 	SYNAPSES_IN_CORE = 1;// still one due to super-synapse logic from Original nemo
+
+	// configure ROSS
+	auto nlp = cfg->lps_per_pe;
+	if (g_tw_mynode == 0) {
+		nlp++;
+	}
+	g_tw_nlp = nlp;
+	g_tw_lookahead = cfg->lookahead;
+	g_tw_lp_types = ne_lps;
 }
 
 void print_sim_config() {
@@ -147,11 +154,18 @@ void print_sim_config() {
 	using namespace p;
 
 	start_sim_hdr();
-	pr_e<uint>(std::string("Number of NS Cores: "), global_config->total_chips);
+	pr_e<uint>(std::string("Total chips: "), global_config->total_chips);
 	pr_e<u_int>("Neurons Per Core: ", global_config->neurons_per_core);
+	if (global_config->do_neuro_os) {
+		pr_e("N.O.S. Scheduler Mode: ", global_config->sched_mode_to_string());
+	}
+	pr_v("Core Types: ", global_config->core_type_ids);
+	pr_e("Debug mode?: ", global_config->DEBUG_FLAG);
+	pr_e("Save all spikes? ", global_config->save_all_spikes);
+	pr_e("Save membrane potentials? ", global_config->save_membrane_pots);
+	pr_e("Save N.O.S. scheduler stats? ", global_config->save_nos_stats);
 
-	pr_v<NemoModel>("Models", global_config->models);
-
+	pr_v<NemoModel>("", global_config->models);
 	pr_v("Scheduler Inputs", global_config->scheduler_inputs);
 
 	p::start_sim_ftr();
@@ -175,7 +189,9 @@ int main(int argc, char* argv[]) {
 	main_config->init_from_tw_opts();
 	nemo::global_config = main_config;
 	print_sim_config();
-	// initialize ROSS
+	// initialize ROSS and NeMo:
+	init_nemo(main_config);
+
 	// main_config -> load network defs
 	//main_config -> init
 

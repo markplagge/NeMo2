@@ -29,6 +29,7 @@ namespace nemo {
 		struct ScheduledTask {
 			double start_time;
 			int task_id;
+			int model_id;
 			friend std::ostream& operator<<(std::ostream& os, const ScheduledTask& task);
 		};
 		/**
@@ -60,14 +61,23 @@ namespace nemo {
 			unsigned int neurons_per_core = 256;
 			unsigned int total_chips = 2;
 			unsigned int total_sim_size = 0;
+			unsigned int lps_per_pe = 0;
 			u_int64_t total_neurons_in_sim = 0;
 			bool do_neuro_os = false;
+
+			bool save_all_spikes = false;
+			bool save_membrane_pots = false;
+			bool save_nos_stats = true;
 			SchedType scheduler_type;
 			std::vector<core_types> core_map;
 			//core_types GetCoreType(::std::string core_type){}
 			std::vector<int> core_type_ids;
 			std::vector<ScheduledTask> scheduler_inputs;
 			std::vector<NemoModel> models;
+
+			double jitter_factor = 0.001;//!< This is the range of jitter. Since core-core comms are used lookahead can now be 1 though
+			int est_events_per_pe = 1024;
+			double lookahead = 0.9;
 
 			int world_size = 0;
 
@@ -79,7 +89,9 @@ namespace nemo {
 
 			NemoConfig();
 			void init_from_tw_opts();
+
 			std::string get_settings();
+			std::string sched_mode_to_string();
 		};
 		extern char* primary_config_file;
 		tw_peid nemo_map_linear(tw_lpid gid);
@@ -93,7 +105,7 @@ namespace nemo {
 	}// namespace config
 }// namespace nemo
 VISITABLE_STRUCT(nemo::config::NemoModel, id, needed_cores, model_file_path, spike_file_path, requested_time, benchmark_model_name);
-VISITABLE_STRUCT(nemo::config::ScheduledTask, task_id, start_time);
+VISITABLE_STRUCT(nemo::config::ScheduledTask, start_time, task_id, model_id);
 #endif// NEMOTNG_NEMOCONFIG_H
 /*
  *

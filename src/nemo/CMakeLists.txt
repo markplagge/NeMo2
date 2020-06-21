@@ -44,7 +44,6 @@ set(nemo_lib_srcs
         nemo_config/NemoConfig.cpp
         nemo_ross.h mapping_functions.cpp
         nemo_io/NemoNeuroInitState.cpp
-        nemo_formatted_print.cpp
         nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreSimple.cpp
         nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.cpp
         nemo_io/ModelFile.cpp nemo_config/NemoModel.cpp nemo_config/NemoModel.h nemo_neuro_system/neurosynaptic_cores/NemoCoreScheduler.cpp nemo_neuro_system/neurosynaptic_cores/NemoCoreScheduler.h nemo_neuro_system/neurosynaptic_cores/NemoCoreDefs.h nemo_neuro_system/neuron_models/NemoNeuronTrueNorth.cpp nemo_neuro_system/neuron_models/NemoNeuronTrueNorth.h)
