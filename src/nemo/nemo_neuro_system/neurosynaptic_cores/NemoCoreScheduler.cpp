@@ -95,7 +95,3 @@ void nemo::neuro_system::sched_core_commit(nemo::neuro_system::NemoCoreScheduler
 void nemo::neuro_system::sched_core_finish(nemo::neuro_system::NemoCoreScheduler* s, tw_lp* lp){
 	s->core_finish(lp);
 }
-tw_peid nemo::neuro_system::sched_map_linear(tw_lpid gid)
-{
-	return 0;
-}

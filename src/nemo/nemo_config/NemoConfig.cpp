@@ -64,11 +64,7 @@ namespace nemo {
 				TWOPT_CHAR("cfg",primary_config_file, "Main configuration file"),
 				TWOPT_END()};
 
-		tw_peid nemo_map_linear(tw_lpid gid)
-		{
 
-			return 1;
-		}
 		/**
 		 * Main configuration function - reads the nemo config file specified by the CLI flag,
 		 * parses it, and sets up the NeMo simulation.

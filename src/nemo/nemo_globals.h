@@ -370,7 +370,7 @@ constexpr int MAX_OUTPUT_PER_TN_NEURON = 1;
 /** @} */
 
 /**
- * @defgroup codes_map Codes Mapping Functions
+ * @defgroup mapping  Mapping Functions
  * helper functions for neuron mapping
  * @{
  */
@@ -380,6 +380,9 @@ get_core_id_from_gid (tw_lpid id);
 
 ne_id_type
 get_local_id_from_gid (tw_lpid id);
+tw_peid nemo_map(tw_lpid gid) ;
+tw_lpid lp_typemapper(tw_lpid gid);
+
 /**@}**/
 }// namespace nemo
 

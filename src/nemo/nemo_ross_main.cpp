@@ -119,15 +119,15 @@ tw_lptype ne_lps[8] = {
 		 (revent_f)neuro_system::sched_reverse_event,
 		 (commit_f)neuro_system::sched_core_commit,
 		 (final_f)neuro_system::sched_core_finish,
-		 (map_f)neuro_system::sched_map_linear,
+		 (map_f)nemo_map,
 		 sizeof(neuro_system::NemoCoreScheduler)},
-		{(init_f)neuro_system::NemoCoreLPWrapper::core_init,
-		 (pre_run_f)neuro_system::NemoCoreLPWrapper::pre_run,
-		 (event_f)neuro_system::NemoCoreLPWrapper::forward_event,
-		 (revent_f)neuro_system::NemoCoreLPWrapper::reverse_event,
-		 (commit_f)neuro_system::NemoCoreLPWrapper::core_commit,
-		 (final_f)neuro_system::NemoCoreLPWrapper::core_finish,
-		 (map_f)config::nemo_map_linear,
+		{(init_f)neuro_system::NemoNeuroCoreBase::core_init,
+		 (pre_run_f)neuro_system::NemoNeuroCoreBase::pre_run,
+		 (event_f)neuro_system::NemoNeuroCoreBase::forward_event,
+		 (revent_f)neuro_system::NemoNeuroCoreBase::reverse_event,
+		 (commit_f)neuro_system::NemoNeuroCoreBase::core_commit,
+		 (final_f)neuro_system::NemoNeuroCoreBase::core_finish,
+		 (map_f)nemo_map,
 		 sizeof(neuro_system::NemoNeuroCoreBase)},
 		{0},
 };
@@ -147,6 +147,8 @@ void init_nemo(nemo::config::NemoConfig* cfg) {
 	g_tw_nlp = nlp;
 	g_tw_lookahead = cfg->lookahead;
 	g_tw_lp_types = ne_lps;
+	g_tw_lp_typemap = lp_typemapper;
+	tw_define_lps(nlp,sizeof(nemo_message))
 }
 
 void print_sim_config() {

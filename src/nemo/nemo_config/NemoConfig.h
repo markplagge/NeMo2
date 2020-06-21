@@ -5,6 +5,7 @@
 #ifndef NEMOTNG_NEMOCONFIG_H
 #define NEMOTNG_NEMOCONFIG_H
 #include "../nemo_globals.h"
+#include "../nemo_neuro_system/neuron_models/NemoNeuronGeneric.h"
 #include <visit_struct/visit_struct.hpp>
 #include <visit_struct/visit_struct_intrusive.hpp>
 #include <configuru.hpp>
@@ -12,7 +13,7 @@
 
 //#include "../nemo_io/ModelFile.h"
 //#include "../nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.h"
-
+#include "../nemo_neuro_system/neuron_models/NemoNeuronGeneric.h"
 #include <map>
 #include <ostream>
 #include <string>
@@ -92,9 +93,10 @@ namespace nemo {
 
 			std::string get_settings();
 			std::string sched_mode_to_string();
+
 		};
 		extern char* primary_config_file;
-		tw_peid nemo_map_linear(tw_lpid gid);
+		
 		extern unsigned int LPS_PER_PE;
 		extern unsigned int SYNAPSES_IN_CORE;
 		extern unsigned int CORE_SIZE;

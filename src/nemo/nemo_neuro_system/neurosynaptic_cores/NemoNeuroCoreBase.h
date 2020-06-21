@@ -50,6 +50,55 @@ namespace nemo {
    * Common code for forward events is here - this function handles basic versions of:
    * - the heartbeat / neurosnaptic tick sync
    */
+			static void core_init(void* s, tw_lp* lp)
+			{
+				auto core = static_cast<NemoNeuroCoreBase *>(s);
+				//determine the type of core we want through mapping
+				for (const auto& model : global_config->models) {
+					core->models[model.id] = model;
+				}
+				auto global_id = lp->gid;
+				core->core_id = get_core_id_from_gid (global_id);
+				core->my_lp = lp;
+
+			}
+
+			static void pre_run(void* s, tw_lp* lp)
+			{
+				auto core = static_cast<NemoNeuroCoreBase *>(s);
+				core->pre_run(lp);
+			}
+
+			static void forward_event(void* s, tw_bf* bf, void* m, tw_lp* lp)
+			{
+
+				auto core = static_cast<NemoNeuroCoreBase *>(s);
+				auto ms = static_cast<nemo_message *> (m);
+				core->forward_event(bf, ms, lp);
+			}
+
+			static void reverse_event(void* s, tw_bf* bf, void* m, tw_lp* lp)
+			{
+				auto core = static_cast<NemoNeuroCoreBase *>(s);
+				auto ms = static_cast<nemo_message *> (m);
+				core->reverse_event(bf, ms, lp);
+			}
+
+			static void core_commit(void* s, tw_bf* bf, void* m, tw_lp* lp)
+			{
+				auto core = static_cast<NemoNeuroCoreBase *>(s);
+				auto ms = static_cast<nemo_message *> (m);
+				core->core_commit(bf, ms, lp);
+			}
+
+			static void core_finish(void* s, tw_lp* lp)
+			{
+				auto core = static_cast<NemoNeuroCoreBase *>(s);
+				core->core_finish(lp);
+			}
+
+
+			ne_id_type core_id;
 
 			virtual void
 			forward_heartbeat_handler();

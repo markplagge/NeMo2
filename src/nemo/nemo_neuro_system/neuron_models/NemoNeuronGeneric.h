@@ -10,7 +10,7 @@
 #include <vector>
 
 namespace nemo {
-	extern config::NemoConfig* global_config;
+	//extern config::NemoConfig* global_config;
 	namespace neuro_system {
 
 		/**

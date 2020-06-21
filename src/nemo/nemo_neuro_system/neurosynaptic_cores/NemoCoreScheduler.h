@@ -39,7 +39,8 @@ namespace nemo {
 		void sched_reverse_event(NemoCoreScheduler * s, tw_bf* bf, nemo_message* m, tw_lp* lp);
 		void sched_core_commit(NemoCoreScheduler * s, tw_bf* bf, nemo_message* m, tw_lp* lp);
 		void sched_core_finish(NemoCoreScheduler * s, tw_lp* lp);
-		tw_peid sched_map_linear(tw_lpid gid);
+
+
 
 	}
 

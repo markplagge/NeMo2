@@ -16,7 +16,7 @@ namespace nemo {
 
 	namespace neuro_system {
 
-		class NemoCoreLPWrapper {
+		class __unused NemoCoreLPWrapper {
 
 		public:
 			static void core_init(NemoCoreLPWrapper* s, tw_lp* lp)
