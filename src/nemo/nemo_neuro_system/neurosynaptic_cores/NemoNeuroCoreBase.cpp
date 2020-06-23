@@ -238,8 +238,7 @@ namespace nemo {
 
 		void NemoNeuroCoreBase::cleanup_output() {
 		}
-		NemoNeuroCoreBase::NemoNeuroCoreBase() {
-		}
+
 		/**
  * run_leaks - iterates through the neurons and runs the leak function.
  */
@@ -305,6 +304,8 @@ namespace nemo {
 			unsigned int dest_chip = dest_core / cores_per_chip;
 			return source_chip != dest_chip;
 		}
+
+
 
 	}// namespace neuro_system
 

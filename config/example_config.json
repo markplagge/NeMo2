@@ -1,7 +1,7 @@
 {
   "nemo_global": {
     "GLOBAL_DEBUG": true,
-    "ns_cores_per_chip": 4096,
+    "ns_cores_per_chip": 32,
     "total_chips": 2,
     "do_neuro_os": true,
     "sched_type": "FCFS",
@@ -9,6 +9,9 @@
     "save_all_spikes": false,
     "save_membrane_pots": false,
     "neurons_per_core": 256,
+    "output_spike_file": "./model_output.csv",
+    "output_nos_stat_file" : "./output_nos_stat_file.csv",
+    "output_membrane_pot_file": "./output_membrane_pot.csv",
     "core_type_ids": [
       0,
       1
@@ -19,7 +22,7 @@
       "id": 0,
       "needed_cores": 0,
       "model_file_path": "../models/cifar100_model.json",
-      "spike_file_path": "../models/cifar100_spk.sqlite",
+      "spike_file_path": "../models/cifar100_spike.json",
       "requested_time": 1024,
       "benchmark_model_name": "NONE"
     },
@@ -34,7 +37,7 @@
       "id": 2,
       "needed_cores": 0,
       "model_file_path": "../models/demo_model.json",
-      "spike_file_path": "../models/demo_model.sqlite",
+      "spike_file_path": "../models/demo_model_spike.json",
       "requested_time": 1024,
       "benchmark_model_name": "NONE"
     }

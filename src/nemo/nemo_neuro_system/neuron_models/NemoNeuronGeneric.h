@@ -57,6 +57,7 @@ namespace nemo {
 
 		};
 
+
 	}// namespace neuro_system
 }// namespace nemo
 #endif//NEMOTNG_NEMONEURONGENERIC_H

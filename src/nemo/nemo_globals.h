@@ -5,9 +5,9 @@
 #ifndef NEMOTNG_NEMO_GLOBALS_H
 #define NEMOTNG_NEMO_GLOBALS_H
 //#include "../../external/eigen/Eigen/Dense"
-
-#include <cstdint>
 #include <ross.h>
+#include <cstdint>
+
 #include <vector>
 
 namespace nemo
@@ -369,21 +369,8 @@ constexpr int WEIGHTS_PER_TN_NEURON = 4;
 constexpr int MAX_OUTPUT_PER_TN_NEURON = 1;
 /** @} */
 
-/**
- * @defgroup mapping  Mapping Functions
- * helper functions for neuron mapping
- * @{
- */
-//Todo: implement these functions based on CODES mapping
-ne_id_type
-get_core_id_from_gid (tw_lpid id);
 
-ne_id_type
-get_local_id_from_gid (tw_lpid id);
-tw_peid nemo_map(tw_lpid gid) ;
-tw_lpid lp_typemapper(tw_lpid gid);
 
-/**@}**/
 }// namespace nemo
 
 #endif//NEMOTNG_NEMO_GLOBALS_H

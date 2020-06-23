@@ -8,7 +8,12 @@
 #define IABS(a) (((a) < 0) ? (-a) : (a))//!< Typeless integer absolute value function
 /** TODO: See if there is a non-branching version of the signum function, maybe in MAth libs and use that. */
 #define SGN(x) ((x > 0) - (x < 0))    //!< Signum function
-#define DT(x) !(x)                    //!<Kronecker Delta function.
+//#define DT(x) !(x)                    //!<Kronecker Delta function.
+
+template <typename T>
+unsigned int DT(T x){
+	return x > 0 ? 1 : 0;
+}
 #define BINCOMP(s, p) IABS((s)) >= (p)//!< binary comparison for conditional stochastic evaluation
 
 //NemoNeuronGeneric::integrate(source_id);

@@ -12,9 +12,8 @@ project(${PROJECT_NAME} VERSION 0.0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
 include(ExternalProject)
-include("cmake/HunterGate.cmake")
+#include("cmake/HunterGate.cmake")
 
 # ===========================
 # CMake Modules and required packages config
@@ -38,26 +37,26 @@ message("MPI C: ${MPI_C_COMPILER}, flags: ${MPI_C_COMPILE_FLAGS} || ${MPI_CXX_CO
 
 
 #### ROSSS EXTERNAL PROJECT
-list(APPEND R_CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX:path=${ROSS_BIN_FOLDER} " )
-list(APPEND R_CMAKE_ARGS "-DROSS_BUILD_SHARED_LIBS=ON ")
-LIST(APPEND R_CMAKE_ARGS "-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS} ")
-ExternalProject_Add(ROSS_EXT
-        SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/ROSS
-        INSTALL_DIR ${ROSS_BIN_FOLDER}
-        BINARY_DIR ${ROSS_BIN_FOLDER}
-        CMAKE_ARGS
-                -DCMAKE_INSTALL_PREFIX:path=${ROSS_BIN_FOLDER}
-                -DROSS_BUILD_SHARED_LIBS=ON
-                -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
-
-        )
+#list(APPEND R_CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX:path=${ROSS_BIN_FOLDER} " )
+#list(APPEND R_CMAKE_ARGS "-DROSS_BUILD_SHARED_LIBS=ON ")
+#LIST(APPEND R_CMAKE_ARGS "-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS} ")
+#ExternalProject_Add(ROSS_EXT
+#        SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/ROSS
+#        INSTALL_DIR ${ROSS_BIN_FOLDER}
+#        BINARY_DIR ${ROSS_BIN_FOLDER}
+#        CMAKE_ARGS
+#                -DCMAKE_INSTALL_PREFIX:path=${ROSS_BIN_FOLDER}
+#                -DROSS_BUILD_SHARED_LIBS=ON
+#                -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
+#
+#        )
 ################# REMOVING CODES ###############
 
 
 #External PRojects
-add_subdirectory(external/sqlite)
+
 add_subdirectory(external/catch2)
-set(SQL_FOLDER ${CMAKE_SOURCE_DIR}/external/sqlite)
+
 message(${CMAKE_MODULE_PATH})
 
 message(${CMAKE_MODULE_PATH})
@@ -65,7 +64,9 @@ include(ParseAndAddCatchTests)
 include(Catch)
 
 ## configuru JSON parser
-include_directories(${CMAKE_SOURCE_DIR}/external/configuru/configuru.hpp)
+include_directories(${CMAKE_SOURCE_DIR}/external/configuru)
+## NLH JSON PARSER
+set(NL_JSON_DIR ${CMAKE_SOURCE_DIR}/external/nlohmann)
 configure_file(config/example_config.json config/example_config.json COPYONLY)
 ###### ROSS EXTERNAL PROJECT
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/ROSS)

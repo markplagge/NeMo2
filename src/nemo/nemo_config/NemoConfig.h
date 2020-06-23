@@ -49,7 +49,7 @@ namespace nemo {
 			double requested_time;
 			std::string benchmark_model_name;
 
-			const std::string to_string() const;
+			std::string to_string() const;
 			friend std::ostream& operator<<(std::ostream& os, const NemoModel& model);
 		};
 
@@ -61,15 +61,24 @@ namespace nemo {
 			unsigned int ns_cores_per_chip = 4096;
 			unsigned int neurons_per_core = 256;
 			unsigned int total_chips = 2;
-			unsigned int total_sim_size = 0;
-			unsigned int lps_per_pe = 0;
+			// computed:
+			unsigned int total_sim_size = 0; //!< Total simulation size - DOES NOT INCLUDE SCHEDULER CORE. Number of compute neurosynaptic cores
+			unsigned int lps_per_pe = 0; //!< LPs per PE in sim. DOES NOT INCLUDE SCHEDULER CORE
+			unsigned int total_lps = 0;
+
 			u_int64_t total_neurons_in_sim = 0;
+
+			//read in again
 			bool do_neuro_os = false;
 
 			bool save_all_spikes = false;
 			bool save_membrane_pots = false;
 			bool save_nos_stats = true;
 			SchedType scheduler_type;
+			std::string output_spike_file;
+			std::string output_membrane_pot_file;
+			std::string output_nos_stat_file;
+			std::vector<std::string> stat_files() const;
 			std::vector<core_types> core_map;
 			//core_types GetCoreType(::std::string core_type){}
 			std::vector<int> core_type_ids;
@@ -79,8 +88,8 @@ namespace nemo {
 			double jitter_factor = 0.001;//!< This is the range of jitter. Since core-core comms are used lookahead can now be 1 though
 			int est_events_per_pe = 1024;
 			double lookahead = 0.9;
-
 			int world_size = 0;
+
 
 			static bool DEBUG_FLAG;
 			static tw_petype main_pe[4];
@@ -92,8 +101,9 @@ namespace nemo {
 			void init_from_tw_opts();
 
 			std::string get_settings();
-			std::string sched_mode_to_string();
+			std::string sched_mode_to_string() const;
 
+			NemoModel get_model(int model_id);
 		};
 		extern char* primary_config_file;
 		

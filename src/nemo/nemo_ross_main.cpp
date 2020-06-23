@@ -1,10 +1,11 @@
+#include <climits>
 /**
 * NeMo main file - taken from the main nemo.c program
 * Created by Mark Plagge on 4/30/20.
 */
 #include <iostream>
 #include <ross.h>
-
+#include "mapping_functions.h"
 #include "include/nemo.h"
 #include "nemo_config/NemoConfig.h"
 #include "nemo_formatted_print.h"
@@ -12,6 +13,7 @@
 #include "nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.h"
 #include "nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreBase.h"
 #include <codecvt>
+#include <utility>
 namespace nemo {
 	config::NemoConfig* global_config = NULL;
 	namespace config {
@@ -19,7 +21,7 @@ namespace nemo {
 	}
 	namespace p {
 
-		extern int VERBOSE;
+
 
 
 		template<>
@@ -86,16 +88,16 @@ namespace nemo {
 		}
 		template<>
 		void print_config_vector<config::NemoModel>(std::vector<config::NemoModel> elms) {
-			print_vector_limit(elms);
+			print_vector_limit(std::move(elms));
 		}
 		template<>
 		void print_config_vector<config::ScheduledTask>(std::vector<config::ScheduledTask> elms) {
 			//pr_e("NeuroOS Task Schedule:", " ");
-			print_vector_limit(elms);
+			print_vector_limit(std::move(elms));
 		}
 		template<>
-		void pr_v<config::ScheduledTask>(std::string desc, std::vector<config::ScheduledTask> elms) {
-			print_vector_limit(elms);
+		void pr_v<config::ScheduledTask>(__unused std::string desc, std::vector<config::ScheduledTask> elms) {
+			print_vector_limit(std::move(elms));
 		}
 
 	}// namespace p
@@ -136,7 +138,7 @@ void init_nemo(nemo::config::NemoConfig* cfg) {
 	using namespace config;
 	CORE_SIZE = cfg->ns_cores_per_chip * cfg->neurons_per_core;
 	SIM_SIZE = cfg->total_chips * CORE_SIZE;
-	LPS_PER_PE = g_tw_nlp;
+	LPS_PER_PE  = cfg->lps_per_pe;
 	SYNAPSES_IN_CORE = 1;// still one due to super-synapse logic from Original nemo
 
 	// configure ROSS
@@ -148,7 +150,21 @@ void init_nemo(nemo::config::NemoConfig* cfg) {
 	g_tw_lookahead = cfg->lookahead;
 	g_tw_lp_types = ne_lps;
 	g_tw_lp_typemap = lp_typemapper;
-	tw_define_lps(nlp,sizeof(nemo_message))
+	g_tw_events_per_pe = cfg->est_events_per_pe;
+
+	/** set up LPs */
+	tw_define_lps(nlp,sizeof(nemo_message));
+	int i = 0;
+	if (g_tw_mynode == 0){
+		std::cout <<"DEBUG: creating scheduler core" <<endl;
+		tw_lp_settype(i, &ne_lps[0]);
+		i ++;
+	}
+
+	for(; i < (int) g_tw_nlp; i ++){
+		tw_lp_settype(i, &ne_lps[1]);
+	}
+
 }
 
 void print_sim_config() {
@@ -156,13 +172,25 @@ void print_sim_config() {
 	using namespace p;
 
 	start_sim_hdr();
+	ss << std::boolalpha;
 	pr_e<uint>(std::string("Total chips: "), global_config->total_chips);
 	pr_e<u_int>("Neurons Per Core: ", global_config->neurons_per_core);
 	if (global_config->do_neuro_os) {
 		pr_e("N.O.S. Scheduler Mode: ", global_config->sched_mode_to_string());
 	}
+	else{
+		pr_e("N.O.S. Scheduler Mode: ", "DISABLED");
+	}
+	pr_e("Total (SIM) LPs :", global_config->total_lps);
+	pr_e("LPs per PE:", global_config->lps_per_pe);
+	pr_e("Lookahead set at: ", global_config->lookahead);
+	pr_e("Preset events per pe: ",global_config->est_events_per_pe);
+	pr_e("Save spikes? ",global_config->save_all_spikes);
+	pr_e("Save Memb. Pots?",global_config->save_membrane_pots);
+	pr_e("Save N.O.S. Stats?",global_config->save_nos_stats);
+	pr_v("Stat File Locs:",global_config->stat_files());
 	pr_v("Core Types: ", global_config->core_type_ids);
-	pr_e("Debug mode?: ", global_config->DEBUG_FLAG);
+	pr_e("Debug mode? ", config::NemoConfig::DEBUG_FLAG);
 	pr_e("Save all spikes? ", global_config->save_all_spikes);
 	pr_e("Save membrane potentials? ", global_config->save_membrane_pots);
 	pr_e("Save N.O.S. scheduler stats? ", global_config->save_nos_stats);
@@ -190,9 +218,16 @@ int main(int argc, char* argv[]) {
 	//After parsing options, and after tw_init is called, init the main_config
 	main_config->init_from_tw_opts();
 	nemo::global_config = main_config;
-	print_sim_config();
 	// initialize ROSS and NeMo:
 	init_nemo(main_config);
+	if(g_tw_mynode == 0){
+		print_sim_config();
+	}
+	MPI_Barrier(MPI_COMM_WORLD);
+	if(tw_ismaster()) printf("@@@ Calling run...\n");
+	MPI_Barrier(MPI_COMM_WORLD);
+	g_tw_ts_end = 5;
+	tw_run();
 
 	// main_config -> load network defs
 	//main_config -> init

@@ -30,10 +30,13 @@ set(nemo_lib_hdrs
         nemo_io/NemoCoreOutput.h
         nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreBase.h
         nemo_config/NemoConfig.h
-        nemo_io/NemoNeuroInitState.h
-        nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreSimple.h
         nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.h
         nemo_io/ModelFile.h
+        nemo_config/NemoModel.h
+        nemo_neuro_system/neurosynaptic_cores/NemoCoreScheduler.h
+        nemo_neuro_system/neurosynaptic_cores/NemoCoreDefs.h
+        nemo_neuro_system/neuron_models/NemoNeuronTrueNorth.h
+        mapping_functions.h
         nemo_formatted_print.h)
 set(nemo_lib_srcs
 
@@ -43,10 +46,10 @@ set(nemo_lib_srcs
         nemo_globals.cpp
         nemo_config/NemoConfig.cpp
         nemo_ross.h mapping_functions.cpp
-        nemo_io/NemoNeuroInitState.cpp
-        nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreSimple.cpp
         nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.cpp
-        nemo_io/ModelFile.cpp nemo_config/NemoModel.cpp nemo_config/NemoModel.h nemo_neuro_system/neurosynaptic_cores/NemoCoreScheduler.cpp nemo_neuro_system/neurosynaptic_cores/NemoCoreScheduler.h nemo_neuro_system/neurosynaptic_cores/NemoCoreDefs.h nemo_neuro_system/neuron_models/NemoNeuronTrueNorth.cpp nemo_neuro_system/neuron_models/NemoNeuronTrueNorth.h)
+        nemo_io/ModelFile.cpp nemo_config/NemoModel.cpp nemo_neuro_system/neurosynaptic_cores/NemoCoreScheduler.cpp
+         nemo_neuro_system/neuron_models/NemoNeuronTrueNorth.cpp
+        mapping_functions.cpp nemo_io/SpikeFile.cpp nemo_io/SpikeFile.h)
 
 add_library(nemo2_lib ${nemo_lib_hdrs} ${nemo_lib_srcs})
 #nemo_ross_main.cpp contains main().
@@ -55,12 +58,14 @@ add_executable(nemo2 nemo_ross_main.cpp) #
 
 
 set_property(TARGET nemo2_lib PROPERTY CXX_STANDARD 14)
+
 ## The EIGEN BLAS library is used for neuromorphic matrix math.
 # The SQLITE library is used to store spikes - but eventually will be replaced with JSON
 message("-------------------------------- ${EIGEN_INCLUDE_FLDR}")
-target_include_directories(nemo2_lib PUBLIC ${EIGEN_INCLUDE_FLDR} ${SQL_FOLDER} ../../external/configuru ../../external/visit_struct/include ../libs/neuro_os/include)
-target_link_libraries(nemo2_lib ROSS SQLite3 neuro_os m)
+target_include_directories(nemo2_lib PUBLIC  ${NL_JSON_DIR}  ../../external/configuru ../../external/visit_struct/include ../libs/neuro_os/include)
+target_link_libraries(nemo2_lib  neuro_os ROSS m)
 target_include_directories(nemo2 PUBLIC nemo2_lib ${SQL_FOLDER})
 target_link_libraries(nemo2 nemo2_lib ROSS m)
+
 #Would like to avoid using yet another library for the math. Currently neuromorphic matrix math is implemented in loops.
 #target_link_libraries(nemo2_lib Eigen3::Eigen)

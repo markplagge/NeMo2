@@ -17,7 +17,6 @@ void nemo::neuro_system::NemoCoreScheduler::forward_scheduler_event(tw_bf* bf, n
 		tw_event_send(os_tick);
 		//update state
 		this->current_neuro_tick = floor(tw_now(lp));
-
 		this->process_queue.system_tick();
 	}
 	//check the current list of processes:
@@ -35,11 +34,13 @@ void nemo::neuro_system::NemoCoreScheduler::set_task_list(const std::vector<nemo
 }
 void nemo::neuro_system::NemoCoreScheduler::init_process_models() {
 
+	test_map[32] = std::string("ASDF");
 	auto l_task_list = global_config->scheduler_inputs;
 	auto l_model_list = global_config->models;
 	for (const auto& model : l_model_list) {
 		auto model_id = model.id;
-		models[model_id] = model;
+
+		models.emplace(model_id, model);
 	}
 	this->set_models(models);
 	this->set_task_list(task_list);
@@ -53,19 +54,24 @@ void nemo::neuro_system::NemoCoreScheduler::init_process_models() {
 		proc.PID = model.id;
 		proc.needed_run_time = model.requested_time;
 		proc.scheduled_start_time = start_time;
-		process_queue.enqueue(proc);\
+		process_queue.enqueue(proc);
+
 	}
 }
+void nemo::neuro_system::NemoCoreScheduler::check_waiting_procs(){
+
+}
+
 void nemo::neuro_system::NemoCoreScheduler::set_models(const std::map<int, nemo::config::NemoModel>& models) {
 	NemoCoreScheduler::models = models;
 }
 
-void nemo::neuro_system::sched_core_init(nemo::neuro_system::NemoCoreScheduler* s, tw_lp* lp){
+void nemo::neuro_system::sched_core_init(NemoCoreScheduler *s, tw_lp* lp){
+	new (s) NemoCoreScheduler();
 	s->my_lp = lp;
-
 	auto sched_time =  JITTER(lp->rng) + 1;
 	struct tw_event* os_tick = tw_event_new(lp->gid, sched_time, lp);
-	nemo_message* msg = (nemo_message*)tw_event_data(os_tick);
+	auto* msg = (nemo_message*)tw_event_data(os_tick);
 	msg->message_type = NOS_TICK;
 	msg->debug_time = tw_now(lp);
 	msg->random_call_count = lp->rng->count;

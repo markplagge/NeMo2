@@ -4,7 +4,7 @@
 
 #ifndef NEMOTNG_NEMONEUROCOREBASE_H
 #define NEMOTNG_NEMONEUROCOREBASE_H
-
+#include "../../mapping_functions.h"
 #include "../../nemo_config/NemoConfig.h"
 #include "../../nemo_globals.h"
 #include "../../nemo_io/NemoCoreOutput.h"
@@ -43,7 +43,7 @@ namespace nemo {
 
 			//INeuroCoreBase();
 		public:
-			NemoNeuroCoreBase();
+
 			/**
    * forward_loop_handler(). Neurosynaptic generally have common functionality - there
    * is a neurosynaptic tick (handled by heartbeat messages), integration, and leak functions.
@@ -52,11 +52,14 @@ namespace nemo {
    */
 			static void core_init(void* s, tw_lp* lp)
 			{
+
 				auto core = static_cast<NemoNeuroCoreBase *>(s);
+				new (core) NemoNeuroCoreBase();
 				//determine the type of core we want through mapping
 				for (const auto& model : global_config->models) {
 					core->models[model.id] = model;
 				}
+
 				auto global_id = lp->gid;
 				core->core_id = get_core_id_from_gid (global_id);
 				core->my_lp = lp;
@@ -112,6 +115,31 @@ namespace nemo {
 			void
 			save_spike(nemo_message* m, long dest_core, long neuron_id, double current_time);
 
+			void core_init(tw_lp* lp);
+
+			void forward_event(tw_bf* bf, nemo_message* m, tw_lp* lp);
+
+			void reverse_event(tw_bf* bf, nemo_message* m, tw_lp* lp);
+
+			void core_commit(tw_bf* bf, nemo_message* m, tw_lp* lp);
+
+			void pre_run(tw_lp* lp);
+
+			void core_finish(tw_lp* lp);
+
+			void cleanup_output();
+
+			void run_leaks();
+			void run_fires();
+			void run_resets();
+
+			void init_current_model();
+			void interrupt_run();
+			void resume_run();
+
+			bool is_dest_interchip(int neuron_id);
+			virtual ~NemoNeuroCoreBase(){};
+
 			NemoCoreOutput* output_system;
 
 			bool save_spikes;
@@ -120,7 +148,7 @@ namespace nemo {
 * The last time that this core had activity. This refers to any  message.
 */
 
-			long last_active_time = 0;
+
 			long current_neuro_tick = 0;
 			long previous_neuro_tick = -1;
 			/**
@@ -164,32 +192,13 @@ namespace nemo {
 			tw_bf* my_bf;
 			NemoNeuronGeneric neuron_template;
 			std::map<int, nemo::config::NemoModel> models;
+			std::map<int,std::string> test_map;
+
+
 			nemo::config::NemoModel current_model;
 			std::vector<NemoNeuroCoreBase> state_stack;
 
-			void core_init(tw_lp* lp);
 
-			void forward_event(tw_bf* bf, nemo_message* m, tw_lp* lp);
-
-			void reverse_event(tw_bf* bf, nemo_message* m, tw_lp* lp);
-
-			void core_commit(tw_bf* bf, nemo_message* m, tw_lp* lp);
-
-			void pre_run(tw_lp* lp);
-
-			void core_finish(tw_lp* lp);
-
-			void cleanup_output();
-
-			void run_leaks();
-			void run_fires();
-			void run_resets();
-
-			void init_current_model();
-			void interrupt_run();
-			void resume_run();
-
-			bool is_dest_interchip(int neuron_id);
 			/** NemoNeuroCoreBase contains neurons and neuron states in a structure */
 			std::vector<NemoNeuronGeneric*> neuron_array;
 			std::vector<unsigned int> neuron_dest_cores;
