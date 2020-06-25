@@ -44,9 +44,15 @@ namespace neuro_system
 	bool NemoNeuronGeneric::is_self_manage_spike_events() const {
 		return self_manage_spike_events;
 	}
-
-
-
+	/**
+	 * initializes the basic neuron - roughly based on LIF neuron.
+	 *  weights:[],leak_v:-1,threshold:20,reset_val:0
+	 * @param js_string neuron parameters
+	 */
+	void NemoNeuronGeneric::init_from_json_string(std::string js_string) {
+		auto cfg = configuru::parse_string(js_string.c_str(),configuru::FORGIVING,"NEMO_GENERIC_INIT");
+		configuru::deserialize(this,cfg,nemo::config::error_reporter);
+	}
 
 }// namespace neuro_system
 }// namespace nemo

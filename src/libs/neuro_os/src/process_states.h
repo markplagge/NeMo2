@@ -7,9 +7,10 @@
 namespace neuro_os {
     namespace sim_proc {
         typedef enum {
-            WAITING,
-            RUNNING,
-            COMPLETE
+            WAITING = 'WAIT',
+            RUNNING = 'RUNN',
+            COMPLETE = 'DONE',
+			NO_OP = 'NOOP'
         } PROC_STATE;
 
         typedef enum {

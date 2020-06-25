@@ -3,16 +3,17 @@
 * NeMo main file - taken from the main nemo.c program
 * Created by Mark Plagge on 4/30/20.
 */
-#include <iostream>
-#include <ross.h>
-#include "mapping_functions.h"
+
 #include "include/nemo.h"
+#include "mapping_functions.h"
 #include "nemo_config/NemoConfig.h"
 #include "nemo_formatted_print.h"
 #include "nemo_neuro_system/neurosynaptic_cores/NemoCoreDefs.h"
 #include "nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.h"
 #include "nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreBase.h"
 #include <codecvt>
+#include <iostream>
+#include <ross.h>
 #include <utility>
 namespace nemo {
 	config::NemoConfig* global_config = NULL;
@@ -20,6 +21,7 @@ namespace nemo {
 		extern unsigned int LPS_PER_PE;
 	}
 	namespace p {
+		using namespace config;
 
 
 
@@ -87,7 +89,7 @@ namespace nemo {
 			ss << star_line << endl;
 		}
 		template<>
-		void print_config_vector<config::NemoModel>(std::vector<config::NemoModel> elms) {
+		void print_config_vector<NemoModel>(std::vector<NemoModel> elms) {
 			print_vector_limit(std::move(elms));
 		}
 		template<>

@@ -32,7 +32,6 @@ set(nemo_lib_hdrs
         nemo_config/NemoConfig.h
         nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.h
         nemo_io/ModelFile.h
-        nemo_config/NemoModel.h
         nemo_neuro_system/neurosynaptic_cores/NemoCoreScheduler.h
         nemo_neuro_system/neurosynaptic_cores/NemoCoreDefs.h
         nemo_neuro_system/neuron_models/NemoNeuronTrueNorth.h
@@ -47,9 +46,9 @@ set(nemo_lib_srcs
         nemo_config/NemoConfig.cpp
         nemo_ross.h mapping_functions.cpp
         nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.cpp
-        nemo_io/ModelFile.cpp nemo_config/NemoModel.cpp nemo_neuro_system/neurosynaptic_cores/NemoCoreScheduler.cpp
+        nemo_io/ModelFile.cpp nemo_neuro_system/neurosynaptic_cores/NemoCoreScheduler.cpp
          nemo_neuro_system/neuron_models/NemoNeuronTrueNorth.cpp
-        mapping_functions.cpp nemo_io/SpikeFile.cpp nemo_io/SpikeFile.h)
+        mapping_functions.cpp nemo_io/SpikeFile.cpp nemo_io/SpikeFile.h nemo_neuro_system/neurosynaptic_cores/TaskProcessMap.cpp)
 
 add_library(nemo2_lib ${nemo_lib_hdrs} ${nemo_lib_srcs})
 #nemo_ross_main.cpp contains main().

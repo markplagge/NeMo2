@@ -13,10 +13,11 @@ using std::boolalpha;
 using std::cout;
 using std::endl;
 
+
 #include <iomanip>
 #include <sstream>
 #include <string>
-	namespace nemo {
+namespace nemo {
 		namespace p {
 			//char vx[] = {"*********************************************************"};
 			std::string vx(80, '*');

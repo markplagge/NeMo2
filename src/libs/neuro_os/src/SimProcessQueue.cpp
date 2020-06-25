@@ -78,14 +78,17 @@ namespace neuro_os { namespace sim_proc{
 		return pre_waiting_processes;
 	}
 
-	double SimProcessQueue::getCurrentTime() const
+	double SimProcessQueue::get_current_time() const
 	{
 		return current_time;
 	}
 
-	void SimProcessQueue::setCurrentTime(double time)
+	void SimProcessQueue::set_current_time(double time)
 	{
 		current_time = time;
+	}
+	void SimProcessQueue::current_time_tick(){
+		current_time += 1;
 	}
 
 //	void SimProcessQueue::from_json_obj(const json& j)

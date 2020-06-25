@@ -125,8 +125,10 @@ namespace neuro_os { namespace sim_proc {
 				}
 				break;
 			case COMPLETE:
+			case NO_OP:
 				break;
 			}
+
 		}
 
 

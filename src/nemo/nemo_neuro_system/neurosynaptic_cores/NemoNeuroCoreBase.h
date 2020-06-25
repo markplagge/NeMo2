@@ -7,13 +7,15 @@
 #include "../../mapping_functions.h"
 #include "../../nemo_config/NemoConfig.h"
 #include "../../nemo_globals.h"
+#include "../../nemo_io/ModelFile.h"
 #include "../../nemo_io/NemoCoreOutput.h"
+#include "../../nemo_io/SpikeFile.h"
 #include "../neuron_models/NemoNeuronGeneric.h"
-#include <visit_struct/visit_struct.hpp>
-#include <visit_struct/visit_struct_intrusive.hpp>
 #include <configuru.hpp>
 #include <neuro_os.h>
 #include <ross.h>
+#include <visit_struct/visit_struct.hpp>
+#include <visit_struct/visit_struct_intrusive.hpp>
 
 #define RNG_START(lp) auto rng_count = lp->rng->count
 #define RNG_END(lp) msg->random_call_count = (lp->rng->count - rng_count)
@@ -203,6 +205,9 @@ namespace nemo {
 			std::vector<NemoNeuronGeneric*> neuron_array;
 			std::vector<unsigned int> neuron_dest_cores;
 			std::vector<unsigned int> neuron_dest_axons;
+
+			std::vector<ModelFile> model_files;
+			std::vector<SpikeFile> spike_files;
 
 			/**
  * output_mode - sets the spike output mode of this core.

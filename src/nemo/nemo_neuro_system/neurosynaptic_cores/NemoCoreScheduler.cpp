@@ -24,26 +24,43 @@ void nemo::neuro_system::NemoCoreScheduler::forward_scheduler_event(tw_bf* bf, n
 void nemo::neuro_system::NemoCoreScheduler::reverse_scheduler_event(tw_bf* bf, nemo::nemo_message* m, tw_lp* lp){
 
 }
-void nemo::neuro_system::NemoCoreScheduler::queue_up_process(neuro_os::sim_proc::SimProc p){
 
-}
 
-void nemo::neuro_system::NemoCoreScheduler::set_task_list(const std::vector<nemo::config::ScheduledTask>& task_list)
+void nemo::neuro_system::NemoCoreScheduler::set_task_list(const std::vector<nemo::config::ScheduledTask>& new_task_list)
 {
-	NemoCoreScheduler::task_list = task_list;
+	NemoCoreScheduler::task_list = new_task_list;
 }
 void nemo::neuro_system::NemoCoreScheduler::init_process_models() {
 
-	test_map[32] = std::string("ASDF");
+	int model_counter = 0;
 	auto l_task_list = global_config->scheduler_inputs;
 	auto l_model_list = global_config->models;
 	for (const auto& model : l_model_list) {
 		auto model_id = model.id;
-
 		models.emplace(model_id, model);
+		if(model.model_file_path.length() != 0) {
+			if (g_tw_mynode == 0)
+				tw_printf(TW_LOC, "Loading Model #%i: %s \n", model_counter, model.model_file_path.c_str());
+			auto model_file = ModelFile(model.model_file_path);
+			if (g_tw_mynode == 0)
+				tw_printf(TW_LOC, "Loading Spike #%i: %s \n", model_counter, model.spike_file_path.c_str());
+			auto spike_file = SpikeFile(model.spike_file_path);
+			model_files.push_back(model_file);
+			spike_files.push_back(spike_file);
+		}else{
+			tw_printf(TW_LOC,"Loading benchmark model %s \n", model.benchmark_model_name.c_str());
+			ModelFile mf;
+			SpikeFile sf;
+			model_files.push_back(mf);
+			spike_files.push_back(sf);
+		}
+
+		model_counter += 1;
 	}
+
 	this->set_models(models);
 	this->set_task_list(task_list);
+	int task_counter = 0;
 	for (const auto& task : task_list) {
 		auto start_time = task.start_time;
 		auto task_id = task.task_id;
@@ -57,6 +74,8 @@ void nemo::neuro_system::NemoCoreScheduler::init_process_models() {
 		process_queue.enqueue(proc);
 
 	}
+	std::cout << "Models loaded: " << model_counter << "\n" << task_counter << " tasks. \n";
+
 }
 void nemo::neuro_system::NemoCoreScheduler::check_waiting_procs(){
 
@@ -68,6 +87,10 @@ void nemo::neuro_system::NemoCoreScheduler::set_models(const std::map<int, nemo:
 
 void nemo::neuro_system::sched_core_init(NemoCoreScheduler *s, tw_lp* lp){
 	new (s) NemoCoreScheduler();
+	//Make sure we are running on PE 0
+	if(g_tw_mynode != 0){
+		tw_error(TW_LOC,"Neuromorphic scheduler core was init'ed from non 0 pe: PEID: %i", g_tw_mynode);
+	}
 	s->my_lp = lp;
 	auto sched_time =  JITTER(lp->rng) + 1;
 	struct tw_event* os_tick = tw_event_new(lp->gid, sched_time, lp);

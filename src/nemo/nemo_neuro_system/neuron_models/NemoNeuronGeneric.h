@@ -6,6 +6,9 @@
 #define NEMOTNG_NEMONEURONGENERIC_H
 
 #include "../../nemo_config/NemoConfig.h"
+#include <visit_struct/visit_struct.hpp>
+#include <visit_struct/visit_struct_intrusive.hpp>
+#include <configuru.hpp>
 #include <utility>
 #include <vector>
 
@@ -21,20 +24,22 @@ namespace nemo {
  */
 
 		class NemoNeuronGeneric {
-			double membrane_pot = 0;
-			std::vector<double> weights;
-			double leak_v = -1;
-			double threshold = 1;
-			double reset_val = 0;
-			bool self_manage_spike_events = false;
-			tw_lp *cur_lp{};
 
 
 			
 
 		public:
-			unsigned  int dest_core;
-			unsigned  int dest_axon;
+			double 	membrane_pot = 0;
+			std::vector<double>weights;
+			double leak_v = -1;
+			double threshold = 1;
+			double reset_val = 0;
+			bool self_manage_spike_events = false;
+			unsigned  int 	dest_core;
+			unsigned  int 	dest_axon;
+			tw_lp *cur_lp{};
+
+
 
 			bool is_self_manage_spike_events() const;
 			void set_self_manage_spike_events(bool self_manage_spike_events);
@@ -44,6 +49,8 @@ namespace nemo {
 
 			NemoNeuronGeneric(double membrane_pot, std::vector<double> weights, double leak_v, double threshold, double reset_val, tw_lp *lp) : membrane_pot(membrane_pot), weights(std::move(weights)), leak_v(leak_v), threshold(threshold), reset_val(reset_val),cur_lp(lp) {}
 			NemoNeuronGeneric() = default;
+
+			virtual void init_from_json_string(std::string js_string) ;
 
 			virtual void
 			integrate(unsigned int source_id);
@@ -60,4 +67,8 @@ namespace nemo {
 
 	}// namespace neuro_system
 }// namespace nemo
+
+VISITABLE_STRUCT(nemo::neuro_system::NemoNeuronGeneric, weights,leak_v,threshold,reset_val);
 #endif//NEMOTNG_NEMONEURONGENERIC_H
+
+

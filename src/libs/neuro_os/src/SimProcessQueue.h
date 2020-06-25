@@ -28,9 +28,9 @@ namespace neuro_os { namespace sim_proc {
 			const std::vector<SimProcess>& get_running_processes();
 			const std::deque<SimProcess>& get_pre_waiting_processes();
 
-			double getCurrentTime() const;
-
-			void setCurrentTime(double time);
+			double get_current_time() const;
+			void set_current_time(double time);
+			void current_time_tick();
 
 			void enqueue(SimProcess& p)
 			{

@@ -35,7 +35,7 @@ namespace neuro_os { namespace sim_proc {
             scheduled_start_time = 0;
             total_wait_time = 0;
             total_run_time = 0;
-            current_state = WAITING;
+            current_state = NO_OP;
 
         }
 

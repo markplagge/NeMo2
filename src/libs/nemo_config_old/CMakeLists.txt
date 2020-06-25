@@ -1,5 +1,5 @@
 project(nero_os_config_subsystem LANGUAGES CXX)
-set(CMAKE_Swift_LANGUAGE_VERSION  )
+
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

@@ -3,6 +3,7 @@
 //
 
 #include "NemoNeuronTrueNorth.h"
+#include "../../include/nemo.h"
 
 /** TODO: Eventually replace this with generic macro and non-branching ABS code. */
 #define IABS(a) (((a) < 0) ? (-a) : (a))//!< Typeless integer absolute value function
@@ -15,6 +16,123 @@ unsigned int DT(T x){
 	return x > 0 ? 1 : 0;
 }
 #define BINCOMP(s, p) IABS((s)) >= (p)//!< binary comparison for conditional stochastic evaluation
+
+/** setup from Nemo1 */
+namespace nemo{
+	 namespace neuro_system{
+
+#define NEURONS_IN_CORE  global_config->neurons_per_core //! < patch so neuron config from nemo1 will see global config value
+
+		 /** \defgroup TNParams TN Parameters
+/** \defgroup TNParams TN Parameters
+ * TrueNorth Neuron Parameter setting functions. Used as helper functions for
+ * init
+ * @{ */
+
+		 void TN_set_neuron_dest(int signalDelay, uint64_t gid, TNNeuronState *n) {
+			 n->delay_val = signalDelay;
+			 n->output_gid = gid;
+
+		 }
+
+//*********************************************************************************
+/** \defgroup TNNeuronInit TrueNorth Init
+ *  TrueNorth Neuron initialization functions
+ * @{ */
+/** Constructor / Init a new neuron. assumes that the reset voltage is NOT
+ * encoded (i.e.,
+  * a reset value of -5 is allowed. Sets reset voltage sign from input reset
+ * voltage).*/
+		void tn_create_neuron(unsigned int core_id, unsigned int n_id,
+				bool synaptic_connectivity[],
+				short G_i[4], short sigma[4], short S[4],
+				bool b[4], bool epsilon, short sigma_l, short lambda,
+				bool c, uint32_t alpha, uint32_t beta, short TM, short VR,
+				short sigma_vr, short gamma, bool kappa,
+				TNNeuronState *n, int signal_delay,
+				uint64_t dest_global_id, int dest_axon_id) {
+			for (int i = 0; i < 4; i++) {
+				n->synaptic_weight.push_back(sigma[i]*S[i]);
+				n->weight_selection.push_back (b[i]);
+				//n->synaptic_weight[i] = sigma[i]*S[i];
+				//n->weight_selection[i] = b[i];
+			}
+			for (int i = 0; i < NEURONS_IN_CORE; i++) {
+				n->synaptic_connectivity.push_back(synaptic_connectivity[i]);
+				n->axon_types.push_back(G_i[i]);
+			}
+
+			// set up other parameters
+			n->my_core_id = core_id;
+			n->my_local_id = n_id;
+			n->epsilon = epsilon;
+			n->sigma_l = sigma_l;
+			n->lambda = lambda;
+			n->c = c;
+			n->pos_threshold = alpha;
+			n->neg_threshold = beta;
+			// n->thresholdMaskBits = TM;
+			// n->thresholdPRNMask = getBitMask(n->thresholdMaskBits);
+			n->sigma_vr = SGN(VR);
+			n->encoded_reset_voltage = VR;
+			n->reset_voltage = VR;  //* sigmaVR;
+
+			n->reset_mode = gamma;
+			n->kappa = kappa;
+
+
+			//! @TODO: perhaps calculate if a neuron is self firing or not.
+			n->fired_last = false;
+			n->heartbeat_out = false;
+			// n->isSelfFiring = false;
+			// n->receivedSynapseMsgs = 0;
+
+			TN_set_neuron_dest(signal_delay, dest_global_id, n);
+
+			// synaptic neuron setup:
+			n->largest_random_value = n->threshold_prn_mask;
+			if (n->largest_random_value > 256) {
+				tw_error(TW_LOC, "Error - neuron (%i,%i) has a PRN Max greater than 256\n ",
+						n->my_core_id, n->my_local_id);
+			}
+			// just using this rather than bit shadowing.
+
+			n->dendrite_local = dest_axon_id;
+			n->output_gid = dest_global_id;
+
+			// Check to see if we are a self-firing neuron. If so, we need to send
+			// heartbeats every big tick.
+			n->is_self_firing =
+					false;
+		}
+
+		void tn_create_neuron_encoded_rv(
+				unsigned int core_id, unsigned int n_id, bool synaptic_connectivity[],
+				short G_i[], short sigma[], short S[], bool b[],
+				bool epsilon, short sigma_l, short lambda, bool c, uint32_t alpha,
+				uint32_t beta, short TM, short VR, short sigma_vr, short gamma, bool kappa,
+				TNNeuronState *n, int signal_delay, uint64_t dest_global_id,
+				int dest_axon_id) {
+			tn_create_neuron(core_id, n_id, synaptic_connectivity, G_i, sigma, S, b, epsilon,
+					sigma_l, lambda, c, alpha, beta, TM, VR, sigma_vr, gamma,
+					kappa, n, signal_delay, dest_global_id, dest_axon_id);
+			n->sigma_vr = sigma_vr;
+			n->encoded_reset_voltage = VR;
+			n->reset_voltage = (n->sigma_vr*(pow(2, n->encoded_reset_voltage) - 1));
+		}
+		void tn_create_neuron_encoded_rv_non_global(
+				int core_id, int n_id, bool synaptic_connectivity[],
+				short G_i[], short sigma[], short S[], bool b[],
+				bool epsilon, int sigma_l, int lambda, bool c, int alpha,
+				int beta, int TM, int VR, int sigma_vr, int gamma, bool kappa,
+				TNNeuronState *n, int signal_delay, int dest_core_id,
+				int dest_axon_id){
+			uint64_t dest_global = get_gid_from_core_local(dest_core_id, dest_axon_id);
+			tn_create_neuron_encoded_rv(core_id, n_id, synaptic_connectivity, G_i, sigma, S, b, epsilon, sigma_l, lambda, c, alpha, beta, TM, VR, sigma_vr, gamma, kappa, n, signal_delay, dest_global, dest_axon_id);
+		}
+		
+	}
+}
 
 //NemoNeuronGeneric::integrate(source_id);
 /** \defgroup TN_Functions TN Functions
@@ -367,4 +485,70 @@ void nemo::neuro_system::NemoNeuronTrueNorth::reset_none() {
 void nemo::neuro_system::NemoNeuronTrueNorth::reset() {
 	//no reset directly called
 }
+void nemo::neuro_system::NemoNeuronTrueNorth::init_from_json_string(std::string js_string) {
+	/* Ref json format (converted)
+	 * {"TN_1_0":{"type":"TN",
+	* "coreID":1,"localID":0,
+	* "synapticConnectivity": [1,1,0,....], "g_i":[0,0,0,0....],
+	* "sigmaG":[-1,-1,1,1], "S":[48,127,34,15","b":"0,0,0,0,
+	* "epsilon":0,"sigma_lmbda":1,
+	* "lmbda":0,"c":0,
+	* "alpha":1,"beta":0,
+	* "TM":0,"VR":0,"sigmaVR":1,"gamma":0,"kappa":1,"signalDelay":1,
+	* "destCore":4,"destLocal":16,"outputNeuron":0,"selfFiring":0,"model_id":"sat_single"} */
+//	Config cfg = configuru::parse_string(js_string);
 
+	using namespace configuru;
+	auto ncfg = configuru::parse_string(js_string.c_str(), FORGIVING, "TN_INIT");
+	ns->last_active_time = 0;
+	ns->last_leak_time = 0;
+	ns->rcvd_msg_count = 0;
+	ns->sops_count = 0;
+	ns->rng_count = 0;
+	ns->membrane_potential = 0;
+
+	auto alpha = (unsigned int)ncfg["alpha"];
+	auto beta = (unsigned int)ncfg["beta"];
+	auto core_id  = (unsigned int)ncfg["coreID"];
+	auto local_id = (unsigned int)ncfg["localID"];
+	auto lambda = (short)ncfg["lmbda"];
+	auto epsilon = (int)ncfg["epsilon"];
+	auto gamma = (short)ncfg["gamma"];
+	auto sigma_vr = (short)ncfg["sigmaVR"];
+	auto sigma_lambda = (int)ncfg["sigma_lmbda"];
+	auto vr = (short)ncfg["VR"];
+	auto kappa = (bool)ncfg["kappa"];
+	auto signal_delay = (int)ncfg["signalDelay"];
+	auto dest_core = (unsigned int)ncfg["destCore"];
+	auto dest_local = (unsigned int)ncfg["destLocal"];
+	auto is_output_neuron = (bool)ncfg["outputNeuron"];
+	auto is_self_firing = (bool)ncfg["selfFiring"];
+	auto model_name = (std::string)ncfg["model_id"];
+	auto c = (int)ncfg["c"];
+	auto tm = (int)ncfg["TM"];
+
+
+	//auto  synaptic_connectivity_v = (std::vector<bool>)ncfg["synapticConnectivity"];
+	auto synaptic_connectivity = (bool *)ncfg["synapticConnectivity"];
+	//bool * synaptic_connectivity = &synaptic_connectivity_v[0];
+	auto g_i_v = (std::vector<short>)ncfg["g_i"];
+	auto g_i = g_i_v.data();
+	auto sigma_g_v = (std::vector<short>) ncfg["sigmaG"];
+	auto sigma_g = sigma_g_v.data();
+	auto s_v = (std::vector<short>)ncfg["S"];
+	auto s = s_v.data();
+
+	//auto b_v = (std::vector<bool>)ncfg["b"];
+	//auto b = &b_v[0];
+	auto b = (bool *) ncfg["b"];
+
+
+	tn_create_neuron_encoded_rv_non_global(core_id,local_id,synaptic_connectivity,g_i,sigma_g,s,b,epsilon,sigma_lambda,
+										   lambda,c,alpha,beta,tm,vr,sigma_vr,gamma,kappa,this->ns,
+										   signal_delay,dest_core,dest_local);
+
+	ns->delay_val = signal_delay;
+	ns->is_output_neuron = is_output_neuron;
+	ns->is_self_firing = is_self_firing;
+
+}

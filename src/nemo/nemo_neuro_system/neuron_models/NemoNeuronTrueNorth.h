@@ -107,7 +107,7 @@ namespace nemo {
 
 			std::vector<int> axon_types;
 			std::vector<int> synaptic_weight;
-			//std::vector<bool> synaptic_connectivity;
+			std::vector<bool> synaptic_connectivity;
 
 			/** stochastic weight mode selection. $b_j^{G_i}$ */
 			std::vector<bool> weight_selection;
@@ -132,7 +132,7 @@ namespace nemo {
 			void leak() final;
 			void leak_n(int n_leaks) final;
 			void reset() final;
-
+			void init_from_json_string(std::string js_string) override;
 
 
 		private:

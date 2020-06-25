@@ -6,6 +6,7 @@
 #define NEMOTNG_NEMOCONFIG_H
 #include "../nemo_globals.h"
 #include "../nemo_neuro_system/neuron_models/NemoNeuronGeneric.h"
+#include "NemoModel.h"
 #include <visit_struct/visit_struct.hpp>
 #include <visit_struct/visit_struct_intrusive.hpp>
 #include <configuru.hpp>
@@ -14,6 +15,7 @@
 //#include "../nemo_io/ModelFile.h"
 //#include "../nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.h"
 #include "../nemo_neuro_system/neuron_models/NemoNeuronGeneric.h"
+
 #include <map>
 #include <ostream>
 #include <string>
@@ -33,30 +35,7 @@ namespace nemo {
 			int model_id;
 			friend std::ostream& operator<<(std::ostream& os, const ScheduledTask& task);
 		};
-		/**
-		 * NeMoModel -
-		 * Struct containing parameters for a particular model, file paths for the model configs / input spikes,
-		 * a string that determines if it is a benchmark network and what network it is.
-		 *
-		 * NemoCoreScheduler takes a vector of these, and uses them to manage the simulation.
-		 */
-		struct NemoModel {
 
-			int id;
-			int needed_cores;
-			std::string model_file_path;
-			std::string spike_file_path;
-			double requested_time;
-			std::string benchmark_model_name;
-
-			std::string to_string() const;
-			friend std::ostream& operator<<(std::ostream& os, const NemoModel& model);
-		};
-
-		struct test_s {
-			int a;
-			int b;
-		};
 		struct NemoConfig {
 			unsigned int ns_cores_per_chip = 4096;
 			unsigned int neurons_per_core = 256;
@@ -113,10 +92,10 @@ namespace nemo {
 		extern unsigned int SIM_SIZE;
 
 		void set_sim_size();
+		void error_reporter(std::string str);
 
 	}// namespace config
 }// namespace nemo
-VISITABLE_STRUCT(nemo::config::NemoModel, id, needed_cores, model_file_path, spike_file_path, requested_time, benchmark_model_name);
 VISITABLE_STRUCT(nemo::config::ScheduledTask, start_time, task_id, model_id);
 #endif// NEMOTNG_NEMOCONFIG_H
 /*

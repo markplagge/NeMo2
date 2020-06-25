@@ -338,7 +338,6 @@ get_gid_from_core_local (ne_id_type dest_core, ne_id_type dest_axon)
 //
 //    };
 
-extern int NEURONS_PER_CORE;
 extern char *SPIKE_OUTPUT_FILENAME;
 extern int SPIKE_OUTPUT_MODE;
 extern int OUTPUT_MODE;

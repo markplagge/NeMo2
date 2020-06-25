@@ -62,7 +62,7 @@ int get_num_needed_cores(std::string filename){
 };
 
 
-std::string demo_filename("/Users/plaggm/dev/nemo-codes/config/models/nemo_demo.json");
+std::string demo_filename("/Users/plaggm/dev/nemo-codes/config/models/sar_model.json");
 
 
 TEST_CASE("Max Neurons/Cores in demo file"){
@@ -110,6 +110,11 @@ TEST_CASE("Model Read Test"){
     INFO("COREID=" << cid);
     INFO("NID=" << nid);
     REQUIRE (neuron_str.length() > 0);
-  }
+
+
+    }
+    auto sx = mdl_file.get_core_settings(3);
+    INFO(sx);
+    REQUIRE(1 == 0);
 
 }

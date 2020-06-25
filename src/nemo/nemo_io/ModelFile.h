@@ -14,14 +14,23 @@ namespace nemo {
 		std::string get_core_neuron_settings(unsigned long core_id, unsigned long neuron_id) {
 			return js_map[core_id][neuron_id];
 		}
+		std::string get_core_settings(unsigned long core_id);
+
 		ModelFile(const std::string& model_file_path);
+		ModelFile(){
+			valid_model = false;
+		}
 
 		int get_num_needed_cores() const;
 	protected:
 		int num_needed_cores = 0;
 		char core_neuron_id[64] = {'\0'};
 		void load_model();
+		bool valid_model = true;
 
+	public:
+		bool is_valid_model() const;
+	protected:
 		int model_id = 0;
 		std::string model_name;
 

@@ -28,10 +28,17 @@ namespace nemo {
 	class SpikeFile {
 	public:
 		SpikeFile(const std::string& spike_filename);
+		SpikeFile(){
+			valid_spike = false;
+		}
+		bool is_valid_spike() const {
+			return valid_spike;
+		}
 		std::vector<SpikeRep> get_spikes_at_time(unsigned int time);
 		/* Public for testing */
 		std::map<int, std::vector<SpikeRep>> input_spikes;
 	private:
+		bool valid_spike = true;
 		std::string spike_filename;
 		void load_spike_file();
 
