@@ -36,7 +36,7 @@ string_format (const ::std::string &format, Args... args)
 }
 
 ::std::string
-Nemo_Message::to_string ()
+NemoMessage::to_string ()
 {
   ::std::string message_type_desc = "HEARTBEAT";
   if (message_type == NEURON_SPIKE)

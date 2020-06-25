@@ -5,7 +5,7 @@
 #include "SpikeFile.h"
 #include <json.hpp>
 #include <fstream>
-
+#include "get_js_mp_file.h"
 namespace nemo {
 
 	SpikeFile::SpikeFile(const std::string& spike_filename) : spike_filename(spike_filename) {
@@ -14,16 +14,16 @@ namespace nemo {
 	void SpikeFile::load_spike_file() {
 		using namespace nlohmann;
 		using namespace std;
-		ifstream spikef(spike_filename);
-		json j;
+//		ifstream spikef(spike_filename);
+
 /** @todo  This is possibly a @bug - I find ".mp" to get messagepack data, so if there is any ".mp" in the file it will fail */
-		if (spike_filename.find(".mb")!= std::string::npos){
-			j = json::from_msgpack(spikef);
-		}else {
-
-			spikef >> j;
-		}
-
+//		if (spike_filename.find(".mb")!= std::string::npos){
+//			j = json::from_msgpack(spikef);
+//		}else {
+//
+//			spikef >> j;
+//		}
+		auto j = nemo::file_help::load_json_data(spike_filename);
 		auto spike_arr = j[0];
 		//[{"time":2,"core":392,"axon":0}, <- spike file format
 		for (json::iterator it = j.begin(); it != j.end(); ++ it){

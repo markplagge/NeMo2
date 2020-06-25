@@ -130,14 +130,13 @@ namespace nemo {
 			void core_finish(tw_lp* lp);
 
 			void cleanup_output();
-
 			void run_leaks();
 			void run_fires();
 			void run_resets();
 
 			void init_current_model();
-			void interrupt_run();
-			void resume_run();
+			void interrupt_running_model();
+			void resume_running_model();
 
 			bool is_dest_interchip(int neuron_id);
 			virtual ~NemoNeuroCoreBase(){};

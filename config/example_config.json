@@ -21,8 +21,8 @@
     {
       "id": 0,
       "needed_cores": 0,
-      "model_file_path": "/Users/plaggm/dev/nemo-codes/config/models/cifar_100_model.mb",
-      "spike_file_path": "/Users/plaggm/dev/nemo-codes/config/models/cifar_100_spike.mb",
+      "model_file_path": "/Users/plaggm/dev/nemo-codes/config/models/cifar_100_model.json",
+      "spike_file_path": "/Users/plaggm/dev/nemo-codes/config/models/cifar_100_spike.json",
       "requested_time": 1024,
       "benchmark_model_name": "NONE"
     },
@@ -43,9 +43,17 @@
     {
       "id": 3,
       "needed_cores": 0,
-      "model_file_path": "/Users/plaggm/dev/nemo-codes/config/models/sar_model.mb",
-      "spike_file_path": "/Users/plaggm/dev/nemo-codes/config/models/sar_spike.json",
+      "model_file_path": "/Users/plaggm/dev/nemo-codes/config/models/sar_model.json",
+      "spike_file_path": "/Users/plaggm/dev/nemo-codes/config/models/sar_model_spike.json",
       "requested_time": 1024,
+      "benchmark_model_name": "NONE"
+    },
+    {
+      "id": 4,
+      "needed_cores": 0,
+      "model_file_path": "/Users/plaggm/dev/nemo-codes/config/models/sar_model.mp",
+      "spike_file_path": "/Users/plaggm/dev/nemo-codes/config/models/sar_model_spike_spike.json",
+      "requested_time": -1,
       "benchmark_model_name": "NONE"
     }
   ],

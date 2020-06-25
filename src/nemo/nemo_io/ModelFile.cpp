@@ -7,6 +7,7 @@
 #include <json.hpp>
 #include <iostream>
 #include <sstream>
+#include "get_js_mp_file.h"
 // Global static pointer used to ensure a single instance of the class.
 namespace nemo {
 
@@ -21,15 +22,15 @@ namespace nemo {
 		// Supports both json and messagepack formats using fancy nhlo
 
 
-		std::ifstream i(model_file_path);
-		json j;
-		if (model_file_path.find(".mb")!= std::string::npos){
-			j = json::from_msgpack(i);
-		}else {
+//		std::ifstream i(model_file_path);
 
-			i >> j;
-		}
-
+//		if (model_file_path.find(".mb")!= std::string::npos){
+//			j = json::from_msgpack(i);
+//		}else {
+//
+//			i >> j;
+//		}
+		auto j =nemo::file_help::load_json_data(model_file_path);
 
 
 

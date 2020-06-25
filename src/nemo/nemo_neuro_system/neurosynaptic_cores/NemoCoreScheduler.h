@@ -19,18 +19,53 @@ namespace nemo {
 			public:
 				TaskProcessMap(unsigned long num_cores) : num_cores(num_cores) {
 					for (unsigned long i = 0; i < num_cores; i++) {
-						task_process_map[i] = sim_proc::SimProcess();
+						task_process_map[i] = std::make_shared<sim_proc::SimProcess>();
 					}
-					task_process_map[0] = sim_proc::SimProcess();
+
 				}
 				TaskProcessMap(){};
-				void set_running_process_at_core(unsigned long core_id, sim_proc::SimProcess process);
-				sim_proc::SimProcess get_running_process_at_core(unsigned long core_id);
+				/**
+				 * Sets 'process' to run mode on core_id, which sets up core->process tracking;
+				 * @param core_id
+				 * @param process
+				 */
+				void set_running_process_at_core(unsigned long core_id,std::shared_ptr<sim_proc::SimProcess> process);
+
+				std::shared_ptr<sim_proc::SimProcess>clear_process_at_core(unsigned long core_id);
+
+				std::shared_ptr<sim_proc::SimProcess>get_process_at_core(unsigned long core_id);
+
+				/**
+				 * gets all *running* processes in the system. This is different from *stopped*
+				 * @return
+				 */
+				std::vector<std::shared_ptr<sim_proc::SimProcess>> get_all_running_processes();
+
+				/**
+				 * gets the process assigned to a specific core, or returns a new process with -1 as a val
+				 * @param core_id
+				 * @return
+				 */
+				std::shared_ptr<sim_proc::SimProcess> get_assigned_process_at_core(unsigned long core_id);
+				/**
+				 * gets the processes assigned to all cores currently.
+				 * @param core_id
+				 * @return
+				 */
+				std::vector<std::shared_ptr<sim_proc::SimProcess>> get_all_assigned_processes();
+				/**
+				 * What cores are not assigned with any task
+				 * @return
+				 */
 				std::vector<unsigned long> get_idle_cores();
+				/**
+				 * What cores currently have an assigned (running or stopped) process?
+				 * @return
+				 */
 				std::vector<unsigned long> get_working_cores();
 
 
-				std::map<unsigned long, sim_proc::SimProcess> task_process_map;
+				std::map<unsigned long, std::shared_ptr<sim_proc::SimProcess>> task_process_map;
 
 			protected:
 				/**
@@ -47,7 +82,7 @@ namespace nemo {
 		public:
 			double last_active_time = 0;
 			neuro_os::sim_proc::SimProcessQueue process_queue;
-			std::vector<nemo::config::ScheduledTask> task_list;
+			std::vector<std::shared_ptr<nemo::config::ScheduledTask>> task_list;
 
 			void set_models(const std::map<int, nemo::config::NemoModel>& models);
 			void forward_scheduler_event(tw_bf *bf, nemo_message *m, tw_lp *lp);
@@ -58,20 +93,24 @@ namespace nemo {
 			void check_waiting_procs();
 
 			/**
+			 * primary function entry point for one scheduler tick. Called every neurosynaptic tick.
+			 * Runs neuron based scheduler algorithms, updates process states, assigns processes to cores,
+			 * and sends cores new state information.
+			 */
+			void scheduler_iteration();
+			/**
 			 * Starts the next process from the waiting process queue. This should be called
 			 * after can_start_waiting_process() has determined if we can start the next process.
-			 * @param bf
-			 * @param m
-			 * @param lp
+
 			 */
-			void start_process(tw_bf *bf, nemo_message *m, tw_lp *lp);
+			void start_process(unsigned int process_id);
 			/**
 			 * Function that sends the new neuron states out to the simulated cores.
 			 * @param bf
 			 * @param m
 			 * @param lp
 			 */
-			void send_process_states(tw_bf *bf, nemo_message *m, tw_lp *lp);
+			void send_process_states();
 
 			/**
 			 * Function that sends stop messages to the simulated cores and updates the task_process_map
@@ -79,7 +118,7 @@ namespace nemo {
 			 * @param m
 			 * @param lp
 			 */
-			void stop_process(tw_bf *bf, nemo_message *m, tw_lp *lp);
+			void stop_process(unsigned int process_id);
 
 			/** Function that actually sends the stop message. Called from stop_process.
 			 *
@@ -89,16 +128,47 @@ namespace nemo {
 			 */
 			void send_stop_process_message(tw_bf *bf, nemo_message *m, tw_lp *lp);
 
-			bool can_start_waiting_process(tw_bf *bf, nemo_message *m, tw_lp *lp);
+			/**
+			 * function that checks if the waiting process can be started based on running cores, scheduler logic, etc.
+			 * @return
+			 */
+			bool can_start_waiting_process();
 
-			bool is_process_waiting(tw_bf *bf, nemo_message *m, tw_lp *lp);
-			bool is_process_running(tw_bf *bf, nemo_message *m, tw_lp *lp);
-			void set_current_process_state(tw_bf *bf, nemo_message *m, tw_lp *lp,neuro_os::sim_proc::PROC_STATE state);
-			void set_process_state(tw_bf *bf, nemo_message *m, tw_lp *lp,neuro_os::sim_proc::PROC_STATE state, int proc_id);
+			/**
+			 * Is there a process waiting in the queue?
+			 * @return
+			 */
+			bool is_process_waiting();
+			/**
+			 * Is there a process running at all?
+			 * @param process_id
+			 * @return
+			 */
+			bool is_process_running(unsigned int process_id);
 
 
+			/**
+			 * Sets a particular process's state
+			 * @param state
+			 * @param proc_id
+			 */
+			void set_process_state(neuro_os::sim_proc::PROC_STATE state, int proc_id);
+
+			/**
+			 * Get the next waiting process' state
+			 * @return
+			 */
 			neuro_os::sim_proc::PROC_STATE get_top_waiting_process_state();
+			/**
+			 * Gets an arbitrary process' state
+			 * @param proc_id
+			 * @return
+			 */
 			neuro_os::sim_proc::PROC_STATE get_process_state(int proc_id);
+			/**
+			 * Get all currently assigned (running or possibly stopped but still in the "running" manager) process states.
+			 * @return
+			 */
 			std::vector<neuro_os::sim_proc::PROC_STATE> get_running_process_states();
 
 

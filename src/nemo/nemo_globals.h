@@ -281,7 +281,7 @@ sgn (T1 x)
  * Main message data structure.
  *
  */
-typedef struct Nemo_Message {
+typedef struct NemoMessage {
 	int message_type;
 
 	int source_core;

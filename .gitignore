@@ -13,7 +13,7 @@ config/models/dask-worker-space/
 
 config/models/cifar_100_local_model.json
 
-
+config/models/test_1
 
 config/models/cifar_100_model.sqlite
 
@@ -74,3 +74,19 @@ CMakeFiles/cmake.check_cache
 scripts/.idea/dataSources.xml
 
 scripts/.idea/sqldialects.xml
+
+config/models/cifar_100_model.json
+
+config/models/cifar_100_spike.json
+
+config/models/sar_model.json
+
+config/models/sar_spike.json
+
+*.7z
+
+*.mp
+
+config/models/models_mx6p/
+
+config/models/
