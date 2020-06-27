@@ -1,6 +1,8 @@
 ### FCFS PROCESS LIBRARY
+cmake_minimum_required(VERSION 3.5)
 
 OPTION(NOS_ENABLE_UNIT_TESTS  "Enable FCFS unit tests (uses Catch2)" ON )
+project(NeuroOS LANGUAGES CXX VERSION 0.1.5)
 
 
 set(NEURO_OS_LIB

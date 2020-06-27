@@ -202,12 +202,22 @@ void print_sim_config() {
 
 	p::start_sim_ftr();
 }
+char primary_config_file[4096] =  {'\0'};
+tw_optdef loc_nemo_tw_options[] = {
+		TWOPT_GROUP("NeMo 2 - TNG Runtime Options"),
+		TWOPT_FLAG("debug", nemo::config::NemoConfig::DEBUG_FLAG, "Debug mode?"),
+		TWOPT_ULONG("mean", nemo::config::NemoConfig::test, "test_value"),
+		TWOPT_CHAR("cfg",primary_config_file, "Main configuration file"),
+		TWOPT_END()
+};
 
 int main(int argc, char* argv[]) {
+	//primary_config_file = (char*)calloc(sizeof(char), 1024);
+	std::snprintf(primary_config_file,1000,"./example_config.json");
 	p::VERBOSE = 5;
 	using namespace nemo;
 	auto main_config = new nemo::config::NemoConfig();
-	auto options = nemo::config::NemoConfig::nemo_tw_options;
+	auto options = loc_nemo_tw_options;
 	tw_opt_add(options);
 	tw_init(&argc, &argv);
 
@@ -218,7 +228,7 @@ int main(int argc, char* argv[]) {
 	main_config->world_size = w_size;
 
 	//After parsing options, and after tw_init is called, init the main_config
-	main_config->init_from_tw_opts();
+	main_config->init_from_tw_opts(primary_config_file);
 	nemo::global_config = main_config;
 	// initialize ROSS and NeMo:
 	init_nemo(main_config);
@@ -229,6 +239,8 @@ int main(int argc, char* argv[]) {
 	if(tw_ismaster()) printf("@@@ Calling run...\n");
 	MPI_Barrier(MPI_COMM_WORLD);
 	g_tw_ts_end = 5;
+
+
 	tw_run();
 
 	// main_config -> load network defs

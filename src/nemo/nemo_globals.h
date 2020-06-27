@@ -9,7 +9,7 @@
 #include <cstdint>
 
 #include <vector>
-
+#include <string>
 namespace nemo
 {
 
@@ -76,9 +76,12 @@ template<typename... Args>
 string_format (const ::std::string &format, Args... args);
 
 typedef enum CoreTypes {
+	NO_CORE_TYPE,
   TN,
   LIF
 } core_types;
+
+core_types get_core_enum_from_json(std::string core_type);
 
 enum nemo_message_type {
   NEURON_SPIKE,
@@ -276,24 +279,29 @@ sgn (T1 x)
 {
   return ((x > 0) - (x < 0));
 }
-
+#define NEMO_MAX_CHAR_DATA_SIZE 65535
 /**
  * Main message data structure.
  *
  */
 typedef struct NemoMessage {
+
 	int message_type;
-
-	int source_core;
-	int dest_axon;
-	unsigned long intended_neuro_tick;
 	uint32_t nemo_event_status;
-	unsigned int random_call_count;
-	double debug_time;
-	int model_id;
 
-	::std::string
-	to_string();
+		int source_core;
+		int dest_axon;
+		unsigned long intended_neuro_tick;
+
+		unsigned int random_call_count;
+		double debug_time;
+
+
+		int model_id;
+		char *update_message;
+
+
+
 } nemo_message;
 
 // Helper functon for BF logic:

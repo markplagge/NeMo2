@@ -98,6 +98,12 @@ set(ENV{PKG_CONFIG_PATH}  "/Users/markplagge/dev/codes-nemo/cmake-build-debug/co
 add_subdirectory(src)
 set_property(TARGET ROSS PROPERTY CXX_STANDARD 14)
 
+set(NEURO_OS_FLDR ${CMAKE_SOURCE_DIR}/src/libs/neuro_os)
+include_directories(${NEURO_OS_FLDR}/SRC)
+include_directories(${NEURO_OS_FLDR}/include)
+add_executable(nemo_os_test ${NEURO_OS_FLDR}/main.cpp ${NEURO_OS_FLDR}/src/process_states.h
+        ${NEURO_OS_FLDR}/src/SimProcess.h ${NEURO_OS_FLDR}/src/SimProcess.cpp
+        src/libs/neuro_os/src/SimProcessQueue.h ${NEURO_OS_FLDR}/src/SimProcessQueue.cpp)
 
 #add_subdirectory(src/nemo_codes)
 

@@ -22,6 +22,8 @@ namespace neuro_os { namespace sim_proc {
         double scheduled_start_time;
         int total_wait_time;
         int total_run_time;
+		int current_run_time = 0;
+		int clock = -1;
         PROC_STATE current_state;
         //T neuron_state_system;
 
@@ -36,6 +38,8 @@ namespace neuro_os { namespace sim_proc {
             total_wait_time = 0;
             total_run_time = 0;
             current_state = NO_OP;
+
+
 
         }
 
@@ -62,6 +66,17 @@ namespace neuro_os { namespace sim_proc {
         bool operator==(const SimProcess &rhs) const;
 
         bool operator!=(const SimProcess &rhs) const;
+
+		bool can_start(){
+			return clock >= scheduled_start_time;
+		}
+		bool is_running(){
+			return current_state == RUNNING;
+		}
+
+		//control ops:
+		void start();
+		void stop();
 
 
     };

@@ -4,7 +4,7 @@
 
 #include "NemoNeuronTrueNorth.h"
 #include "../../include/nemo.h"
-
+#include <configuru.hpp>
 /** TODO: Eventually replace this with generic macro and non-branching ABS code. */
 #define IABS(a) (((a) < 0) ? (-a) : (a))//!< Typeless integer absolute value function
 /** TODO: See if there is a non-branching version of the signum function, maybe in MAth libs and use that. */
@@ -529,7 +529,9 @@ void nemo::neuro_system::NemoNeuronTrueNorth::init_from_json_string(std::string 
 
 
 	//auto  synaptic_connectivity_v = (std::vector<bool>)ncfg["synapticConnectivity"];
-	auto synaptic_connectivity = (bool *)ncfg["synapticConnectivity"];
+	auto synaptic_connectivity_v = (std::vector<unsigned int>)ncfg["synapticConnectivity"];
+	bool *synaptic_connectivity = reinterpret_cast<bool*>(synaptic_connectivity_v.data());
+
 	//bool * synaptic_connectivity = &synaptic_connectivity_v[0];
 	auto g_i_v = (std::vector<short>)ncfg["g_i"];
 	auto g_i = g_i_v.data();
@@ -540,7 +542,8 @@ void nemo::neuro_system::NemoNeuronTrueNorth::init_from_json_string(std::string 
 
 	//auto b_v = (std::vector<bool>)ncfg["b"];
 	//auto b = &b_v[0];
-	auto b = (bool *) ncfg["b"];
+	auto bx = (std::vector<unsigned int>)ncfg["b"];
+	bool  *b = reinterpret_cast<bool*>( bx.data() );
 
 
 	tn_create_neuron_encoded_rv_non_global(core_id,local_id,synaptic_connectivity,g_i,sigma_g,s,b,epsilon,sigma_lambda,

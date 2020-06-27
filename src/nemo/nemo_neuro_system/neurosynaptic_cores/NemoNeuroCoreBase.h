@@ -11,6 +11,7 @@
 #include "../../nemo_io/NemoCoreOutput.h"
 #include "../../nemo_io/SpikeFile.h"
 #include "../neuron_models/NemoNeuronGeneric.h"
+
 #include <configuru.hpp>
 #include <neuro_os.h>
 #include <ross.h>
@@ -133,8 +134,8 @@ namespace nemo {
 			void run_leaks();
 			void run_fires();
 			void run_resets();
-
-			void init_current_model();
+			void create_blank_neurons();
+			void init_current_model(std::string model_def);
 			void interrupt_running_model();
 			void resume_running_model();
 
@@ -142,7 +143,10 @@ namespace nemo {
 			virtual ~NemoNeuroCoreBase(){};
 
 			NemoCoreOutput* output_system;
+			bool is_init;
 
+			std::vector<std::vector<std::shared_ptr<NemoNeuronGeneric>>> neuron_stack;
+			bool neurons_init = false;
 			bool save_spikes;
 			bool save_mpots;
 			/**
@@ -197,16 +201,20 @@ namespace nemo {
 
 
 			nemo::config::NemoModel current_model;
-			std::vector<NemoNeuroCoreBase> state_stack;
+			std::vector<std::shared_ptr<NemoNeuronGeneric>> state_stack;
 
 
 			/** NemoNeuroCoreBase contains neurons and neuron states in a structure */
-			std::vector<NemoNeuronGeneric*> neuron_array;
+			std::vector<std::shared_ptr<NemoNeuronGeneric>> neuron_array;
 			std::vector<unsigned int> neuron_dest_cores;
 			std::vector<unsigned int> neuron_dest_axons;
 
 			std::vector<ModelFile> model_files;
 			std::vector<SpikeFile> spike_files;
+
+			core_types my_core_type = NO_CORE_TYPE;
+
+
 
 			/**
  * output_mode - sets the spike output mode of this core.

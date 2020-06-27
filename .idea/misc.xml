@@ -4,6 +4,7 @@
   <component name="CidrRootsConfiguration">
     <sourceRoots>
       <file path="$PROJECT_DIR$/src" />
+      <file path="$PROJECT_DIR$/src/libs/neuro_os" />
     </sourceRoots>
     <libraryRoots>
       <file path="$PROJECT_DIR$/external" />
@@ -12,8 +13,5 @@
   </component>
   <component name="NodePackageJsonFileManager">
     <packageJsonPaths />
-  </component>
-  <component name="ProjectPlainTextFileTypeManager">
-    <file url="file://$PROJECT_DIR$/src/nemo/nemo_formatted_print.cpp" />
   </component>
 </project>

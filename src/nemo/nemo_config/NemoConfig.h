@@ -77,7 +77,7 @@ namespace nemo {
 			static std::string main_config_file;
 
 			NemoConfig();
-			void init_from_tw_opts();
+			void init_from_tw_opts(char* config_file);
 
 			std::string get_settings();
 			std::string sched_mode_to_string() const;

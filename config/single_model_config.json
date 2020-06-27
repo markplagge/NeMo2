@@ -1,8 +1,8 @@
 {
   "nemo_global": {
     "GLOBAL_DEBUG": true,
-    "ns_cores_per_chip": 32,
-    "total_chips": 2,
+    "ns_cores_per_chip": 4096,
+    "total_chips": 1,
     "do_neuro_os": false,
     "sched_type": "FCFS",
     "save_nos_stats": true,
@@ -31,16 +31,7 @@
       "needed_cores": 2048,
       "requested_time": 1024,
       "benchmark_model_name": "IDENTITY"
-    },
-    {
-      "id": 2,
-      "needed_cores": 0,
-      "model_file_path": "/Users/plaggm/dev/nemo-codes/config/models/sar_model.json",
-      "spike_file_path": "/Users/plaggm/dev/nemo-codes/config/models/sar_model_spike.json",
-      "requested_time": 1024,
-      "benchmark_model_name": "NONE"
     }
-
   ],
   "scheduler_inputs": [
     {
@@ -55,12 +46,12 @@
     },
     {
       "start_time": 1024,
-      "task_id": 2,
+      "task_id": 0,
       "model_id": 1
     },
     {
       "start_time": 1024,
-      "task_id": 0,
+      "task_id": 1,
       "model_id": 1
     }
   ]
