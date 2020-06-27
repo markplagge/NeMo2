@@ -152,7 +152,7 @@ void init_nemo(nemo::config::NemoConfig* cfg) {
 	g_tw_lookahead = cfg->lookahead;
 	g_tw_lp_types = ne_lps;
 	g_tw_lp_typemap = lp_typemapper;
-	g_tw_events_per_pe = cfg->est_events_per_pe;
+	g_tw_events_per_pe = cfg->est_events_per_pe * 2;
 
 	/** set up LPs */
 	tw_define_lps(nlp,sizeof(nemo_message));

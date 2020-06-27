@@ -127,6 +127,10 @@ namespace nemo {
 			void send_process_states(int dest_core, int model_id);
 
 			/**
+			 * Sends input spikes from the current model
+			 */
+			void send_input_spikes(int model_id, double time_t );
+			/**
 			 * Function that sends stop messages to the simulated cores and updates the task_process_map
 			 * @param bf
 			 * @param m

@@ -41,6 +41,7 @@ namespace nemo {
 		bool valid_spike = true;
 		std::string spike_filename;
 		void load_spike_file();
+		int current_time = 0;
 
 	};
 

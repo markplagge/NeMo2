@@ -12,6 +12,7 @@ namespace nemo {
 		void NemoCoreScheduler::forward_scheduler_event(tw_bf* bf, nemo::nemo_message* m, tw_lp* lp) {
 			//Scheduler events are only once per global tick
 			//first queue up next scheduler event
+			static int did_init = 0;
 			if (global_config->do_neuro_os) {
 				//First schedule the next tick of the neuro_os_scheduler
 				auto sched_time = JITTER(lp->rng) + 1;
@@ -26,7 +27,8 @@ namespace nemo {
 				//Now run the scheduler iteration code which handles scheduling processes.
 
 				scheduler_iteration();
-			}else{
+			}else if (!did_init){
+				did_init = 1;
 				//no scheduler. Just run the model at position 0
 				auto model_file = model_files[0];
 
@@ -34,6 +36,10 @@ namespace nemo {
 				for(int i = 0; i < num_needed_cores; i ++){
 					send_process_states(i, 0);
 				}
+				for (int i = 0; i < g_tw_ts_end; ++i) {
+					send_input_spikes(0,i);
+				}
+
 			}
 			//check the current list of processes:
 		}
@@ -173,6 +179,22 @@ namespace nemo {
 
 
 		}
+		void NemoCoreScheduler::send_input_spikes(int model_id,double time_t) {
+			auto time = floor(time_t);
+			auto spike_r = spike_files[model_id].get_spikes_at_time(time);
+			for (const auto& spk : spike_r) {
+				auto dest = get_gid_from_core_local(spk.dest_core,spk.dest_axon);
+				auto dest_t = JITTER(this->my_lp->rng) + spk.time;
+				struct tw_event* os_input_spike_evt = tw_event_new(dest,dest_t,this->my_lp);
+				nemo_message *msg = (nemo_message*) tw_event_data(os_input_spike_evt);
+				msg->dest_axon = spk.dest_axon;
+				msg->message_type = NEURON_SPIKE;
+				//add random call count
+				msg->intended_neuro_tick = spk.time;
+				msg->source_core = -1;
+				tw_event_send(os_input_spike_evt);
+			}
+		}
 
 
 		void sched_core_init(NemoCoreScheduler* s, tw_lp* lp) {
@@ -212,6 +234,7 @@ namespace nemo {
 		void sched_core_finish(NemoCoreScheduler* s, tw_lp* lp) {
 			s->core_finish(lp);
 		}
+
 
 
 
