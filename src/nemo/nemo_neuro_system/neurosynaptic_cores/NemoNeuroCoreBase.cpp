@@ -338,6 +338,7 @@ namespace nemo {
 					check ++;
 				}
 				auto neuron_id =(unsigned int) core_stat_cfg["localID"];
+
 				this->neuron_array[neuron_id].get()->init_from_json_string(line);
 			}
 

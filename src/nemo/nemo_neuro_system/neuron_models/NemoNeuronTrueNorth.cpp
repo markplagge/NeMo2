@@ -5,6 +5,7 @@
 #include "NemoNeuronTrueNorth.h"
 #include "../../include/nemo.h"
 #include <configuru.hpp>
+
 /** TODO: Eventually replace this with generic macro and non-branching ABS code. */
 #define IABS(a) (((a) < 0) ? (-a) : (a))//!< Typeless integer absolute value function
 /** TODO: See if there is a non-branching version of the signum function, maybe in MAth libs and use that. */
@@ -145,15 +146,15 @@ namespace nemo{
  * @param source_id axon ID source for weight computations
  */
 void nemo::neuro_system::NemoNeuronTrueNorth::integrate(unsigned int source_id) {
-	auto st = this->ns;
-	auto wt = st->synaptic_weight[st->axon_types[source_id]];
+	//auto st = this->ns;
+	auto wt = ns->synaptic_weight[ns->axon_types[source_id]];
 	if (wt) {
-		if (st->weight_selection[st->axon_types[source_id]]) {// zero if this is
+		if (ns->weight_selection[ns->axon_types[source_id]]) {// zero if this is
 			// normal, else
 			stochastic_integrate(wt);
 		}
 		else {
-			st->membrane_potential += wt;
+			ns->membrane_potential += wt;
 		}
 	}
 }
@@ -227,16 +228,16 @@ bool nemo::neuro_system::NemoNeuronTrueNorth::should_fire() {
 	return (ns->membrane_potential >= threshold && fire_timing_check(tw_now(this->get_cur_lp())));
 }
 bool nemo::neuro_system::NemoNeuronTrueNorth::over_underflow_check() {
-	auto n = ns;
+	//auto n = ns;
 	int ceiling = 393216;
 	int floor = -393216;
 	bool spike = false;
-	if (n->membrane_potential > ceiling) {
+	if (ns->membrane_potential > ceiling) {
 		spike = true;
-		n->membrane_potential = ceiling;
+		ns->membrane_potential = ceiling;
 	}
-	else if (n->membrane_potential < floor) {
-		n->membrane_potential = floor;
+	else if (ns->membrane_potential < floor) {
+		ns->membrane_potential = floor;
 	}
 	return spike;
 }
@@ -303,9 +304,9 @@ bool nemo::neuro_system::NemoNeuronTrueNorth::fire_floor_ceiling_reset() {
  *  @param st     the neuron state
  */
 void nemo::neuro_system::NemoNeuronTrueNorth::stochastic_integrate(int weight) {
-	auto st = ns;
-	if (BINCOMP(weight, st->drawn_random_number)) {
-		st->membrane_potential += 1;
+
+	if (BINCOMP(weight, ns->drawn_random_number)) {
+		ns->membrane_potential += 1;
 	}
 }
 /**
@@ -499,6 +500,7 @@ void nemo::neuro_system::NemoNeuronTrueNorth::init_from_json_string(std::string 
 //	Config cfg = configuru::parse_string(js_string);
 
 	using namespace configuru;
+	ns = std::make_unique<TNNeuronState>();
 	auto ncfg = configuru::parse_string(js_string.c_str(), FORGIVING, "TN_INIT");
 	ns->last_active_time = 0;
 	ns->last_leak_time = 0;
@@ -517,12 +519,12 @@ void nemo::neuro_system::NemoNeuronTrueNorth::init_from_json_string(std::string 
 	auto sigma_vr = (short)ncfg["sigmaVR"];
 	auto sigma_lambda = (int)ncfg["sigma_lmbda"];
 	auto vr = (short)ncfg["VR"];
-	auto kappa = (bool)ncfg["kappa"];
+	bool kappa = (unsigned int)ncfg["kappa"];
 	auto signal_delay = (int)ncfg["signalDelay"];
 	auto dest_core = (unsigned int)ncfg["destCore"];
 	auto dest_local = (unsigned int)ncfg["destLocal"];
-	auto is_output_neuron = (bool)ncfg["outputNeuron"];
-	auto is_self_firing = (bool)ncfg["selfFiring"];
+	bool is_output_neuron = (unsigned int)ncfg["outputNeuron"];
+	bool is_self_firing = (unsigned int)ncfg["selfFiring"];
 	auto model_name = (std::string)ncfg["model_id"];
 	auto c = (int)ncfg["c"];
 	auto tm = (int)ncfg["TM"];
@@ -547,7 +549,7 @@ void nemo::neuro_system::NemoNeuronTrueNorth::init_from_json_string(std::string 
 
 
 	tn_create_neuron_encoded_rv_non_global(core_id,local_id,synaptic_connectivity,g_i,sigma_g,s,b,epsilon,sigma_lambda,
-										   lambda,c,alpha,beta,tm,vr,sigma_vr,gamma,kappa,this->ns,
+										   lambda,c,alpha,beta,tm,vr,sigma_vr,gamma,kappa,this->ns.get(),
 										   signal_delay,dest_core,dest_local);
 
 	ns->delay_val = signal_delay;

@@ -121,7 +121,7 @@ namespace nemo {
 		};
 
 		class NemoNeuronTrueNorth final : public NemoNeuronGeneric {
-			TNNeuronState * ns;
+			std::unique_ptr<TNNeuronState> ns;
 
 
 		public:

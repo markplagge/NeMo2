@@ -489,6 +489,10 @@ class ParJSConv(DaskJS):
                         pbar.update(0)
                         with open(self.out_json_name.parent / 'full_dump.mp', 'wb') as bigf:
                             self.write_msgpack(big_data,bigf)
+                        pbar.desc = f"Wrriter writing big json all at once"
+                        pbar.update(0)
+                        with open(self.out_json_name.parent / "big_model.json", 'wb') as bigf:
+                            big_data.to_json(bigf,orient="index")
 
     def loader(self):
         with open(self.nfg_file, 'r') as nfg:
