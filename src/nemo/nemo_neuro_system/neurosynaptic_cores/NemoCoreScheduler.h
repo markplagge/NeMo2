@@ -15,6 +15,7 @@ namespace nemo {
 	namespace neuro_system {
 
 			using namespace neuro_os;
+			using  SimProcess = neuro_os::sim_proc::SimProcess ;
 			class TaskProcessMap {
 			public:
 				TaskProcessMap(unsigned long num_cores) : num_cores(num_cores) {
@@ -30,6 +31,8 @@ namespace nemo {
 				 * @param process
 				 */
 				void set_running_process_at_core(unsigned long core_id,std::shared_ptr<sim_proc::SimProcess> process);
+
+				void remove_assigned_process(unsigned long core_id);
 
 				std::shared_ptr<sim_proc::SimProcess>clear_process_at_core(unsigned long core_id);
 
@@ -65,6 +68,7 @@ namespace nemo {
 				std::vector<unsigned long> get_working_cores();
 
 
+
 				std::map<unsigned long, std::shared_ptr<sim_proc::SimProcess>> task_process_map;
 
 			protected:
@@ -83,6 +87,9 @@ namespace nemo {
 			double last_active_time = 0;
 			neuro_os::sim_proc::SimProcessQueue process_queue;
 			std::vector<std::shared_ptr<nemo::config::ScheduledTask>> task_list;
+			unsigned long current_scheduler_time;
+			unsigned long time_slice = 1000;
+			TaskProcessMap core_process_map; // Keeps track of what cores are running what processes.
 
 			void set_models(const std::map<int, nemo::config::NemoModel>& models);
 			void forward_scheduler_event(tw_bf *bf, nemo_message *m, tw_lp *lp);
@@ -104,13 +111,20 @@ namespace nemo {
 
 			 */
 			void start_process(unsigned int process_id);
+
+			/**
+			 * Gets a list of cores that are idle.
+			 * If the process can not fit in the cores then it will return a zero length array.
+			 * @param number_of_cores_needed
+			 */
+			std::vector<unsigned int> get_idle_cores(unsigned int number_of_cores_needed);
 			/**
 			 * Function that sends the new neuron states out to the simulated cores.
 			 * @param bf
 			 * @param m
 			 * @param lp
 			 */
-			void send_process_states();
+			void send_process_states(int dest_core, int model_id);
 
 			/**
 			 * Function that sends stop messages to the simulated cores and updates the task_process_map
@@ -169,13 +183,15 @@ namespace nemo {
 			 * Get all currently assigned (running or possibly stopped but still in the "running" manager) process states.
 			 * @return
 			 */
-			std::vector<neuro_os::sim_proc::PROC_STATE> get_running_process_states();
+			std::vector<std::shared_ptr<SimProcess>> get_running_process_states();
 
 
 
-		protected:
-			unsigned long current_scheduler_time;
-			TaskProcessMap core_process_map; // Keeps track of what cores are running what processes.
+
+
+			int remove_assigned_done_processes();
+
+			virtual std::vector<std::shared_ptr<SimProcess>>  get_removable_processes();
 
 		};
 		// This class gets directly init'ed by ROSS through these functions:

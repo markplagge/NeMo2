@@ -2,6 +2,7 @@
 // Created by Mark Plagge on 11/1/19.
 //
 #include "NemoNeuroCoreBase.h"
+#include "../neuron_models/neuron_factory.h"
 #include <string>
 #include <utility>
 namespace nemo {
@@ -47,11 +48,10 @@ namespace nemo {
 			if (cur_message->message_type == NEURON_SPIKE) {// this if statement is a double check on the calling function
 				if (heartbeat_sent && cur_message->intended_neuro_tick > current_neuro_tick) {
 
-					tw_error(TW_LOC, "Got a spike with an out of bounds tick.\n %s\n"
-
+					tw_error(TW_LOC, "Got a spike with an out of bounds tick.\n"
 									 "Current core tick: %li\n"
 									 "Current time: %Lf \n",
-							 this->cur_message->to_string().c_str(),
+							 //this->cur_message->to_string().c_str(),
 							 this->current_neuro_tick,
 							 tw_now(this->my_lp));
 				}
@@ -88,8 +88,8 @@ namespace nemo {
 					my_bf->c0 = 0;
 				}
 				else {
-					tw_error(TW_LOC, "Invalid tick times:\nMsg Data:\n %s \n current_neuro_tick: %d \n",
-							 cur_message->to_string().c_str(), this->current_neuro_tick);
+					tw_error(TW_LOC, "Invalid tick times: \n current_neuro_tick: %d \n",
+							 this->current_neuro_tick);
 				}
 
 				this->evt_stat = BF_Event_Status::Spike_Rec | this->evt_stat;
@@ -107,17 +107,15 @@ namespace nemo {
 								 "Got a spike intended for t %d, but heartbeat has been sent and LP is active at time %d.\n"
 								 "Details:\n"
 								 "CoreID: %i \n"
-								 "Message Data:\n"
-								 "source_core,dest_axon,intended_neuro_tick,nemo_event_status,"
-								 "random_call_count,debug_time %s\n",
+								 "Message Data:\n",
+
 								 this->cur_message->intended_neuro_tick,
 								 this->current_neuro_tick,
-								 this->core_local_id,
-								 cur_message->to_string().c_str());
+								 this->core_local_id);
 					}
 				}
 			}
-			else {//Heartbeat message received
+			else if (cur_message->message_type == HEARTBEAT){//Heartbeat message received
 				evt_stat = BF_Event_Status::Heartbeat_Rec;
 				//error check:
 				//message is heartbeat - We need to call leak, fire, reset logic
@@ -193,31 +191,42 @@ namespace nemo {
 			auto out = new NemoCoreOutput(core_local_id, x);
 			this->output_system = out;
 			// Use the nemo global config to set up this core
-			if (!global_config->do_neuro_os) {
-				current_model = models[0];
-			}
+
 		}
 
 		void NemoNeuroCoreBase::forward_event(tw_bf* bf, nemo_message* m, tw_lp* lp) {
 			this->cur_message = m;
-			this->forward_heartbeat_handler();
+			this->my_lp = lp;
+			this->my_bf = bf;
+
 			if (m->message_type == NOS_LOAD_MODEL) {
-				current_model = models[m->model_id];
-			}
-			if (m->message_type == NEURON_SPIKE) {
-				for (const auto& item : neuron_array) {
-					item->integrate(m->dest_axon);
-				}
-			}
-			else if (m->message_type == HEARTBEAT) {
-				//LEAK
-				run_leaks();
-				//Fire
-				run_fires();
-				//Reset
-				run_resets();
+				//current_model = models[m->model_id];
+				std::istringstream iss(m->update_message);
+				std::string tdl_m = "CORE INIT";
+				int check_nums = -1;
+				this->current_model = this->models[m->model_id];
+				this->init_current_model(m->update_message);
 			}else {
-				tw_error(TW_LOC,"Error - got message %i in neuro core base", m->message_type);
+				this->forward_heartbeat_handler();
+
+				//				auto core_stat_cfg = configuru::parse_string(m->update_message,configuru::FORGIVING,"CORE LOAD");
+
+				if (m->message_type == NEURON_SPIKE) {
+					for (const auto& item : neuron_array) {
+						item->integrate(m->dest_axon);
+					}
+				}
+				if (m->message_type == HEARTBEAT) {
+					//LEAK
+					run_leaks();
+					//Fire
+					run_fires();
+					//Reset
+					run_resets();
+				}
+				else {
+					tw_error(TW_LOC, "Error - got message %i in neuro core base", m->message_type);
+				}
 			}
 		}
 
@@ -304,8 +313,45 @@ namespace nemo {
 			unsigned int dest_chip = dest_core / cores_per_chip;
 			return source_chip != dest_chip;
 		}
+		void NemoNeuroCoreBase::create_blank_neurons() {
+			if(neurons_init){
+				neuron_stack.push_back(neuron_array);
+			}
+			for(int i = 0; i < global_config->neurons_per_core; i ++){
+				std::shared_ptr<NemoNeuronGeneric> neuron(get_new_neuron(this->my_core_type));
+				this->neuron_array.push_back(neuron);
+			}
+		}
+		void NemoNeuroCoreBase::init_current_model(std::string model_def) {
+
+			//line-by-line init of neurons
+			std::istringstream mdl_string(model_def);
+			/** @todo: I know this is bad to parse the lines multiple times but I don't want to pass around configuru ojbects
+			 */
+			int check = -1;
+			for (std::string line; std::getline(mdl_string, line); ){
+				auto core_stat_cfg = configuru::parse_string(line.c_str(),configuru::FORGIVING,"CORE_INIT");
+				if(check){
+					auto new_core_type = get_core_enum_from_json((std::string)core_stat_cfg["type"]);
+					this->my_core_type = new_core_type;
+					create_blank_neurons();
+					check ++;
+				}
+				auto neuron_id =(unsigned int) core_stat_cfg["localID"];
+				this->neuron_array[neuron_id].get()->init_from_json_string(line);
+			}
 
 
+
+
+			}
+
+			void NemoNeuroCoreBase::interrupt_running_model() {
+
+			}
+		void NemoNeuroCoreBase::resume_running_model() {
+
+		}
 
 	}// namespace neuro_system
 

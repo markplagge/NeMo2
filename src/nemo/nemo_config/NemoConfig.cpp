@@ -23,7 +23,7 @@ namespace nemo {
 		void error_reporter(std::string str) {
 			std::cerr << str << std::endl;// or throw or ignore
 		}
-		char* primary_config_file = (char*)calloc(sizeof(char), 1024);
+
 
 		std::string NemoConfig::get_settings() {
 			std::stringstream output;
@@ -57,12 +57,7 @@ namespace nemo {
 		}
 
 
-		tw_optdef NemoConfig::nemo_tw_options[] = {
-				TWOPT_GROUP("NeMo 2 - TNG Runtime Options"),
-				TWOPT_FLAG("debug", NemoConfig::DEBUG_FLAG, "Debug mode?"),
-				TWOPT_ULONG("mean", NemoConfig::test, "test_value"),
-				TWOPT_CHAR("cfg",primary_config_file, "Main configuration file"),
-				TWOPT_END()};
+
 
 
 		/**
@@ -70,10 +65,9 @@ namespace nemo {
 		 * parses it, and sets up the NeMo simulation.
 		 * Uses configuru
 		 */
-		void NemoConfig::init_from_tw_opts()
-		{
+		void NemoConfig::init_from_tw_opts(char* config_file) {
 			world_size = tw_nnodes();
-			auto cli_cfg_file = std::string(primary_config_file);
+			auto cli_cfg_file = std::string(config_file);
 			if (cli_cfg_file.length() > 0) {
 				NemoConfig::main_config_file = cli_cfg_file;
 			}

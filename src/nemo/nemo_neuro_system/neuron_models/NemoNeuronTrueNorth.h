@@ -120,7 +120,7 @@ namespace nemo {
 //			bool weightSelection[NUM_NEURON_WEIGHTS];
 		};
 
-		class NemoNeuronTrueNorth final : NemoNeuronGeneric {
+		class NemoNeuronTrueNorth final : public NemoNeuronGeneric {
 			TNNeuronState * ns;
 
 

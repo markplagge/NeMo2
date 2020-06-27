@@ -90,3 +90,7 @@ config/models/sar_spike.json
 config/models/models_mx6p/
 
 config/models/
+
+scripts/.idea/
+
+*.pyc

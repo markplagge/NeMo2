@@ -4,75 +4,90 @@
 
 #include "ModelFile.h"
 #include <fstream>
-#include <json.hpp>
 #include <iostream>
 #include <sstream>
+#include <utility>
 #include "get_js_mp_file.h"
 // Global static pointer used to ensure a single instance of the class.
 namespace nemo {
 
-	ModelFile::ModelFile(const std::string& model_file_path) : model_file_path(model_file_path) {
+
+	ModelFile::ModelFile(std::string  model_file_path) : model_file_path(std::move(model_file_path)) {
 		//load up the model:
 		load_model();
 
 
 	}
-	void  ModelFile::load_model(){
-		using namespace nlohmann;
-		// Supports both json and messagepack formats using fancy nhlo
+	int ModelFile::read_file(const std::string& model_path){
+		std::ifstream is (model_path,std::ifstream::binary);
+		is.seekg (0, is.end);
+		int length = is.tellg();
+		is.seekg (0, is.beg);
+		char * buffer = new char [length];
+		is.read(buffer,length);
+		if (is){
+			std::cout << "Read " << length << " bytes \n";
+			auto current_pos = buffer;
 
+			auto line = buffer;
+			for(int i = 0; i < length; i ++ ){
+				if(*current_pos == '\n'){
+					*current_pos = '\0';
+					parse_line(line);
+					line = current_pos + 1;
+				}
+				current_pos ++;
 
-//		std::ifstream i(model_file_path);
-
-//		if (model_file_path.find(".mb")!= std::string::npos){
-//			j = json::from_msgpack(i);
-//		}else {
-//
-//			i >> j;
-//		}
-		auto j =nemo::file_help::load_json_data(model_file_path);
-
-
-
-		int itr = 0;
-		for (json::iterator it = j.begin(); it != j.end(); ++it) {
-			//js_map[it.key()] = it.value().dump();
-			auto coreid = it.value()["coreID"].get<unsigned long>();
-			auto neuronid = it.value()["localID"].get<unsigned long>();
-			if (itr == 0){
-				auto core_id = it.value()["model_id"].dump();
-				model_name = core_id;
-				itr ++;
 			}
-
-
-			js_map[coreid][neuronid] = it.value().dump();
-
 		}
-		num_needed_cores = js_map.size();
+		is.close();
+		delete[] (buffer);
+		return length;
+	}
+	void ModelFile::parse_line(char line[]){
+		long core_id;
+		long neuron_id;
+		const char tok[2] = "_";
+		const char enter_tok[3] = "\"";
+		auto data = strchr(line,':') + 1;
 
+		auto datalen = strlen(data);
+		if (data[datalen - 1] == '\n') {
+			data[datalen - 2] = ' ';
+		}
+		data[datalen - 1] = '\n';
 
+		std::string dat_s(data);
+		char *token = strtok(line, tok) +1;
+		char * stred;
 
+		token = strtok(NULL, tok);
+		core_id = strtol(token,&stred,10);
+		token = strtok(NULL, enter_tok);
+		neuron_id = strtol(token, &stred, 10);
+		if (js_core_map[core_id] == nullptr){
+			js_core_map[core_id] = new std::stringstream ();
+		}
+		*js_core_map[core_id] << data;
+
+	}
+	void  ModelFile::load_model(){
+		auto sz_loaded = read_file(model_file_path);
+		num_needed_cores = js_core_map.size();
 
 	}
 	int ModelFile::get_num_needed_cores() const {
 		return num_needed_cores;
 	}
-	const std::map<unsigned long, std::map<unsigned long, std::string>>& ModelFile::get_js_map() const {
-		return js_map;
-	}
+
 	bool ModelFile::is_valid_model() const {
 		return valid_model;
 	}
 
 	std::string ModelFile::get_core_settings(unsigned long core_id) {
-		std::stringstream s;
-		auto cid_elms = js_map[core_id];
-		for (const auto& neuron : cid_elms) {
-			s << neuron.second << "\n";
-		}
+		//return js_core_map[core_id].str();
+		return js_core_map[core_id]->str();
 
-		return s.str();
 	}
 
 }

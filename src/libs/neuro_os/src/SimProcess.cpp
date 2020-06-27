@@ -110,14 +110,22 @@ namespace neuro_os { namespace sim_proc {
 			return scheduled_start_time;
 		}
 
-
+		/**
+		 * system_tick manages the ticks for a process
+		 * State path:
+		 * PRE_WAIT -> WAITING -> RUNNING -> COMPLETE
+		 * 			           <-
+		 * system_tick
+		 */
 		void SimProcess::system_tick() {
+			clock ++;
 			switch(current_state){
 			case WAITING:
 				++total_wait_time;
 				break;
 			case RUNNING:
 				++total_run_time;
+				++current_run_time;
 				if (total_run_time == needed_run_time){
 					current_state = COMPLETE;
 				}else if(total_run_time > needed_run_time){
@@ -126,6 +134,8 @@ namespace neuro_os { namespace sim_proc {
 				break;
 			case COMPLETE:
 			case NO_OP:
+				break;
+			case PRE_WAIT:
 				break;
 			}
 
@@ -140,8 +150,19 @@ namespace neuro_os { namespace sim_proc {
 		int SimProcess::get_total_run_time() const {
 			return total_run_time;
 		}
+		void SimProcess::start() {
+			current_run_time = 0;
+			current_state = RUNNING;
+		}
+		void SimProcess::stop() {
+			if (total_run_time >= needed_run_time){
+				current_state = COMPLETE;
+			}else{
+				current_state = WAITING;
+			}
+		}
 
-//        template <class T>
+		//        template <class T>
 //        void from_json(const json &j, const SimProcess &p){
 //            j.at("PID").get_to(p.PID);
 //            j.at("needed_cores").get_to(p.needed_cores);
