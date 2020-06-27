@@ -5,11 +5,11 @@
 #ifndef NEMOTNG_NEMO_GLOBALS_H
 #define NEMOTNG_NEMO_GLOBALS_H
 //#include "../../external/eigen/Eigen/Dense"
-
-#include <cstdint>
 #include <ross.h>
-#include <vector>
+#include <cstdint>
 
+#include <vector>
+#include <string>
 namespace nemo
 {
 
@@ -76,13 +76,21 @@ template<typename... Args>
 string_format (const ::std::string &format, Args... args);
 
 typedef enum CoreTypes {
+	NO_CORE_TYPE,
   TN,
   LIF
 } core_types;
 
+core_types get_core_enum_from_json(std::string core_type);
+
 enum nemo_message_type {
   NEURON_SPIKE,
-  HEARTBEAT
+  HEARTBEAT,
+	NOS_LOAD_MODEL,
+	NOS_TICK,
+	NOS_START,
+	NOS_STOP,
+	NOS_STATUS
 };
 /** @} */
 
@@ -271,22 +279,29 @@ sgn (T1 x)
 {
   return ((x > 0) - (x < 0));
 }
-
+#define NEMO_MAX_CHAR_DATA_SIZE 65535
 /**
  * Main message data structure.
  *
  */
-typedef struct Nemo_Message {
-  int message_type;
-  int source_core;
-  int dest_axon;
-  unsigned long intended_neuro_tick;
-  uint32_t nemo_event_status;
-  unsigned int random_call_count;
-  double debug_time;
+typedef struct NemoMessage {
 
-  ::std::string
-  to_string ();
+	int message_type;
+	uint32_t nemo_event_status;
+
+		int source_core;
+		int dest_axon;
+		unsigned long intended_neuro_tick;
+
+		unsigned int random_call_count;
+		double debug_time;
+
+
+		int model_id;
+		char *update_message;
+
+
+
 } nemo_message;
 
 // Helper functon for BF logic:
@@ -331,7 +346,6 @@ get_gid_from_core_local (ne_id_type dest_core, ne_id_type dest_axon)
 //
 //    };
 
-extern int NEURONS_PER_CORE;
 extern char *SPIKE_OUTPUT_FILENAME;
 extern int SPIKE_OUTPUT_MODE;
 extern int OUTPUT_MODE;
@@ -362,18 +376,8 @@ constexpr int WEIGHTS_PER_TN_NEURON = 4;
 constexpr int MAX_OUTPUT_PER_TN_NEURON = 1;
 /** @} */
 
-/**
- * @defgroup codes_map Codes Mapping Functions
- * helper functions for neuron mapping
- * @{
- */
-//Todo: implement these functions based on CODES mapping
-ne_id_type
-get_core_id_from_gid (tw_lpid id);
 
-ne_id_type
-get_local_id_from_gid (tw_lpid id);
-/**@}**/
+
 }// namespace nemo
 
 #endif//NEMOTNG_NEMO_GLOBALS_H

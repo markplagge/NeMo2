@@ -1,17 +1,42 @@
+import json
+import multiprocessing
+import queue
+import sqlite3
+import threading
+import time
+import warnings
+from pathlib import Path
+
 import click
 import dask
 import dask.dataframe as dd
-import multiprocessing
 import pandas as pd
-import threading
-import time
 import tqdm
-import warnings
-from JSReader import JSReader
 from dask.distributed import Client
 from numba import jit
-from pathlib import Path
 from sqlalchemy import create_engine
+from JSReader import JSReader
+import msgpack
+from io import BytesIO
+
+class Counter(object):
+    def __init__(self, initval=0):
+        self.val = multiprocessing.Value('i', initval)
+        self.lock = multiprocessing.Lock()
+        x = 32
+    def increment(self):
+        with self.lock:
+            self.val.value += 1
+
+    def value(self):
+        with self.lock:
+            return self.val.value
+
+def func(counter):
+    for i in range(50):
+        time.sleep(0.01)
+        counter.increment()
+
 
 warnings.filterwarnings('ignore')
 
@@ -51,9 +76,11 @@ class ModelInfo():
 
 
 class DaskJS(JSReader):
-    def __init__(self, client, nfg_file, model_id, nid=1, db_path=Path("./model_data.sqlite"), table_name="model",
-                 db_user='plaggm', do_sql=True, out_json_file='./out.json', out_csv_file='./out.csv'):
+    counter = Counter()
+    def __init__(self,nworkers, client, nfg_file, model_id, nid=1, db_path=Path("./model_data.sqlite"), table_name="model",
+                 db_user='plaggm', do_sql=True, out_json_file='./out.json', out_csv_file='./out.csv',buffer_size=2048):
         super().__init__(None, None, 0, db_path, table_name, do_sql, use_pandas=False)
+        self.buffer_size = buffer_size
         self.nfg_file = nfg_file
         self.model_id = model_id
         if isinstance(db_path, str):
@@ -65,49 +92,58 @@ class DaskJS(JSReader):
         self.nid = nid
         self.dfs = []
         self.client = client
-
-        self.file_read_buffer = multiprocessing.SimpleQueue()
+        frb_m = min(buffer_size, nworkers * 2)
+        self.file_read_buffer = multiprocessing.Queue(maxsize=frb_m * 10)
 
         self.line_buffer = multiprocessing.Queue()
         self.json_result_buffer = multiprocessing.Queue()
 
-        self.buffer_size = 4096
-        self.nworkers = (multiprocessing.cpu_count() // 2) + 2
 
+        #self.nworkers = (multiprocessing.cpu_count() // 2) + 2
+        self.nworkers = nworkers
         self.json_archive_q = multiprocessing.Queue()
-
         self.end_sql_q = multiprocessing.Queue()
-
         self.file_out_buffer = multiprocessing.Queue()
-
         self.out_json_name = Path(out_json_file)
         self.out_csv_name = Path(out_csv_file)
 
         self.completed_dataframe_q = multiprocessing.Queue(maxsize=100000)
+        self.done_workers = multiprocessing.Queue()
+        self.lr_buffer = 1000
 
-    def line_reader(self):
+    def line_reader(self,th=False):
         buffer = []
         nb = 0
+        line_buffer = self.buffer_size * 2
+        def dsc():
+            return f'Read - lines : {nb}/{len(buffer)}'
         with open(self.nfg_file, 'r') as nfg:
             # for l in tqdm.tqdm(nfg, desc=f'reading lines : {nb}/{len(buffer)}', position=1, leave=False):
-            with tqdm.tqdm(desc=f'reading lines : {nb}/{len(buffer)}', position=2) as pbar:
+            with tqdm.tqdm(desc=dsc(), position=1) as pbar:
                 for l in nfg:
                     if "{" in l:
                         buffer.append(l)
 
-                    if len(buffer) > self.buffer_size:
+                    if len(buffer) > line_buffer:
                         # tqdm.tqdm.write(f"Buffer {nb} queue up")
-                        pbar.desc = f"reading lines : {nb}/{len(buffer)}"
                         bx = [l for l in buffer]
                         self.file_read_buffer.put(bx)
                         buffer = []
-                        time.sleep(.5)
                         nb += 1
-                    pbar.update(1)
+                    pbar.desc = f"reading lines : {nb}/{len(buffer)}: BS: {line_buffer}"
+                    pbar.update(0)
+                    if th:
+                         time.sleep(0.000001)
+                #pbar.desc =  f"reading lines : {nb}/{len(buffer)}: BS: {line_buffer} - DONE!"""
+
+                pbar.desc = dsc() + " -- DONE --"
+                pbar.update(0)
 
         if buffer:
             self.file_read_buffer.put(buffer)
-        self.file_read_buffer.put("DONE")
+        for i in range(0,self.nworkers + 5):
+            self.file_read_buffer.put("DONE")
+
 
     def write_sql(self, data):
         if isinstance(data, dask.dataframe.DataFrame):
@@ -123,7 +159,7 @@ class DaskJS(JSReader):
             num_writes = 0
             check_done = False
             while True:
-                pbar.update(1)
+                pbar.update(0)
                 try:
                     rez = self.json_result_buffer.get_nowait()
 
@@ -132,7 +168,7 @@ class DaskJS(JSReader):
                     else:
                         local_buffer.append(rez)
                 except:
-                    pbar.update(1)
+                    pbar.update(0)
                     time.sleep(2)
 
                 if check_done and not self.end_sql_q.empty():
@@ -152,17 +188,17 @@ class DaskJS(JSReader):
                 time.sleep(1)
             # CLEANUP
             pbar.desc = f"SQL Thread First Cleanup"
-            pbar.update(1)
+            pbar.update(0)
             while not self.json_result_buffer.empty():
                 rez = self.json_result_buffer.get()
                 if not isinstance(rez, str):
                     self.write_sql(rez)
                     self.completed_dataframe_q.put(rez)
-                pbar.update(1)
+                pbar.update(0)
 
             pbar.desc = 'SQL thread Second Cleanup'
-            pbar.update(1)
-            if len(local_buffer) > 0:
+            pbar.update(0)
+            if local_buffer:
                 dbx = pd.concat(local_buffer)
                 self.write_sql(dbx)
 
@@ -177,8 +213,8 @@ class DaskJS(JSReader):
             tn_c = k[key]
             for k2 in tn_c.keys():
                 vx = tn_c[k2]
-                if isinstance(vx, list):
-                    vx = ",".join([str(tx) for tx in vx])
+                # if isinstance(vx, list):
+                #     vx = ",".join([str(tx) for tx in vx])
                 new_dict[k2] = vx
             k[key] = new_dict
             break
@@ -216,42 +252,70 @@ class DaskJS(JSReader):
 
         k['model_id'] = self.model_id
         return k
+    @jit
+    def json_reader_work(self, ndone, line, js_buf):
 
-    def json_reader(self, i):
-        time.sleep(1)
-        print(f"POSITION {i}")
+        if "{" in line:
+            # rx = r"(TN_?\d*?_\d*?\s*?=)"
+            # match = re.findall(rx, line)[0].replace("=", "").rstrip()
+            k = self.jit_lp(line)
+            ndone += 1
+            kd = list(k.keys())[0]
+            kv = k[kd]
+            js_buf[kd] = kv
+            # self.file_out_buffer.put({kd: kv})
+
+        return js_buf
+
+    def json_reader(self, i,th=False):
+
+
         # with tqdm.tqdm(position=i, leave=False, desc="Reading JSON") as pbar:
         ndone = 0
         js_buf = {}
         buflen = self.buffer_size // 2
-
+        def dvx(c):
+            return f'Worker {i - 2} processing'
         while True:
 
             line_arr = self.file_read_buffer.get()
             if isinstance(line_arr, str) and "DONE" in line_arr:
                 self.file_read_buffer.put("DONE")
+                self.done_workers.put("DONE")
                 break
-            for line in tqdm.tqdm(line_arr, position=i, desc=f'p:{i - 2} - line processing:{ndone}', leave=False):
-                if "{" in line:
-                    # rx = r"(TN_?\d*?_\d*?\s*?=)"
-                    # match = re.findall(rx, line)[0].replace("=", "").rstrip()
-                    k = self.jit_lp(line)
-                    ndone += 1
-                    kd = list(k.keys())[0]
-                    kv = k[kd]
-                    js_buf[kd] = kv
-                    # self.file_out_buffer.put({kd: kv})
-                if len(list(js_buf.keys())) > buflen:
-                    k = self.df_gen(js_buf)
-                    self.json_result_buffer.put(k)
-                    js_buf = {}
+            self.counter.increment()
+            ldx = 0
+            max_ldx = max(self.buffer_size // 100, 10)
+            ct = self.counter.value()
+            with tqdm.tqdm(total = len(line_arr), position = i, desc=dvx(ct), leave=False) as pbar:
+            # for line in tqdm.tqdm(line_arr, position=i,
+            #                       desc=dvx(),
+            #                       leave=False):
+                for line in line_arr:
+                    pbar.update(0)
+                    js_buf = self.json_reader_work(ndone, line, js_buf)
+                    if len(list(js_buf.keys())) > buflen:
+                        k = self.df_gen(js_buf)
+                        self.json_result_buffer.put(k)
+                        js_buf = {}
+
+                    # if ldx > max_ldx:
+                    #     ct = self.counter.value()
+                    #     ldx = 0
+
+                    pbar.desc = dvx(ct)
+                    pbar.update(1)
+                    ldx += 1
+
 
         if len(list(js_buf.keys())):
             k = self.df_gen(js_buf)
             self.json_result_buffer.put(k)
-
+        if th:
+            time.sleep(0.4)
         self.json_result_buffer.put("DONE")
-        click.secho("File Read Done", fg="bright_green", underline=True)
+        self.done_workers.put("DONE")
+        #click.secho("File Read Done", fg="bright_green", underline=True)
 
     def parse_file(self):
 
@@ -274,8 +338,9 @@ class DaskJS(JSReader):
         file_out_buffer = []
         result_dataframes = []
         dxd = "Generating Bags (MT) - FP: "
+
         with tqdm.tqdm(position=0, desc=dxd, leave=False) as pbar:
-            reader.start()
+
             [worker.start() for worker in workers]
             writer.start()
             while True:
@@ -287,12 +352,12 @@ class DaskJS(JSReader):
                 with tqdm.tqdm(position=1, desc="Working file queues from main thread", leave=False) as bbar:
                     while not self.file_out_buffer.empty():
                         file_out_buffer.append(self.file_out_buffer.get())
-                        bbar.update(1)
+                        bbar.update(0)
                     while not self.completed_dataframe_q.empty():
                         result_dataframes.append(self.completed_dataframe_q.get())
 
                 pbar.desc = f"{dxd}{len(file_out_buffer)}"
-                pbar.update(1)
+                pbar.update(0)
         print(self.json_result_buffer.empty())
         click.secho("Join Reader", fg="bright_blue")
         reader.join()
@@ -316,6 +381,190 @@ class DaskJS(JSReader):
 
         # for df in tqdm.tqdm(as_completed(self.dfs),position=0,leave=True):
         #     self.write_sql(df)
+import tempfile
+
+
+class ParJSConv(DaskJS):
+    file_worker_cleanup = multiprocessing.RLock()
+    def __init__(self, *args, **kwargs):
+        super(ParJSConv, self).__init__(*args, **kwargs)
+        self.n_workers = self.nworkers
+        self.js_buff_q = multiprocessing.Queue()
+        self.n_done_workers = 0
+        self.ttl_workers = 0
+
+    def json_read_jl(self, line):
+        js_buf = self.json_reader_work(0, line, {})
+        self.js_buff_q.put(js_buf)
+
+    def append_json(self, df, out_file_handle, orient="index"):
+
+        if not isinstance(df, pd.DataFrame):
+            click.secho(f"{'*' * 30}\nGOT WEIRD VALUE IN WRITER:\n {df}", bold=True, underline=True, fg="red")
+
+        js = df.to_json( orient='index')
+
+        js = js.lstrip("{")
+        js = js.split("},")
+
+        js = "},\n".join(js)
+        js = js.replace("}}","},")
+
+
+        # js = js.replace("}}","},\n")
+        # js = js.rstrip("}")
+
+        out_file_handle.write(js.encode())
+
+    def write_msgpack(self,df, buf = BytesIO()):
+        for d in df.itertuples():
+            dc = d._asdict()
+            buf.write(msgpack.packb(dc, use_bin_type=True))
+
+
+    def json_writer(self,th=False):
+        mpfile = self.out_json_name.parent / self.out_json_name.name.replace(".json",".mb")
+        with tqdm.tqdm(desc="Writer running: waits: 0 / writes: 0", position=2, leave=False) as pbar:
+            with tqdm.tqdm(desc="Line Q TTL", position=multiprocessing.cpu_count() + 2, leave=True) as ttl_bar:
+                big_data = None
+                #buf = BytesIO()
+                with open(mpfile, "wb") as buf:
+                    with open(self.out_json_name, 'wb+') as outf:
+                        outf.write(b'{')
+                        niter = 0
+                        nwrites = 0
+                        nd = self.counter.value()
+                        while True:
+                            if th:
+                                time.sleep(0.001)
+                            try:
+                                df = self.json_result_buffer.get(timeout=2)
+                                if not isinstance(df, str):
+                                    if isinstance(df, pd.DataFrame):
+                                    # js_buff.update(dct)
+                                        self.append_json(df,outf)
+                                        self.write_msgpack(df,buf)
+                                        big_data = df if big_data is None else pd.concat([df,big_data])
+                                        nwrites += 1
+                                    else:
+                                        click.secho(f"{'*'*30}\nGOT WEIRD VALUE IN WRITER:\n {df}",bold=True,underline=True, fg="red")
+                            except queue.Empty:
+                                time.sleep(0.5)
+                            niter += 1
+                            counter_val = self.counter.value()
+                            if counter_val == nd:
+                                ttl_bar.update(0)
+                            else:
+                                while counter_val > nd:
+                                    nd += 1
+                                    ttl_bar.update(1)
+
+                            pbar.desc = f"Writer Running: waits:{niter}|writes:{nwrites}|ttlLQ:{self.counter.value()}"
+                            pbar.update()
+
+                            # try:
+                            #     dd = self.done_workers.get_nowait()
+                            #     nd += 1
+                            # except queue.Empty:
+                            #     pass
+                            # if nd >= self.n_workers:
+                            #     break
+                            if self.file_worker_cleanup.acquire(block=False):
+                                break
+
+                        while(self.json_result_buffer.empty() == False):
+                            df = self.json_result_buffer.get()
+                            if isinstance(df, pd.DataFrame):
+                                self.write_msgpack(df,buf)
+                                self.append_json(df, outf)
+                                big_data = pd.concat([big_data,df])
+                                #nwrites += 1
+                                pbar.desc = f"Writer Finishing - writes: {nwrites}"
+
+
+                                #pbar.update(0)
+                        outf.seek(-1,1)
+                        outf.write(b" }\n")
+                        pbar.desc = f"Writer Writing MP: {nwrites}"
+                        pbar.update(0)
+                        with open(self.out_json_name.parent / 'full_dump.mp', 'wb') as bigf:
+                            self.write_msgpack(big_data,bigf)
+                        pbar.desc = f"Wrriter writing big json all at once"
+                        pbar.update(0)
+                        with open(self.out_json_name.parent / "big_model.json", 'wb') as bigf:
+                            big_data.to_json(bigf,orient="index")
+
+    def loader(self):
+        with open(self.nfg_file, 'r') as nfg:
+            for l in nfg:
+                if "{" in l:
+                    yield l
+
+    def check_worker_done(self):
+        try:
+            wd = self.done_workers.get_nowait()
+            self.done_workers.put(wd)
+            self.n_done_workers += 1
+
+        except:
+            pass
+        return (self.n_done_workers >= self.ttl_workers)
+
+    def parse_file(self,debug=False):
+        self.file_worker_cleanup.acquire()
+        #reader = threading.Thread(target=self.line_reader,args=(True,))
+        if debug:
+            self.buffer_size = 9000000
+            self.lr_buffer = self.buffer_size
+            self.line_reader()
+            self.json_reader(1)
+            self.json_writer()
+        reader = multiprocessing.Process(target=self.line_reader)
+        workers = []
+        i = 3
+        while self.nworkers > 1:
+            workers.append(multiprocessing.Process(target=self.json_reader, args=(i,)))
+            i += 1
+            self.nworkers -= 1
+        self.n_workers = len(workers)
+        click.secho(f"Started {len(workers)} workers",fg="green")
+
+
+        writer = multiprocessing.Process(target=self.json_writer)
+        #writer = threading.Thread(target=self.json_writer,args=(True,))
+
+        js_buf = {}
+        dxd = "Generating Bags (MT) - FP: "
+        self.ttl_workers = len(workers)
+        with tqdm.tqdm(position=0, desc=dxd, leave=False) as pbar:
+
+            [worker.start() for worker in workers]
+            reader.start()
+            writer.start()
+            niter = -1
+        print(self.json_result_buffer.empty())
+        click.secho("Join Reader", fg="bright_blue")
+        reader.join()
+        click.secho("Line Worker Join", fg="bright_blue")
+        #[self.file_read_buffer.put("DONE") for _ in workers]
+        [self.done_workers.put("DONE") for _ in workers]
+        with tqdm.tqdm(workers, desc='worker joins',position=0,leave=False) as pbar:
+            rd = True
+            while rd:
+                rs = []
+                for w in workers:
+                    rs.append(w.is_alive())
+                rd = all(rs)
+                time.sleep(2)
+                pbar.update(0)
+
+
+        [w.join() for w in workers]
+        click.secho("Writer Join---------------------------",fg="magenta")
+        self.file_worker_cleanup.release()
+
+        writer.join()
+
 
 
 def connect_dask_client(host='localhost', port="8786", nprocs=0, nthreads=0):
@@ -328,27 +577,70 @@ def connect_dask_client(host='localhost', port="8786", nprocs=0, nthreads=0):
     return client
 
 
+
+def convert_spike_to_json(sqlite_json_filename,client=None):
+    rr = "sqlite"
+    assert(isinstance(sqlite_json_filename,Path))
+    out_file = sqlite_json_filename.name.split(".")[0]
+    out_file = Path(out_file +".json")
+
+    click.secho(f"Starting Spike conversion. Reading {sqlite_json_filename} into {out_file}\n",fg="blue")
+    con = sqlite3.connect(str(sqlite_json_filename.absolute()))
+    df = pd.read_sql_query("SELECT * from input_spikes",con)
+    jss = df.to_json( orient='records')
+    jss = jss.replace("},", "},\n")
+    out_file.write_text(jss)
+    click.secho("Done writing spike json", fg="green")
+
+
 ## Read JSON nfg file and
 @click.command()
-@click.option('--no_dask', is_flag=True, default=False, help="Use DASK for df processing?")
+@click.option('--no-dask', is_flag=True, default=False, help="Use DASK for df processing?")
 @click.option("--dask-host", default="cci-triton.duckdns.org")
 @click.option("--local-dask", is_flag=True, default=False)
 @click.option('--dask-port', default="8786")
 @click.option("--model-name")
-@click.argument('nfg_file', type=click.Path(exists=True, dir_okay=False))
-@click.argument('spike_file', type=click.Path(exists=True, dir_okay=False))
-@click.argument('new_sqlite')
-def cli(no_dask, dask_host, local_dask, dask_port, model_name, nfg_file, spike_file, new_sqlite):
+@click.option("--only-json", default=False, is_flag=True, help="Save result to JSON only.")
+@click.option("--out-js", default="./new_js.json", help="Json output file")
+@click.option("--n-wkrs", default=20)
+@click.option("--buffer-size", default=4096, help="Parser process buffer size")
+@click.option("--debug",default=False, is_flag=True)
+@click.argument('nfg-file', type=click.Path(exists=True, dir_okay=False))
+@click.argument('spike-file', type=click.Path(exists=True, dir_okay=False))
+@click.argument('new-sqlite')
+def cli(no_dask, dask_host, local_dask, dask_port, model_name, only_json, out_js, n_wkrs, buffer_size, debug, nfg_file, spike_file, new_sqlite):
     # spike = Path(spike_file)
+    click.clear()
+    if "sql" not in spike_file:
+        click.secho(f"Got {spike_file} as spike db - does not look like a sqlite3 db",fg="red")
+
+        click.confirm(click.style("Continue", bold=True, fg="red"),abort=True)
+
     if not no_dask:
         if local_dask:
             dask_host = None
-        nfg = Path(nfg_file)
         client = connect_dask_client(dask_host, dask_port)
-        reader = DaskJS(client, nfg, model_name, nid=2, db_path=new_sqlite)
+    else:
+        client = None
+    nfg = Path(nfg_file)
 
-        click.secho(f"created reader for model {reader.model_id}.\nSaving to {new_sqlite}", fg="green")
+    if only_json:
+        click.secho("JSON ONLY", fg="green")
+        reader = ParJSConv(n_wkrs,client, nfg, model_name, nid=2, db_path=new_sqlite, out_json_file=out_js,buffer_size=buffer_size)
+    else:
+        reader = DaskJS(n_wkrs,client, nfg, model_name, nid=2, db_path=new_sqlite,buffer_size=buffer_size)
+
+    click.secho(f"created reader for model {reader.model_id}.\nSaving to {new_sqlite}", fg="green")
+    click.secho("Starting up SPIKE conversion...",fg="green")
+    spike_file = Path(spike_file)
+    spike_worker = multiprocessing.Process(target=convert_spike_to_json,args=(spike_file,))
+    spike_worker.start()
+    if debug:
+        reader.parse_file(debug=True)
+    else:
         reader.parse_file()
+    click.secho("Complete - Waiting on spike",fg="green")
+    spike_worker.join()
 
 
 if __name__ == '__main__':

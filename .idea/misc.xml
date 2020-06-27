@@ -2,8 +2,13 @@
 <project version="4">
   <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
   <component name="CidrRootsConfiguration">
+    <sourceRoots>
+      <file path="$PROJECT_DIR$/src" />
+      <file path="$PROJECT_DIR$/src/libs/neuro_os" />
+    </sourceRoots>
     <libraryRoots>
       <file path="$PROJECT_DIR$/external" />
+      <file path="$PROJECT_DIR$/src/libs" />
     </libraryRoots>
   </component>
   <component name="NodePackageJsonFileManager">

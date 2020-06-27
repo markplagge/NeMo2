@@ -1,15 +1,17 @@
-ExternalProject_Add(ROSS_EXT
-        SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/ROSS
-        INSTALL_DIR ${ROSS_BIN_FOLDER}
-        BINARY_DIR ${ROSS_BIN_FOLDER}
-        CMAKE_ARGS
-        -DCMAKE_INSTALL_PREFIX:path=${ROSS_BIN_FOLDER}
-        -DROSS_BUILD_SHARED_LIBS=ON
-        -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
-
-        )
+#ExternalProject_Add(ROSS_EXT
+#        SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/ROSS
+#        INSTALL_DIR ${ROSS_BIN_FOLDER}
+#        BINARY_DIR ${ROSS_BIN_FOLDER}
+#        CMAKE_ARGS
+#        -DCMAKE_INSTALL_PREFIX:path=${ROSS_BIN_FOLDER}
+#        -DROSS_BUILD_SHARED_LIBS=ON
+#        -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
+#
+#        )
+add_subdirectory(ROSS)
 add_subdirectory(catch2)
 add_subdirectory(sqlite)
+
 
 #ExternalProject_Add(project_CODES
 #        SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/CODES

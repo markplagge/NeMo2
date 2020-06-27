@@ -11,26 +11,34 @@
 #include <sstream>
 #include <strstream>
 #include <utility>
-#define CONFIGURU_IMPLEMENTATION 1
+
 #include <codecvt>
+#include <visit_struct/visit_struct.hpp>
+#define CONFIGURU_IMPLEMENTATION 1
 #include <configuru.hpp>
 #include <iosfwd>
-#include <visit_struct/visit_struct.hpp>
+
 namespace nemo {
 	namespace config {
-		void error_reporter(std::string str)
-		{
+		void error_reporter(std::string str) {
 			std::cerr << str << std::endl;// or throw or ignore
 		}
-		char* primary_config_file = (char*)calloc(sizeof(char), 1024);
 
-		std::string NemoConfig::get_settings()
-		{
+
+		std::string NemoConfig::get_settings() {
 			std::stringstream output;
+			output << "Main config file location: " << main_config_file << "\n";
 			output << "Cores per chip: " << ns_cores_per_chip << "\n";
-			output << "Total Chips" << total_chips << "\n";
-			output << "Sim size (total NS CORES)" << total_sim_size << "\n";
+			output << "Total Chips: " << total_chips << "\n";
+			output << "Sim size (total NS CORES): " << total_sim_size << "\n";
 			output << "Scheduler in use? " << do_neuro_os << "\n";
+			output << sched_mode_to_string() << "\n";
+
+			return output.str();
+		}
+
+		std::string NemoConfig::sched_mode_to_string() const {
+			std::stringstream output;
 			if (do_neuro_os) {
 				output << "Scheduler Type ";
 				switch (scheduler_type) {
@@ -44,51 +52,46 @@ namespace nemo {
 					output << "Fair Share";
 					break;
 				}
-				output << "\n";
 			}
-			output << "Main config file location: " << main_config_file << "\n";
-
 			return output.str();
 		}
 
 
-		tw_optdef NemoConfig::nemo_tw_options[] = {
-				TWOPT_GROUP("NeMo 2 - TNG Runtime Options"),
-				TWOPT_FLAG("debug", NemoConfig::DEBUG_FLAG, "Debug mode?"),
-				TWOPT_ULONG("mean", NemoConfig::test, "test_value"),
-				TWOPT_CHAR("cfg",primary_config_file, "Main configuration file"),
-				TWOPT_END()};
 
-		tw_peid nemo_map_linear(tw_lpid gid)
-		{
 
-			return 1;
-		}
+
 		/**
 		 * Main configuration function - reads the nemo config file specified by the CLI flag,
 		 * parses it, and sets up the NeMo simulation.
 		 * Uses configuru
 		 */
-		void NemoConfig::init_from_tw_opts()
-		{
-
-			auto cli_cfg_file = std::string(primary_config_file);
+		void NemoConfig::init_from_tw_opts(char* config_file) {
+			world_size = tw_nnodes();
+			auto cli_cfg_file = std::string(config_file);
 			if (cli_cfg_file.length() > 0) {
 				NemoConfig::main_config_file = cli_cfg_file;
 			}
 			else {
 				NemoConfig::main_config_file = std::string("../config/example_config.json");
 			}
-			std::cout << "NeMo config file loading from  " << NemoConfig::main_config_file << "\n";
 
 			using namespace configuru;
 			Config cfg = configuru::parse_file(main_config_file, FORGIVING);
 			auto cgbl = cfg["nemo_global"];
-			std::cout << cgbl << "\n";
 			this->ns_cores_per_chip = (u_long)cgbl["ns_cores_per_chip"];
 			this->total_chips = (u_int)cgbl["total_chips"];
 			this->do_neuro_os = (bool)cgbl["do_neuro_os"];
 			this->neurons_per_core = (u_int64_t)cgbl["neurons_per_core"];
+			this->save_all_spikes = (bool)cgbl["save_all_spikes"];
+			this->save_membrane_pots = (bool)cgbl["save_membrane_pots"];
+			this->save_nos_stats = (bool)cgbl["save_nos_stats"];
+			this->output_spike_file =(std::string)cgbl["output_spike_file"];
+			this->output_nos_stat_file =(std::string)cgbl["output_nos_stat_file"];
+			this->output_membrane_pot_file =(std::string)cgbl["output_membrane_pot_file"];
+			this->core_type_ids = (std::vector<int>)cgbl["core_type_ids"];
+
+			DEBUG_FLAG = ((bool)cgbl["GLOBAL_DEBUG"]);
+
 			if (this->do_neuro_os) {
 				auto sched_type = (std::string)cgbl["sched_type"];
 				if ("FCFS" == sched_type) {
@@ -108,12 +111,25 @@ namespace nemo {
 
 			std::cout << "models\n";
 
-			total_sim_size = total_chips * ns_cores_per_chip * neurons_per_core;
+			total_sim_size = total_chips * ns_cores_per_chip;
+			total_lps = total_sim_size + 1;
+			lps_per_pe = total_lps / tw_nnodes();
+			est_events_per_pe = total_sim_size / world_size;
+			//Does not include the scheduler LP which runs on PE 0
+			lps_per_pe = (ns_cores_per_chip * total_chips) / world_size;
 		}
 		NemoConfig::NemoConfig() = default;
 		bool NemoConfig::DEBUG_FLAG;
 		std::string NemoConfig::main_config_file = "../config/example_config.json";
 		u_long NemoConfig::test = 0;
+		std::vector<std::string> NemoConfig::stat_files() const {
+			std::vector<std::string> ofs;
+
+			ofs.push_back(output_spike_file);
+			ofs.push_back(output_nos_stat_file);
+			ofs.push_back(output_membrane_pot_file);
+			 return ofs;
+		}
 
 		std::unique_ptr<NemoModel> create_model_from_cfg(const configuru::Config& c)
 		{
@@ -128,10 +144,14 @@ namespace nemo {
 			return nm;
 		}
 
+		NemoModel NemoConfig::get_model(int model_id){
+			return models[model_id];
+		}
+
 		//template<>
 		//std::ostream& operator<<(std::ostream& output_stream, const NemoModel& p) {
 
-		const std::string NemoModel::to_string() const {
+		std::string NemoModel::to_string() const {
 			char fmtp[90] = {'\0'};
 			char idf[30] = {'\0'};
 			char bdf[30] = {'\0'};

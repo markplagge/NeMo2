@@ -13,7 +13,7 @@
 
 namespace neuro_os { namespace sim_proc {
         using nlohmann::json;
-    template<class T>
+
     struct SimProcess {
 
         int PID;
@@ -22,6 +22,8 @@ namespace neuro_os { namespace sim_proc {
         double scheduled_start_time;
         int total_wait_time;
         int total_run_time;
+		int current_run_time = 0;
+		int clock = -1;
         PROC_STATE current_state;
         //T neuron_state_system;
 
@@ -35,7 +37,9 @@ namespace neuro_os { namespace sim_proc {
             scheduled_start_time = 0;
             total_wait_time = 0;
             total_run_time = 0;
-            current_state = WAITING;
+            current_state = NO_OP;
+
+
 
         }
 
@@ -57,11 +61,22 @@ namespace neuro_os { namespace sim_proc {
 
         void system_tick();
 
-        friend std::ostream &operator<<(std::ostream &os, const SimProcess<T> &process);
+        friend std::ostream &operator<<(std::ostream &os, const SimProcess &process);
 
         bool operator==(const SimProcess &rhs) const;
 
         bool operator!=(const SimProcess &rhs) const;
+
+		bool can_start(){
+			return clock >= scheduled_start_time;
+		}
+		bool is_running(){
+			return current_state == RUNNING;
+		}
+
+		//control ops:
+		void start();
+		void stop();
 
 
     };

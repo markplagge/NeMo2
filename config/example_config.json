@@ -1,13 +1,17 @@
 {
   "nemo_global": {
-    "ns_cores_per_chip": 4096,
+    "GLOBAL_DEBUG": true,
+    "ns_cores_per_chip": 32,
     "total_chips": 2,
-    "do_neuro_os": true,
+    "do_neuro_os": false,
     "sched_type": "FCFS",
-    "save_spikes": true,
+    "save_nos_stats": true,
     "save_all_spikes": false,
     "save_membrane_pots": false,
     "neurons_per_core": 256,
+    "output_spike_file": "./model_output.csv",
+    "output_nos_stat_file" : "./output_nos_stat_file.csv",
+    "output_membrane_pot_file": "./output_membrane_pot.csv",
     "core_type_ids": [
       0,
       1
@@ -17,39 +21,47 @@
     {
       "id": 0,
       "needed_cores": 0,
-      "model_file_path": "../models/cifar100_model.json",
-      "spike_file_path": "../models/cifar100_spk.sqlite",
+      "model_file_path": "/Users/plaggm/dev/nemo-codes/config/models/cifar_100_model.json",
+      "spike_file_path": "/Users/plaggm/dev/nemo-codes/config/models/cifar_100_spike.json",
       "requested_time": 1024,
       "benchmark_model_name": "NONE"
     },
     {
       "id": 1,
       "needed_cores": 2048,
-      "model_file_path": "",
       "requested_time": 1024,
       "benchmark_model_name": "IDENTITY"
     },
     {
       "id": 2,
       "needed_cores": 0,
-      "model_file_path": "../models/demo_model.json",
-      "spike_file_path": "../models/demo_model.sqlite",
+      "model_file_path": "/Users/plaggm/dev/nemo-codes/config/models/sar_model.json",
+      "spike_file_path": "/Users/plaggm/dev/nemo-codes/config/models/sar_model_spike.json",
       "requested_time": 1024,
       "benchmark_model_name": "NONE"
     }
+
   ],
   "scheduler_inputs": [
     {
       "start_time": 0,
-      "task_id": 0
+      "task_id": 0,
+      "model_id": 0
     },
     {
       "start_time": 0,
-      "task_id": 1
+      "task_id": 1,
+      "model_id": 0
     },
     {
       "start_time": 1024,
-      "task_id": 2
+      "task_id": 2,
+      "model_id": 1
+    },
+    {
+      "start_time": 1024,
+      "task_id": 0,
+      "model_id": 1
     }
   ]
 }

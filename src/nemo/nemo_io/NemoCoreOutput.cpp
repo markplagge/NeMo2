@@ -6,18 +6,22 @@
 #include <mpi.h>
 
 #include <utility>
+void nemo::NemoCoreOutput::save_spike(long source_neuron, long dest_core, long dest_axon, double sched_spike_time, double cur_time, bool is_interchip) const {
+	NemoSpikeData s{};
+	s.source_neuron = source_neuron;
+	s.dest_core = dest_core;
+	s.source_core = core_id;
+	s.dest_axon = dest_axon;
+	s.dest_core = dest_core;
+	s.cur_time = cur_time;
+	s.sched_spike_time = sched_spike_time;
+	s.interchip = is_interchip;
+	output_handler->add_data (s);
+}
 void nemo::NemoCoreOutput::save_spike (long source_neuron, long dest_core, long dest_axon, double sched_spike_time,
 									   double cur_time) const
 {
-  NemoSpikeData s{};
-  s.source_neuron = source_neuron;
-  s.dest_core = dest_core;
-  s.source_core = core_id;
-  s.dest_axon = dest_axon;
-  s.dest_core = dest_core;
-  s.cur_time = cur_time;
-  s.sched_spike_time = sched_spike_time;
-  output_handler->add_data (s);
+	save_spike( source_neuron,  dest_core,  dest_axon,  sched_spike_time, cur_time, false);
 }
 
 void nemo::NemoCoreOutput::save_membrane_pot (long source_neuron, double membrane_pot, double cur_time) const
@@ -49,6 +53,7 @@ std::ostream &nemo::operator<< (std::ostream &os, const nemo::NemoCoreOutput &ou
   os << "core_id: " << output.core_id << " output_handler: " << output.output_handler;
   return os;
 }
+
 
 void nemo::NeMoPOSIXOut::open_comms ()
 {
