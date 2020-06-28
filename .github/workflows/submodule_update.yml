@@ -8,7 +8,7 @@ on:
 
 jobs:
   submodule_bump:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ubuntu-latest]
     steps:
       - name: Bump Git Submodules
         uses: domdere/git-submodule-action@0.0.1
