@@ -1,0 +1,33 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ develop testing master ]
+  pull_request:
+    branches: [ develop testing master ]
+
+jobs:
+  build:
+
+    runs-on: [self-hosted, ubuntu-latest]
+
+    steps:
+    - name: Checkout submodules
+      uses: textbook/git-checkout-submodule-action@master
+      with:
+        remote: true
+    
+    - name: pre_configure  
+      run: mkdir build
+      
+    - name: Build CMake
+      uses: ashutoshvarma/action-cmake-build@v1
+      with:
+        build-type: Release
+        parallel: 4
+        submodule-update: true
+        
+    - name: make
+      run: cd build && make nemo2
+    
+      
