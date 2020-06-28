@@ -1,7 +1,5 @@
 
 cmake-build-debug/
-external/ROSS
-external/codes
 
 src/.DS_Store
 *.DS_Store
@@ -23,45 +21,10 @@ config/models/cifar_100.sqlite
 
 config/models/converted.sqlite
 
-external/visit_struct/IMPLEMENTATION_NOTES.md
-
-external/visit_struct/appveyor.yml
-
-external/visit_struct/generate_pp_map.py
-
-external/visit_struct/include/visit_struct/visit_struct_boost_fusion.hpp
-
-external/visit_struct/include/visit_struct/visit_struct_boost_hana.hpp
-
-external/visit_struct/include/visit_struct/visit_struct_intrusive.hpp
-
-external/visit_struct/include/visit_struct/visit_struct.hpp
-
-external/visit_struct/Jamroot.jam
-
-external/visit_struct/LICENSE
-
-external/visit_struct/README.md
-
-external/visit_struct/run_tests.sh
-
-external/visit_struct/test_fully_visitable.cpp
-
-external/visit_struct/test_visit_struct_boost_fusion.cpp
-
-external/visit_struct/test_visit_struct_boost_hana.cpp
-
-external/visit_struct/test_visit_struct_intrusive.cpp
-
-external/visit_struct/test_visit_struct.cpp
-
-external/visit_struct/test.sh
-
 scripts/__pycache__/JSReader.cpython-37.pyc
 
 scripts/.idea/deployment.xml
 
-external/visit_struct/
 
 .idea/dataSources/2d99f724-9a77-4a99-89a5-d755fd3a2906.xml
 
