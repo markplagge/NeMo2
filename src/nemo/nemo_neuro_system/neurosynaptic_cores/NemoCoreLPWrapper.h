@@ -16,12 +16,15 @@ namespace nemo {
 
 	namespace neuro_system {
 
-		class NemoCoreLPWrapper {
+		class __unused NemoCoreLPWrapper {
 
 		public:
 			static void core_init(NemoCoreLPWrapper* s, tw_lp* lp)
 			{
 				//determine the type of core we want through mapping
+				for (const auto& model : global_config->models) {
+					s->core->models[model.id] = model;
+				}
 				s->set_core_id(s, lp);
 			}
 

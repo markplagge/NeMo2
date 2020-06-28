@@ -7,19 +7,19 @@
 namespace neuro_os { namespace sim_proc {
 
 
-        template <class T>
-        SimProcess<T> from_json_factory(const nlohmann::json &j ){
+
+        SimProcess from_json_factory(const nlohmann::json &j ){
             auto pid = j.at("PID").get<int>();
             auto needed_cores = j.at("needed_cores").get<int>();
             auto needed_run_time = j.at("needed_run_time").get<int>();
             auto scheduled_start_time = j.at("scheduled_start_time").get<double>();
 
-            auto p = SimProcess<T>(pid,needed_cores,needed_run_time,scheduled_start_time);
+            auto p = SimProcess(pid,needed_cores,needed_run_time,scheduled_start_time);
             return p;
         }
 
-		template<class T>
-		bool SimProcess<T>::operator==(const SimProcess &rhs) const {
+
+		bool SimProcess::operator==(const SimProcess &rhs) const {
 			return PID == rhs.PID &&
 					needed_cores == rhs.needed_cores &&
 					needed_run_time == rhs.needed_run_time &&
@@ -30,13 +30,13 @@ namespace neuro_os { namespace sim_proc {
 
 		}
 
-		template<class T>
-		bool SimProcess<T>::operator!=(const SimProcess &rhs) const {
+
+		bool SimProcess::operator!=(const SimProcess &rhs) const {
 			return !(rhs == *this);
 		}
 
-		template <class T>
-		void to_json(json &j, const SimProcess<T> &p) {
+
+		void to_json(json &j, const SimProcess &p) {
 			j = json{
 					{"PID",                  p.PID},
 					{"needed_cores",         p.needed_cores},
@@ -47,8 +47,8 @@ namespace neuro_os { namespace sim_proc {
 					{"current_state",        p.current_state},
 			};
 		};
-		template <class T>
-		void from_json(const json &j,  SimProcess<T> &p){
+
+		void from_json(const json &j,  SimProcess &p){
 			j.at("PID").get_to(p.PID);
 			j.at("needed_cores").get_to(p.needed_cores);
 			j.at("needed_run_time").get_to(p.needed_run_time);
@@ -57,67 +57,75 @@ namespace neuro_os { namespace sim_proc {
 		}
 
 
-		template <class T>
-		void from_json(const json &j, const SimProcess<T> &p);
 
-		template <class T>
-		SimProcess<T> from_json_factory(const nlohmann::json &j );
+		void from_json(const json &j, const SimProcess &p);
 
-		template<class T>
-		SimProcess<T>::SimProcess(int pid, int neededCores, int neededRunTime, double scheduledStartTime):PID(pid), needed_cores(neededCores), needed_run_time(neededRunTime),
+
+		SimProcess from_json_factory(const nlohmann::json &j );
+
+
+		SimProcess::SimProcess(int pid, int neededCores, int neededRunTime, double scheduledStartTime):PID(pid), needed_cores(neededCores), needed_run_time(neededRunTime),
 																										  scheduled_start_time(scheduledStartTime) {
 			total_run_time = 0;
 			total_wait_time = 0;
 			current_state = WAITING;
 		}
-		template<class T>
-		std::ostream &operator<<(std::ostream &os, const SimProcess<T> &process) {
+
+		std::ostream &operator<<(std::ostream &os, const SimProcess &process) {
 			os << "PID: " << process.PID << " needed_cores: " << process.needed_cores << " needed_run_time: "
 			   << process.needed_run_time << " scheduled_start_time: " << process.scheduled_start_time
 			   << " total_wait_time: " << process.total_wait_time << " total_run_time: " << process.total_run_time
 			   << " current_state: " << process.current_state;
 			return os;
 		}
-		template<class T>
-		PROC_STATE SimProcess<T>::get_current_state() const {
+
+		PROC_STATE SimProcess::get_current_state() const {
 			return current_state;
 		}
 
-		template<class T>
-		void SimProcess<T>::set_current_state(PROC_STATE currentState) {
+
+		void SimProcess::set_current_state(PROC_STATE currentState) {
 			current_state = currentState;
 		}
 
 
 
-		template<class T>
-		int SimProcess<T>::get_pid() const {
+
+		int SimProcess::get_pid() const {
 			return PID;
 		}
 
-		template<class T>
-		int SimProcess<T>::get_needed_cores() const {
+
+		int SimProcess::get_needed_cores() const {
 			return needed_cores;
 		}
 
-		template<class T>
-		int SimProcess<T>::get_needed_run_time() const {
+
+		int SimProcess::get_needed_run_time() const {
 			return needed_run_time;
 		}
 
-		template<class T>
-		double SimProcess<T>::get_scheduled_start_time() const {
+
+		double SimProcess::get_scheduled_start_time() const {
 			return scheduled_start_time;
 		}
 
-		template<class T>
-		void SimProcess<T>::system_tick() {
+		/**
+		 * system_tick manages the ticks for a process
+		 * State path:
+		 * PRE_WAIT -> WAITING -> RUNNING -> COMPLETE
+		 * 			           <-
+		 * system_tick
+		 */
+		void SimProcess::system_tick() {
+			clock ++;
 			switch(current_state){
 			case WAITING:
 				++total_wait_time;
 				break;
 			case RUNNING:
 				++total_run_time;
+				++current_run_time;
 				if (total_run_time == needed_run_time){
 					current_state = COMPLETE;
 				}else if(total_run_time > needed_run_time){
@@ -125,22 +133,37 @@ namespace neuro_os { namespace sim_proc {
 				}
 				break;
 			case COMPLETE:
+			case NO_OP:
+				break;
+			case PRE_WAIT:
 				break;
 			}
+
 		}
 
-		template<class T>
-		int SimProcess<T>::get_total_wait_time() const {
+
+		int SimProcess::get_total_wait_time() const {
 			return total_wait_time;
 		}
 
-		template<class T>
-		int SimProcess<T>::get_total_run_time() const {
+
+		int SimProcess::get_total_run_time() const {
 			return total_run_time;
 		}
+		void SimProcess::start() {
+			current_run_time = 0;
+			current_state = RUNNING;
+		}
+		void SimProcess::stop() {
+			if (total_run_time >= needed_run_time){
+				current_state = COMPLETE;
+			}else{
+				current_state = WAITING;
+			}
+		}
 
-//        template <class T>
-//        void from_json(const json &j, const SimProcess<T> &p){
+		//        template <class T>
+//        void from_json(const json &j, const SimProcess &p){
 //            j.at("PID").get_to(p.PID);
 //            j.at("needed_cores").get_to(p.needed_cores);
 //            j.at("needed_run_time").get_to(p.needed_run_time);

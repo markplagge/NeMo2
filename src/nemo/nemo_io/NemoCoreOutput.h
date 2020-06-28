@@ -42,6 +42,7 @@ struct NemoSpikeData: DataFunctions<NemoSpikeData> {
   long dest_axon;
   double sched_spike_time;
   double cur_time;
+  bool interchip;
   std::string
   csv_header ()
   {
@@ -56,6 +57,7 @@ struct NemoSpikeData: DataFunctions<NemoSpikeData> {
 	std::string datarep = data_srm.str ();
 	return datarep;
   }
+
 };
 struct NemoMembraneData: DataFunctions<NemoSpikeData> {
   long source_core;
@@ -136,7 +138,7 @@ class NemoCoreOutput {
 
   void
   save_spike (long source_neuron, long dest_core, long dest_axon, double sched_spike_time, double cur_time) const;
-
+  void save_spike (long source_neuron, long dest_core, long dest_axon, double sched_spike_time, double cur_time,bool is_interchip) const;
   friend std::ostream &
   operator<< (std::ostream &os, const NemoCoreOutput &output);
 

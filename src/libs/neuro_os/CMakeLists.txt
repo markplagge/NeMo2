@@ -1,6 +1,8 @@
 ### FCFS PROCESS LIBRARY
+cmake_minimum_required(VERSION 3.5)
 
 OPTION(NOS_ENABLE_UNIT_TESTS  "Enable FCFS unit tests (uses Catch2)" ON )
+project(NeuroOS LANGUAGES CXX VERSION 0.1.5)
 
 
 set(NEURO_OS_LIB
@@ -14,7 +16,9 @@ set(NEURO_OS_LIB
         src/SimProcessQueue.cpp
         src/SimProcessQueue.h)
 
-add_library(neuro_os  ${NEURO_OS_LIB})
+add_library(neuro_os STATIC ${NEURO_OS_LIB} )
+add_executable(neuro_os_bin main.cpp)
+target_link_libraries(neuro_os_bin neuro_os)
 #target_link_libraries(fcfs_logic_system simclist)
 set_property(TARGET neuro_os PROPERTY CXX_STANDARD 14)
 enable_testing()

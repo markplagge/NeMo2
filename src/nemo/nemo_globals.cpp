@@ -11,7 +11,17 @@
 #include <vector>
 namespace nemo
 {
-unsigned long
+	core_types get_core_enum_from_json(std::string core_type){
+		if (core_type.find("TN") != std::string::npos){
+			return TN;
+		}else if (core_type.find("LIF") != std::string::npos){
+			return LIF;
+		}else{
+			return NO_CORE_TYPE;
+		}
+	}
+
+	unsigned long
 get_neurosynaptic_tick (double now)
 {
   return (unsigned long)now;
@@ -35,20 +45,21 @@ string_format (const ::std::string &format, Args... args)
   return string (buf.get (), buf.get () + size - 1);// We don't want the '\0' inside
 }
 
-::std::string
-Nemo_Message::to_string ()
-{
-  ::std::string message_type_desc = "HEARTBEAT";
-  if (message_type == NEURON_SPIKE)
-  {
-	message_type_desc = "NEURON SPIKE";
-  }
-  ::std::string result = string_format ("type \tsource_core\tdest_axon\tintended_neuro_tick\tnemo_event_status\t"
-										"random_call_count\t debug_time\n"
-										"%s\t%i\t%i\t%i\t%i\t%i\t%f\n",
-										message_type_desc.c_str (), source_core, dest_axon, intended_neuro_tick,
-										nemo_event_status, random_call_count, debug_time);
 
-  return result;
-}
+//::std::string
+//NemoMessage::to_string ()
+//{
+//  ::std::string message_type_desc = "HEARTBEAT";
+//  if (message_type == NEURON_SPIKE)
+//  {
+//	message_type_desc = "NEURON SPIKE";
+//  }
+//  ::std::string result = string_format ("type \tsource_core\tdest_axon\tintended_neuro_tick\tnemo_event_status\t"
+//										"random_call_count\t debug_time\n"
+//										"%s\t%i\t%i\t%i\t%i\t%i\t%f\n",
+//										message_type_desc.c_str (), source_core, dest_axon, intended_neuro_tick,
+//										nemo_event_status, random_call_count, debug_time);
+//
+//  return result;
+//}
 }// namespace nemo

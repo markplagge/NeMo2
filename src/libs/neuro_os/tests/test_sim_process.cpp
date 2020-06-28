@@ -3,9 +3,10 @@
 //
 
 #include <catch2/catch.hpp>
-#include <fcfs_logic_system.h>
+//#include <fcfs_logic_system.h>
 #include <random>
 #include "../lib/json.hpp"
+/**
 using namespace neuro_os::sim_proc;
 class ProcListGenerator : public Catch::Generators::IGenerator<std::vector<SimProcess<int>> >{
     std::default_random_engine generator;
@@ -116,3 +117,4 @@ TEST_CASE("Process QUEUE JSON WORKS", "[proc_queue]"){
 
     }
 }
+*/
