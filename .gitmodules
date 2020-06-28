@@ -10,3 +10,6 @@
 [submodule "external/catch2"]
 	path = external/catch2
 	url = https://github.com/catchorg/Catch2.git
+[submodule "neuro_os"]
+	path = src/libs/neuro_os
+	url = https://github.com/markplagge/neuro_os.git
