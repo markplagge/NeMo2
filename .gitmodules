@@ -7,3 +7,6 @@
 [submodule "CODES"]
 	path = external/CODES
 	url = https://github.com/codes-org/codes.git
+[submodule "catch2"]
+	path = external/catch2
+	url = https://github.com/catchorg/Catch2.git
