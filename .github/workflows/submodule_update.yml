@@ -1,15 +1,16 @@
-name: C/C++ CI
+name: Submodule Bump
 
 on:
   push:
     branches: [ develop test ]
   pull_request:
-    branches: [ develop test]
+    branches: [ develop test ]
 
 jobs:
   submodule_bump:
     runs-on: ubuntu-latest
     steps:
-      - uses: domdere/git-submodule-action@0.0.1  
       - name: Bump Git Submodules
+        uses: domdere/git-submodule-action@0.0.1
+        
       
