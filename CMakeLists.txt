@@ -65,6 +65,7 @@ include(Catch)
 
 ## configuru JSON parser
 include_directories(${CMAKE_SOURCE_DIR}/external/configuru)
+include_directories(${CMAKE_SOURCE_DIR}/external/visit_struct)
 ## NLH JSON PARSER
 set(NL_JSON_DIR ${CMAKE_SOURCE_DIR}/external/nlohmann)
 configure_file(config/example_config.json config/example_config.json COPYONLY)
