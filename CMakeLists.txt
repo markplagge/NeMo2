@@ -11,7 +11,19 @@ set(PROJECT_AUTHOR "Mark Plagge")
 project(${PROJECT_NAME} VERSION 0.0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD 11)
+
+# ===========================
+# Libs / archives in (build)/libs, binaries (except for NEMO itself go in (build)/bin
+# ===========================
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+# ===========================
+# External Project Support
+# ===========================
+
 include(ExternalProject)
 #include("cmake/HunterGate.cmake")
 
@@ -53,31 +65,29 @@ message("MPI C: ${MPI_C_COMPILER}, flags: ${MPI_C_COMPILE_FLAGS} || ${MPI_CXX_CO
 ################# REMOVING CODES ###############
 
 
-#External PRojects
-
+######## CATCH 2 ##### (TEST FRAMEWORK)
 add_subdirectory(external/catch2)
-
 message(${CMAKE_MODULE_PATH})
-
 message(${CMAKE_MODULE_PATH})
 include(ParseAndAddCatchTests)
 include(Catch)
 
-## configuru JSON parser
+####### CONFIGURU JSON PARSER ############
 include_directories(${CMAKE_SOURCE_DIR}/external/configuru)
 include_directories(${CMAKE_SOURCE_DIR}/external/visit_struct/include/visit_struct)
-## NLH JSON PARSER
+
+####### NLH JSON PARSER
 set(NL_JSON_DIR ${CMAKE_SOURCE_DIR}/external/nlohmann)
 configure_file(config/example_config.json config/example_config.json COPYONLY)
+
 ###### ROSS EXTERNAL PROJECT
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/ROSS)
 
 ##### NEMO OS EXTERNAL PROJECT
 
-
 ### EIGEN Matrix Vector Library
 #add_subdirectory(${CMAKE_SOURCE_DIR}/external/Eigen)
-set(EIGEN_INCLUDE_FLDR ${CMAKE_SOURCE_DIR}/external/eigen/)
+#set(EIGEN_INCLUDE_FLDR ${CMAKE_SOURCE_DIR}/external/eigen/)
 
 set(ENV{PKG_CONFIG_PATH}  "/Users/markplagge/dev/codes-nemo/cmake-build-debug/codes_build/lib/pkgconfig")
 #find_package(PkgConfig REQUIRED)
@@ -108,7 +118,13 @@ add_executable(nemo_os_test ${NEURO_OS_FLDR}/main.cpp ${NEURO_OS_FLDR}/src/proce
 
 #add_subdirectory(src/nemo_codes)
 
-
+### SET NEMO FILE LOCATION
+set_target_properties(nemo2 nemo2_lib  
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+)
 #################
 # UNIT TESTS
 #################
