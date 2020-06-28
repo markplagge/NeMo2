@@ -10,7 +10,7 @@
 #        )
 add_subdirectory(ROSS)
 add_subdirectory(catch2)
-add_subdirectory(sqlite)
+#add_subdirectory(sqlite)
 
 
 #ExternalProject_Add(project_CODES

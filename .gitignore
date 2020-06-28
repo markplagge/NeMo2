@@ -1,5 +1,5 @@
-
 cmake-build-debug/
+build/
 
 src/.DS_Store
 *.DS_Store
@@ -31,8 +31,6 @@ scripts/.idea/deployment.xml
 .idea/dataSources.local.xml
 
 .idea/dataSources.xml
-
-CMakeFiles/cmake.check_cache
 
 scripts/.idea/dataSources.xml
 
