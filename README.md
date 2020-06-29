@@ -1,4 +1,4 @@
-# <img src="/tex/2cdafcfe3809098823bc2a2ab74f59ab.svg?invert_in_darkmode&sanitize=true" align=middle width=70.0369923pt height=26.95890780000001pt/>
+# <p align="center"><img src="/tex/2b0e90db259cb83be63c505be10a2daf.svg?invert_in_darkmode&sanitize=true" align=middle width=146.3428329pt height=27.941632949999995pt/></p>
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/75fb4b9636a14f8bb220f03480d541df)](https://www.codacy.com/manual/plaggm/NeMo2?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=markplagge/NeMo2&amp;utm_campaign=Badge_Grade)
 [![Code-Inspect](https://www.code-inspector.com/project/10414/score/svg)][code-inspect]
