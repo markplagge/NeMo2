@@ -1,4 +1,4 @@
-# $\text{N}\epsilon\text{M}\ddot{\text{o}} \cdot\text{2}$
+# $\displaystyle \large  \text{N}\epsilon\text{M}\ddot{\text{o}} \cdot\text{2}$
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/75fb4b9636a14f8bb220f03480d541df)](https://www.codacy.com/manual/plaggm/NeMo2?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=markplagge/NeMo2&amp;utm_campaign=Badge_Grade)
 [![Code-Inspect](https://www.code-inspector.com/project/10414/score/svg)][code-inspect]
