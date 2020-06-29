@@ -5,7 +5,7 @@
 [![BCH compliance](https://bettercodehub.com/edge/badge/markplagge/NeMo2?branch=master)](https://bettercodehub.com/)
 [![CodeFactor](https://www.codefactor.io/repository/github/markplagge/nemo2/badge)](https://www.codefactor.io/repository/github/markplagge/nemo2)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-[![CodeScene System Mastery](https://codescene.io/projects/8568/status-badges/system-mastery)](https://codescene.io/projects/8568)
+[![CodeScene Code Health](https://codescene.io/projects/8568/status-badges/code-health)](https://codescene.io/projects/8568)
 ----------------------------------------------------------------------------------------------------------------------------------
 
 *NeMo* is a neuromorphic hardware simulation leveraging the extremely
