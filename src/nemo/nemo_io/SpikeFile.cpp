@@ -39,7 +39,7 @@ namespace nemo {
 	}
 
 	std::vector<SpikeRep> SpikeFile::get_spikes_at_time(unsigned int time) {
-
+		// if you don't need to allocate a new vector, don't do it (hence the if/else/while)
 		if (time == 0){
 			return input_spikes[time];
 			current_time ++;
@@ -49,7 +49,7 @@ namespace nemo {
 				auto spx = input_spikes[time];
 				//spikes.vector1.insert( vector1.end(), vector2.begin(), vector2.end() );
 				spikes.insert(spikes.end(),spx.begin(),spx.end());
-				current_time ++;
+				current_time --;
 
 			}
 		}
