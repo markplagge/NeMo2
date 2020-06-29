@@ -45,8 +45,8 @@ In order to build *NeMo* you will need:
   good options. In general, any MPI compatible with [ROSS][ROSS] will
   work.
 * A mostly C++ 14 compatible compiler
-  * Tested with GCC <img src="/tex/de66a962c389147615d86dc8270b830c.svg?invert_in_darkmode&sanitize=true" align=middle width=24.01260179999999pt height=14.15524440000002pt/> 7, Clang, and IBM XLC++ 14
-* CMake <img src="/tex/a27bd5e00db840936296ead0783388e7.svg?invert_in_darkmode&sanitize=true" align=middle width=12.785434199999989pt height=20.908638300000003pt/> 3.12
+  * Tested with GCC $geq$ 7, Clang, and IBM XLC++ 14
+* CMake $\geq$ 3.12
 
 ### Building
 
