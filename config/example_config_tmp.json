@@ -1,15 +1,15 @@
 {
   "nemo_global": {
     "GLOBAL_DEBUG": true,
-    "ns_cores_per_chip": 4096,
-    "total_chips": 1,
+    "ns_cores_per_chip": 32,
+    "total_chips": 2,
     "do_neuro_os": false,
     "sched_type": "FCFS",
     "save_nos_stats": true,
-    "output_system": 0,
     "save_all_spikes": false,
     "save_membrane_pots": false,
     "neurons_per_core": 256,
+    "output_system": 0,
     "output_spike_file": "./model_output.csv",
     "output_nos_stat_file" : "./output_nos_stat_file.csv",
     "output_membrane_pot_file": "./output_membrane_pot.csv",
@@ -22,38 +22,18 @@
     {
       "id": 0,
       "needed_cores": 0,
-      "model_file_path": "/Users/plaggm/dev/nemo-codes/config/models/cifar_100_model.json",
-      "spike_file_path": "/Users/plaggm/dev/nemo-codes/config/models/cifar_100_spike.json",
+      "model_file_path": "/tmp/tmp.gDHJaGvCum/models/cifar_100_model.json",
+      "spike_file_path": "/tmp/tmp.gDHJaGvCum/config/models/cifar_100_spike.json",
       "requested_time": 1024,
       "benchmark_model_name": "NONE"
-    },
-    {
-      "id": 1,
-      "needed_cores": 2048,
-      "requested_time": 1024,
-      "benchmark_model_name": "IDENTITY"
     }
+
   ],
   "scheduler_inputs": [
     {
       "start_time": 0,
       "task_id": 0,
       "model_id": 0
-    },
-    {
-      "start_time": 0,
-      "task_id": 1,
-      "model_id": 0
-    },
-    {
-      "start_time": 1024,
-      "task_id": 0,
-      "model_id": 1
-    },
-    {
-      "start_time": 1024,
-      "task_id": 1,
-      "model_id": 1
     }
   ]
 }

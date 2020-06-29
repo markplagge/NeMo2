@@ -155,8 +155,11 @@ void nemo::neuro_system::NemoNeuronTrueNorth::integrate(unsigned int source_id) 
 		}
 		else {
 			ns->membrane_potential += wt;
+			this->membrane_pot = ns->membrane_potential;
 		}
+
 	}
+
 }
 /**
  * Leak_n - leaks *n* number of times (backwards compatibility for non-loop based cores
@@ -166,6 +169,7 @@ void nemo::neuro_system::NemoNeuronTrueNorth::leak_n(int n_leaks) {
 	for (int i = 0; i < n_leaks; i++) {
 		leak();
 	}
+	this->membrane_pot = ns->membrane_potential;
 }
 /**
  * Primary leak
@@ -178,6 +182,7 @@ void nemo::neuro_system::NemoNeuronTrueNorth::leak() {
 	ringing(prev_volt);
 	//leak logic
 	//ring check
+	this->membrane_pot = ns->membrane_potential;
 }
 
 /**
@@ -202,6 +207,7 @@ bool nemo::neuro_system::NemoNeuronTrueNorth::fire() {
 			// used to set the bf here --- should do that
 		}
 	}
+	this->membrane_pot = ns->membrane_potential;
 
 	return will_fire;
 
@@ -292,6 +298,7 @@ bool nemo::neuro_system::NemoNeuronTrueNorth::fire_floor_ceiling_reset() {
 			}
 		}
 		ns->membrane_potential = Vj;
+		this->membrane_pot = ns->membrane_potential;
 	}
 	return should_fire;
 }
@@ -307,6 +314,7 @@ void nemo::neuro_system::NemoNeuronTrueNorth::stochastic_integrate(int weight) {
 
 	if (BINCOMP(weight, ns->drawn_random_number)) {
 		ns->membrane_potential += 1;
+		this->membrane_pot = ns->membrane_potential;
 	}
 }
 /**
@@ -347,6 +355,7 @@ void nemo::neuro_system::NemoNeuronTrueNorth::numeric_leak_calc(tw_stime now) {
 	new_mp += (omega*((1 - ns->c)*lamb)) + (c & (BINCOMP(lamb, drawn_random)));
 
 	ns->membrane_potential = new_mp;
+	this->membrane_pot = ns->membrane_potential;
 
 }
 
@@ -359,6 +368,7 @@ void nemo::neuro_system::NemoNeuronTrueNorth::numeric_leak_calc(tw_stime now) {
 void nemo::neuro_system::NemoNeuronTrueNorth::ringing(unsigned int old_voltage) {
 	if (ns->epsilon && (SGN(ns->membrane_potential)!=SGN(old_voltage))) {
 		ns->membrane_potential = 0;
+		this->membrane_pot = ns->membrane_potential;
 	}
 }
 
@@ -437,6 +447,7 @@ bool nemo::neuro_system::NemoNeuronTrueNorth::fire_timing_check(tw_stime now) {
 **/
 void nemo::neuro_system::NemoNeuronTrueNorth::neg_threshold_reset() {
 	ns->membrane_potential = -ns->neg_threshold;
+	this->membrane_pot = ns->membrane_potential;
 }
 /**
  * Normal reset function
@@ -451,6 +462,7 @@ void nemo::neuro_system::NemoNeuronTrueNorth::reset_normal() {
 	} else {
 		ns->membrane_potential = ns->reset_voltage;  // set current voltage to \f$R\f$.
 	}
+	this->membrane_pot = ns->membrane_potential;
 }
 /**
  *   Linear reset mode - ignores \f$R\f$, and sets the membrane potential
@@ -468,6 +480,7 @@ void nemo::neuro_system::NemoNeuronTrueNorth::reset_linear() {
 		ns->membrane_potential =
 				ns->membrane_potential - (ns->pos_threshold + ns->drawn_random_number);
 	}
+	this->membrane_pot = ns->membrane_potential;
 }
 
 /**
@@ -479,6 +492,7 @@ void nemo::neuro_system::NemoNeuronTrueNorth::reset_none() {
 	if (ns->kappa && ns->membrane_potential < ns->neg_threshold) {
 		neg_threshold_reset();
 	}
+	this->membrane_pot = ns->membrane_potential;
 }
 /** @}  */
 

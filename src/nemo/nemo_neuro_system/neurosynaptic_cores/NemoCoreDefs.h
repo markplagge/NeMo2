@@ -4,13 +4,13 @@
 
 #ifndef NEMOTNG_NEMOCOREDEFS_H
 #define NEMOTNG_NEMOCOREDEFS_H
-#include "NemoCoreLPWrapper.h"
+
 #include "NemoCoreScheduler.h"
 #include <ross.h>
 namespace nemo {
 	namespace neuro_system {
 
-		class __unused NemoCoreLPWrapper;
+
 		class NemoCoreScheduler;
 		void sched_core_init(NemoCoreScheduler* s, tw_lp* lp);
 		void sched_pre_run(NemoCoreScheduler* s, tw_lp* lp);

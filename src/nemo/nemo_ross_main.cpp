@@ -9,7 +9,7 @@
 #include "nemo_config/NemoConfig.h"
 #include "nemo_formatted_print.h"
 #include "nemo_neuro_system/neurosynaptic_cores/NemoCoreDefs.h"
-#include "nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.h"
+
 #include "nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreBase.h"
 #include <codecvt>
 #include <iostream>
@@ -98,7 +98,7 @@ namespace nemo {
 			print_vector_limit(std::move(elms));
 		}
 		template<>
-		void pr_v<config::ScheduledTask>(__unused std::string desc, std::vector<config::ScheduledTask> elms) {
+		void pr_v<config::ScheduledTask>( std::string desc, std::vector<config::ScheduledTask> elms) {
 			print_vector_limit(std::move(elms));
 		}
 

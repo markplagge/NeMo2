@@ -9,7 +9,7 @@
 #include <iostream>
 #include <ross.h>
 #include <sstream>
-#include <strstream>
+
 #include <utility>
 
 #include <codecvt>
@@ -89,6 +89,14 @@ namespace nemo {
 			this->output_nos_stat_file =(std::string)cgbl["output_nos_stat_file"];
 			this->output_membrane_pot_file =(std::string)cgbl["output_membrane_pot_file"];
 			this->core_type_ids = (std::vector<int>)cgbl["core_type_ids"];
+
+			auto os = (int)cgbl["output_system"];
+			switch (os) {
+			case 0:
+				this->output_system = POSIX;
+				break;
+			}
+
 
 			DEBUG_FLAG = ((bool)cgbl["GLOBAL_DEBUG"]);
 

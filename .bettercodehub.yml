@@ -1,0 +1,7 @@
+component_depth: 2
+languanges:
+  - C++
+  - Python
+exclude:
+  /external/.*
+  /src/libs/.*
