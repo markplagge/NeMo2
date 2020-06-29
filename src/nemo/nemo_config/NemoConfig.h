@@ -27,7 +27,9 @@ namespace nemo {
 			RR,
 			FS
 		} SchedType;
-
+		typedef enum OutputSystem {
+			POSIX = 0
+		};
 		struct ScheduledTask {
 			double start_time;
 			int task_id;
@@ -52,6 +54,7 @@ namespace nemo {
 			bool save_all_spikes = false;
 			bool save_membrane_pots = false;
 			bool save_nos_stats = true;
+			OutputSystem output_system;
 			SchedType scheduler_type;
 			std::string output_spike_file;
 			std::string output_membrane_pot_file;

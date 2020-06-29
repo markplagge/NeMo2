@@ -6,6 +6,7 @@
     "do_neuro_os": false,
     "sched_type": "FCFS",
     "save_nos_stats": true,
+    "output_system": 0,
     "save_all_spikes": false,
     "save_membrane_pots": false,
     "neurons_per_core": 256,

@@ -7,7 +7,8 @@
 #include <utility>
 namespace nemo {
 	namespace neuro_system {
-
+		NemoCoreOutput* NemoNeuroCoreBase::output_system;
+		bool NemoNeuroCoreBase::is_init = false;
 		/**
  * Manages a heartbeat message. If this LP has not sent a heartbeat message, send it, and set the
  * heartbeat status to true.
@@ -72,7 +73,7 @@ namespace nemo {
 	   *  last_leak_time = current_neuro_tick  <- this could be updated, but left in for possible different ways of calculating leak_needed_count
 	   *  do leak, reset, fire funs.
 	   *  fire messages are scheduled for current_neuro_tick + delay + JITTER (but this is handled by the implementation of this class)
-	   * else:
+	   * else:7
 	   *  This is an error condition.
 	   *
 	   */
@@ -169,7 +170,7 @@ namespace nemo {
 			tw_event_send(heartbeat_event);
 		}
 
-		void NemoNeuroCoreBase::save_spike(nemo_message* m, long dest_core, long neuron_id, double current_time) {
+		void NemoNeuroCoreBase::save_spike(nemo_message* m, long dest_core, long neuron_id, double current_time) const {
 			this->output_system->save_spike(m->source_core, dest_core, m->dest_axon, m->debug_time, current_time);
 			this->output_system->output_handler->write();
 			//    SpikeData s = {0};
@@ -187,7 +188,7 @@ namespace nemo {
 		void NemoNeuroCoreBase::core_init(tw_lp* lp) {
 			this->core_local_id = get_core_id_from_gid(lp->gid);
 			this->has_self_firing_neuron = false;
-			auto x = new NeMoPOSIXOut();
+			auto x = new NemoPosixOut();
 			auto out = new NemoCoreOutput(core_local_id, x);
 			this->output_system = out;
 			// Use the nemo global config to set up this core
@@ -234,12 +235,29 @@ namespace nemo {
 		}
 
 		void NemoNeuroCoreBase::core_commit(tw_bf* bf, nemo_message* m, tw_lp* lp) {
-			if (save_spikes) {
-				save_spike(m, core_local_id, m->dest_axon, tw_now(lp));
+			if (this->evt_stat == BF_Event_Status::Spike_Sent) {
+				f_save_spikes(m);
 			}
+			if(this->evt_stat == BF_Event_Status::Heartbeat_Rec && global_config->save_membrane_pots){
+				f_save_mpots(lp);
+			}
+
+
+
 		}
 
 		void NemoNeuroCoreBase::pre_run(tw_lp* lp) {
+			NemoOutputHandler * output_handler;
+			if (!this->is_init) {
+				if (global_config->output_system == config::POSIX) {
+					output_handler = new NemoPosixOut(global_config->output_spike_file,g_tw_mynode);
+				} else{
+
+				}
+
+				NemoNeuroCoreBase::output_system = new NemoCoreOutput(this->core_id,output_handler);
+				is_init = true;
+			}
 		}
 
 		void NemoNeuroCoreBase::core_finish(tw_lp* lp) {
@@ -262,22 +280,24 @@ namespace nemo {
 			}
 		}
 		void NemoNeuroCoreBase::run_fires() {
-			int nid = 0;
+			unsigned int nid = 0;
 			for (const auto& item : neuron_array) {
 
 				auto did_fire = item->fire();
 				if (did_fire) {
 					this->evt_stat = add_evt_status(this->evt_stat, BF_Event_Status::Output_Spike_Sent);
 					this->evt_stat = add_evt_status(this->evt_stat, BF_Event_Status::Spike_Sent);
+					if(global_config->save_all_spikes || item->dest_core < 0) {
+						this->neuron_spike_record.push_back(nid);
+					}
 					if(is_dest_interchip(nid)){
 						/** @todo: add cross chip communication recording here */
-
 					}
 
 					if (not item->is_self_manage_spike_events()) {
 						auto dest_gid = get_gid_from_core_local(neuron_dest_cores[nid],neuron_dest_axons[nid]);
 						struct tw_event* spike = tw_event_new(dest_gid, get_neurosynaptic_tick(tw_now(my_lp)), my_lp);
-						nemo_message* msg = (nemo_message*)tw_event_data(spike);
+						auto* msg = (nemo_message*)tw_event_data(spike);
 						msg->intended_neuro_tick = this->current_neuro_tick + 1;
 						msg->message_type = NEURON_SPIKE;
 						msg->nemo_event_status = as_integer(this->evt_stat);
@@ -353,7 +373,22 @@ namespace nemo {
 		void NemoNeuroCoreBase::resume_running_model() {
 
 		}
+		void NemoNeuroCoreBase::f_save_spikes(nemo_message *m) {
+			for (const auto& spike_record : neuron_spike_record) {
 
+				auto n = this->neuron_array[spike_record];
+				if (global_config->save_all_spikes || n->dest_axon < 0) {
+					save_spike(m, n->dest_core, n->dest_axon,tw_now(my_lp));
+				}
+			}
+		}
+		void NemoNeuroCoreBase::f_save_mpots(tw_lp *lp) {
+			int nid = 0;
+			for (const auto& neuron : neuron_array) {
+				this->output_system->save_membrane_pot(nid,neuron->membrane_pot,tw_now(lp));
+				nid ++;
+			}
+		}
 	}// namespace neuro_system
 
 }// namespace nemo

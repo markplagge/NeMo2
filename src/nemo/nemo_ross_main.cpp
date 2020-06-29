@@ -98,7 +98,7 @@ namespace nemo {
 			print_vector_limit(std::move(elms));
 		}
 		template<>
-		void pr_v<config::ScheduledTask>(__unused std::string desc, std::vector<config::ScheduledTask> elms) {
+		void pr_v<config::ScheduledTask>( std::string desc, std::vector<config::ScheduledTask> elms) {
 			print_vector_limit(std::move(elms));
 		}
 

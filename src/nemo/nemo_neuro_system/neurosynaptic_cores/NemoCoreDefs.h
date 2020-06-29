@@ -10,7 +10,7 @@
 namespace nemo {
 	namespace neuro_system {
 
-		
+
 		class NemoCoreScheduler;
 		void sched_core_init(NemoCoreScheduler* s, tw_lp* lp);
 		void sched_pre_run(NemoCoreScheduler* s, tw_lp* lp);
