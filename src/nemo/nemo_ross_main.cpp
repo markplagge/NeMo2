@@ -9,7 +9,7 @@
 #include "nemo_config/NemoConfig.h"
 #include "nemo_formatted_print.h"
 #include "nemo_neuro_system/neurosynaptic_cores/NemoCoreDefs.h"
-#include "nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.h"
+
 #include "nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreBase.h"
 #include <codecvt>
 #include <iostream>

@@ -30,7 +30,6 @@ set(nemo_lib_hdrs
         nemo_io/NemoCoreOutput.h
         nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreBase.h
         nemo_config/NemoConfig.h
-        nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.h
         nemo_io/ModelFile.h
         nemo_neuro_system/neurosynaptic_cores/NemoCoreScheduler.h
         nemo_neuro_system/neurosynaptic_cores/NemoCoreDefs.h
@@ -45,7 +44,6 @@ set(nemo_lib_srcs
         nemo_globals.cpp
         nemo_config/NemoConfig.cpp
         nemo_ross.h mapping_functions.cpp
-        nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.cpp
         nemo_io/ModelFile.cpp nemo_neuro_system/neurosynaptic_cores/NemoCoreScheduler.cpp
          nemo_neuro_system/neuron_models/NemoNeuronTrueNorth.cpp
         mapping_functions.cpp nemo_io/SpikeFile.cpp nemo_io/SpikeFile.h nemo_neuro_system/neurosynaptic_cores/TaskProcessMap.cpp nemo_io/get_js_mp_file.cpp nemo_io/get_js_mp_file.h nemo_neuro_system/VirtualCore.cpp nemo_neuro_system/VirtualCore.h nemo_neuro_system/neuron_models/neuron_factory.h)

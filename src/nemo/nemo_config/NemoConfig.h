@@ -13,7 +13,6 @@
 
 
 //#include "../nemo_io/ModelFile.h"
-//#include "../nemo_neuro_system/neurosynaptic_cores/NemoCoreLPWrapper.h"
 #include "../nemo_neuro_system/neuron_models/NemoNeuronGeneric.h"
 
 #include <map>

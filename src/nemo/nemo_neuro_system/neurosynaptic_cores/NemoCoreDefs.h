@@ -4,7 +4,7 @@
 
 #ifndef NEMOTNG_NEMOCOREDEFS_H
 #define NEMOTNG_NEMOCOREDEFS_H
-#include "NemoCoreLPWrapper.h"
+
 #include "NemoCoreScheduler.h"
 #include <ross.h>
 namespace nemo {
