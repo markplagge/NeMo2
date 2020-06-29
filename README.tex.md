@@ -1,4 +1,4 @@
-# *NeMo*&middot;2
+# $$\mathbf {\displaystyle \mbox{\Huge $\text{N}\epsilon\text{M}\ddot{\text{o}} \cdot\text{2} $ } }$$
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/75fb4b9636a14f8bb220f03480d541df)](https://www.codacy.com/manual/plaggm/NeMo2?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=markplagge/NeMo2&amp;utm_campaign=Badge_Grade)
 [![Code-Inspect](https://www.code-inspector.com/project/10414/score/svg)][code-inspect]
@@ -45,12 +45,12 @@ In order to build *NeMo* you will need:
   good options. In general, any MPI compatible with [ROSS][ROSS] will
   work.
 * A mostly C++ 14 compatible compiler
-  * Tested with GCC $geq$ 7, Clang, and IBM XLC++ 14
-* CMake $\geq$ 3.12
+  * Tested with GCC $\geq 7$ , Clang, and IBM XLC++ 14
+* CMake $\geq 3.10$ - But current dev branch is using CMake 3.15
 
 ### Building
 
-*NeMo*&middot;2 uses CMAKE to build libraries and binaries (apps and
+$\text{N}\epsilon\text{M}\ddot{\text{o}} \cdot\text{2}$ uses CMAKE to build libraries and binaries (apps and
 tests). Execute following commands to build *NeMo*&middot;2 using CMAKE:
 1. `mkdir build`
 2. `cd build`
@@ -69,7 +69,7 @@ More detailed install instructions are coming in the Wiki
 
 ## Usage and Examples
 
-To run *NeMo*&middot;2:
+To run $\text{N}\epsilon\text{M}\ddot{\text{o}} \cdot\text{2}$:
 
 #### As a Sequential Run (Not Distributed):
 
@@ -88,14 +88,14 @@ other config options for *NeMo*&middot;2. To get a list of options run:
 ./nemo2 --help
 ```
 
-Most of *NeMo*&middot;2's options are handled by the configuration file.
+Most of $\text{N}\epsilon\text{M}\ddot{\text{o}} \cdot\text{2}$'s options are handled by the configuration file.
 
 ## Configuration File Documentation
 
-*NeMo*&middot;2's configuration file is a standard JSON document.
+$\text{N}\epsilon\text{M}\ddot{\text{o}} \cdot\text{2}$'s configuration file is a standard JSON document.
 Details will be coming in the Wiki. :shipit:
 
-_note_: *NeMo*&middot;2 expects a JSON standard that does not have line
+_note_: $\text{N}\epsilon\text{M}\ddot{\text{o}} \cdot\text{2}$ expects a JSON standard that does not have line
 comments. The examples below contain comments to help explain the
 sections, but __do not__ use them in your config file.
 
@@ -163,7 +163,7 @@ based neuron process scheduling. More to come.
 ## Test Data
 
 A few demo models are available. We are finding a hosting provider to
-store them, as a model file in *NeMo*&middot;2 is quite a large file.
+store them, as a model file in $\text{N}\epsilon\text{M}\ddot{\text{o}} \cdot\text{2}$ is quite a large file.
 
 ## Development
 
