@@ -2,8 +2,11 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/CODES" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/ROSS" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/ROSS/core/risa" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/external/codes" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/catch2" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/visit_struct" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/libs/neuro_os" vcs="Git" />
   </component>
 </project>

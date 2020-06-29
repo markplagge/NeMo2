@@ -58,3 +58,5 @@ scripts/.idea/
 *.pyc
 
 *.swp
+
+CMakeFiles/cmake.check_cache
