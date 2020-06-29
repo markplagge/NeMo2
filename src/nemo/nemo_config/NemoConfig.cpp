@@ -122,7 +122,7 @@ namespace nemo {
 			total_sim_size = total_chips * ns_cores_per_chip;
 			total_lps = total_sim_size + 1;
 			lps_per_pe = total_lps / tw_nnodes();
-			est_events_per_pe = total_sim_size / world_size;
+			est_events_per_pe = (total_sim_size * 256) + 4096;
 			//Does not include the scheduler LP which runs on PE 0
 			lps_per_pe = (ns_cores_per_chip * total_chips) / world_size;
 		}

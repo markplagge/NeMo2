@@ -13,6 +13,9 @@ namespace nemo {
 			//Scheduler events are only once per global tick
 			//first queue up next scheduler event
 			static int did_init = 0;
+			if (! did_init ){
+				std::cout << "GTW EVENTS: " << g_tw_events_per_pe << "\n";
+			}
 			if (global_config->do_neuro_os) {
 				//First schedule the next tick of the neuro_os_scheduler
 				auto sched_time = JITTER(lp->rng) + 1;

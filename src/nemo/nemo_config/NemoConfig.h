@@ -67,7 +67,7 @@ namespace nemo {
 			std::vector<NemoModel> models;
 
 			double jitter_factor = 0.001;//!< This is the range of jitter. Since core-core comms are used lookahead can now be 1 though
-			int est_events_per_pe = 1024;
+			int est_events_per_pe = 165535;
 			double lookahead = 0.9;
 			int world_size = 0;
 

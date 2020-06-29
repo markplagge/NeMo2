@@ -199,9 +199,8 @@ namespace nemo {
 			this->cur_message = m;
 			this->my_lp = lp;
 			this->my_bf = bf;
-
 			if (m->message_type == NOS_LOAD_MODEL) {
-				//current_model = models[m->model_id];
+
 				std::istringstream iss(m->update_message);
 				std::string tdl_m = "CORE INIT";
 				int check_nums = -1;
@@ -348,6 +347,7 @@ namespace nemo {
 			std::istringstream mdl_string(model_def);
 			/** @todo: I know this is bad to parse the lines multiple times but I don't want to pass around configuru ojbects
 			 */
+
 			int check = -1;
 			for (std::string line; std::getline(mdl_string, line); ){
 				auto core_stat_cfg = configuru::parse_string(line.c_str(),configuru::FORGIVING,"CORE_INIT");
