@@ -535,8 +535,8 @@ void nemo::neuro_system::NemoNeuronTrueNorth::init_from_json_string(std::string 
 	auto vr = (short)ncfg["VR"];
 	bool kappa = (unsigned int)ncfg["kappa"];
 	auto signal_delay = (int)ncfg["signalDelay"];
-	auto dest_core = (unsigned int)ncfg["destCore"];
-	auto dest_local = (unsigned int)ncfg["destLocal"];
+	auto dest_core = ( int)ncfg["destCore"];
+	auto dest_local = ( int)ncfg["destLocal"];
 	bool is_output_neuron = (unsigned int)ncfg["outputNeuron"];
 	bool is_self_firing = (unsigned int)ncfg["selfFiring"];
 	auto model_name = (std::string)ncfg["model_id"];
@@ -569,5 +569,12 @@ void nemo::neuro_system::NemoNeuronTrueNorth::init_from_json_string(std::string 
 	ns->delay_val = signal_delay;
 	ns->is_output_neuron = is_output_neuron;
 	ns->is_self_firing = is_self_firing;
+	if (dest_local < 0 || dest_core < 0){
+		ns->is_output_neuron = true;
+
+	}
+	this->dest_axon = dest_axon;
+	this->dest_core = dest_core;
+
 
 }

@@ -5,10 +5,14 @@
 #include "../neuron_models/neuron_factory.h"
 #include <string>
 #include <utility>
+#include <regex>
 namespace nemo {
 	namespace neuro_system {
+
 		NemoCoreOutput* NemoNeuroCoreBase::output_system;
 		bool NemoNeuroCoreBase::is_init = false;
+		std::map<int, nemo::config::NemoModel> NemoNeuroCoreBase::models;
+		std::vector<ModelFile> NemoNeuroCoreBase::model_files;
 		/**
  * Manages a heartbeat message. If this LP has not sent a heartbeat message, send it, and set the
  * heartbeat status to true.
@@ -200,12 +204,12 @@ namespace nemo {
 			this->my_lp = lp;
 			this->my_bf = bf;
 			if (m->message_type == NOS_LOAD_MODEL) {
-
-				std::istringstream iss(m->update_message);
 				std::string tdl_m = "CORE INIT";
 				int check_nums = -1;
 				this->current_model = this->models[m->model_id];
-				this->init_current_model(m->update_message);
+				auto update_data = this->model_files[this->current_model.id].get_core_settings(this->core_local_id);
+
+				this->init_current_model(update_data);
 			}else {
 				this->forward_heartbeat_handler();
 
@@ -254,7 +258,7 @@ namespace nemo {
 
 				}
 
-				NemoNeuroCoreBase::output_system = new NemoCoreOutput(this->core_id,output_handler);
+				NemoNeuroCoreBase::output_system = new NemoCoreOutput(this->core_local_id,output_handler);
 				is_init = true;
 			}
 		}
@@ -350,6 +354,8 @@ namespace nemo {
 
 			int check = -1;
 			for (std::string line; std::getline(mdl_string, line); ){
+
+
 				auto core_stat_cfg = configuru::parse_string(line.c_str(),configuru::FORGIVING,"CORE_INIT");
 				if(check){
 					auto new_core_type = get_core_enum_from_json((std::string)core_stat_cfg["type"]);

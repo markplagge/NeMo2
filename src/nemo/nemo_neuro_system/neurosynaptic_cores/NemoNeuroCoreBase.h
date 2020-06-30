@@ -57,7 +57,7 @@ namespace nemo {
 				}
 
 				auto global_id = lp->gid;
-				core->core_id = get_core_id_from_gid(global_id);
+				core->core_local_id = get_core_id_from_gid(global_id);
 				core->my_lp = lp;
 				/* @note using standard POSIX output - one file per PE */
 
@@ -92,7 +92,7 @@ namespace nemo {
 				core->core_finish(lp);
 			}
 
-			ne_id_type core_id;
+
 
 			virtual void forward_heartbeat_handler();
 
@@ -180,7 +180,7 @@ namespace nemo {
 			tw_lp* my_lp;
 			tw_bf* my_bf;
 			NemoNeuronGeneric neuron_template;
-			std::map<int, nemo::config::NemoModel> models;
+			static std::map<int, nemo::config::NemoModel> models;
 			std::map<int, std::string> test_map;
 			nemo::config::NemoModel current_model;
 			std::vector<std::shared_ptr<NemoNeuronGeneric>> state_stack;
@@ -191,7 +191,7 @@ namespace nemo {
 			std::vector<unsigned int> neuron_dest_cores;
 			std::vector<unsigned int> neuron_dest_axons;
 
-			std::vector<ModelFile> model_files;
+			static std::vector<ModelFile> model_files;
 			std::vector<SpikeFile> spike_files;
 
 			core_types my_core_type = NO_CORE_TYPE;

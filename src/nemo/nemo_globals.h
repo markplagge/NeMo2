@@ -279,7 +279,7 @@ sgn (T1 x)
 {
   return ((x > 0) - (x < 0));
 }
-#define NEMO_MAX_CHAR_DATA_SIZE 65535
+#define NEMO_MAX_CHAR_DATA_SIZE 927408
 /**
  * Main message data structure.
  *
@@ -298,7 +298,7 @@ typedef struct NemoMessage {
 
 
 		int model_id;
-		char *update_message;
+		//char update_message[NEMO_MAX_CHAR_DATA_SIZE];
 
 
 
@@ -310,7 +310,7 @@ inline uint64_t
 get_gid_from_core_local (ne_id_type dest_core, ne_id_type dest_axon)
 {
   //currently, cores are GIDs since this is a strict linear map
-  return (uint64_t)dest_core;
+  return (uint64_t)dest_core + 1;
 }
 ///**
 // * 2D Array helper template. Matrix is a 2D array using STD::Array

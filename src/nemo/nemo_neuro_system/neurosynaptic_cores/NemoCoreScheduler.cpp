@@ -48,15 +48,16 @@ namespace nemo {
 		}
 
 		void NemoCoreScheduler::send_process_states(int dest_core, int model_id){
-			auto model_file = model_files[model_id];
+
 			struct tw_event* set_state = tw_event_new(get_gid_from_core_local(dest_core,0),JITTER(my_lp->rng),my_lp);
 			auto msg = (nemo_message*) tw_event_data(set_state);
 			msg->message_type = NOS_LOAD_MODEL;
 			msg->debug_time = tw_now(my_lp);
 			msg->model_id = model_id;
-			auto core_dat = model_files[model_id].get_core_settings(model_id);
-			char * core_dat_s = const_cast<char*>(core_dat.c_str());
-			msg->update_message = core_dat_s;
+//			auto core_dat = model_files[model_id].get_core_settings(model_id);
+//			char * core_dat_s = const_cast<char*>(core_dat.c_str());
+//			strncpy(msg->update_message,core_dat_s,NEMO_MAX_CHAR_DATA_SIZE - 1);
+//			//msg->update_message = core_dat_s;
 			//memcpy(msg->update_message,core_dat_s,core_dat.size());
 			tw_event_send(set_state);
 

@@ -35,8 +35,8 @@ namespace nemo {
 			double threshold = 1;
 			double reset_val = 0;
 			bool self_manage_spike_events = false;
-			unsigned  int 	dest_core;
-			unsigned  int 	dest_axon;
+			  int 	dest_core;
+			  int 	dest_axon;
 			tw_lp *cur_lp{};
 
 

@@ -42,11 +42,7 @@ namespace nemo {
 		int current_neuron = 0;
 		std::string model_file_path;
 
-
-
-
-
-
+		void fix_extra_line_dat(char* linep);
 	};
 
 }

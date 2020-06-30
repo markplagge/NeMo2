@@ -8,10 +8,23 @@
 #include <sstream>
 #include <utility>
 #include "get_js_mp_file.h"
+#include <regex>
 // Global static pointer used to ensure a single instance of the class.
 namespace nemo {
 
-
+	namespace util {
+		std::string replace_string_regex( std::string const & in, std::string  const & from, std::string  const & to ){
+			return std::regex_replace( in, std::regex(from), to );
+		}
+		void replace_string_in_place(std::string& subject, const std::string& search,
+				const std::string& replace) {
+			size_t pos = 0;
+			while((pos = subject.find(search, pos)) != std::string::npos) {
+				subject.replace(pos, search.length(), replace);
+				pos += replace.length();
+			}
+		}
+	}
 	ModelFile::ModelFile(std::string  model_file_path) : model_file_path(std::move(model_file_path)) {
 		//load up the model:
 		load_model();
@@ -44,12 +57,33 @@ namespace nemo {
 		delete[] (buffer);
 		return length;
 	}
+	void ModelFile::fix_extra_line_dat(char linep[]){
+		auto has_extra = [](auto line) {return  strstr(line,",\"TN_") ; };
+
+		auto tl = has_extra(linep);
+		if (tl != NULL){
+			int ipos = 0;
+			tl[ipos] = '\n';
+			while(++ipos < 256){
+				if (tl[ipos] == '{'){
+					break;
+				}else{
+					tl[ipos] = ' ';
+
+				}
+			}
+			fix_extra_line_dat(linep);
+
+		}
+
+	}
 	void ModelFile::parse_line(char line[]){
 		long core_id;
 		long neuron_id;
 		const char tok[2] = "_";
 		const char enter_tok[3] = "\"";
 		auto data = strchr(line,':') + 1;
+		fix_extra_line_dat(data);
 
 		auto datalen = strlen(data);
 		if (data[datalen - 1] == '\n') {
@@ -68,6 +102,7 @@ namespace nemo {
 		if (js_core_map[core_id] == nullptr){
 			js_core_map[core_id] = new std::stringstream ();
 		}
+
 		*js_core_map[core_id] << data;
 
 	}
