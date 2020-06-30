@@ -84,13 +84,13 @@ typedef enum CoreTypes {
 core_types get_core_enum_from_json(std::string core_type);
 
 enum nemo_message_type {
-  NEURON_SPIKE,
-  HEARTBEAT,
-	NOS_LOAD_MODEL,
-	NOS_TICK,
-	NOS_START,
-	NOS_STOP,
-	NOS_STATUS
+	NEURON_SPIKE = 1,
+	HEARTBEAT = 2,
+	NOS_LOAD_MODEL = 4,
+	NOS_TICK = 8,
+	NOS_START = 16,
+	NOS_STOP = 32,
+	NOS_STATUS = 64
 };
 /** @} */
 

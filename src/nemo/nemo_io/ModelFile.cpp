@@ -38,53 +38,76 @@ namespace nemo {
 		is.seekg (0, is.beg);
 		char * buffer = new char [length];
 		is.read(buffer,length);
-		if (is){
+		if (is) {
 			std::cout << "Read " << length << " bytes \n";
 			auto current_pos = buffer;
 
 			auto line = buffer;
-			for(int i = 0; i < length; i ++ ){
-				if(*current_pos == '\n'){
+			bool did_fix = false;
+			for (int i = 0; i < length; i++) {
+
+				if (*current_pos == '\n') {
 					*current_pos = '\0';
-					parse_line(line);
+					if (!did_fix) {
+						did_fix = parse_line(line);
+					}
+					else {
+						did_fix = false;
+					}
 					line = current_pos + 1;
 				}
-				current_pos ++;
-
+				current_pos++;
 			}
 		}
 		is.close();
-		delete[] (buffer);
+		delete[](buffer);
 		return length;
 	}
-	void ModelFile::fix_extra_line_dat(char linep[]){
-		auto has_extra = [](auto line) {return  strstr(line,",\"TN_") ; };
-
+	bool ModelFile::fix_extra_line_dat(char* linep) {
+		auto has_extra = [](auto line) { return strstr(line, ",\"TN_"); };
+		bool fixed = false;
 		auto tl = has_extra(linep);
-		if (tl != NULL){
+		if (tl != NULL) {
+			fixed = true;
 			int ipos = 0;
-			tl[ipos] = '\n';
-			while(++ipos < 256){
-				if (tl[ipos] == '{'){
-					break;
-				}else{
-					tl[ipos] = ' ';
-
-				}
-			}
+			tl[ipos] = '#';
+			//			while(++ipos < 256){
+			//				if (tl[ipos] == '{'){
+			//					break;
+			//				}else{
+			//					tl[ipos] = '#';
+			//
+			//				}
+			//			}
 			fix_extra_line_dat(linep);
-
 		}
-
+		return fixed;
 	}
-	void ModelFile::parse_line(char line[]){
+	std::stringstream buf_str;
+	bool ModelFile::parse_line(char* line) {
 		long core_id;
 		long neuron_id;
 		const char tok[2] = "_";
 		const char enter_tok[3] = "\"";
-		auto data = strchr(line,':') + 1;
-		fix_extra_line_dat(data);
+		auto data = strchr(line, ':') + 1;
 
+		bool did_fix = fix_extra_line_dat(data);
+		char* d1;
+		if (did_fix) {
+			auto x = 3;
+			d1 = strchr(data, '#');
+			char dx[strlen(d1) + 5];
+			dx[strlen(d1) + 4] = '\0';
+			char* d2 = dx;
+			strncpy(d2, d1, strlen(d1) + 4);
+			d2[0] = '\0';
+			d2[strlen(d2) + 1] = ' ';
+			d2[strlen(d2) + 2] = ' ';
+			d2++;
+			d1[0] = ' ';
+			d1[1] = '\0';
+			parse_line(d2);
+		}
 		auto datalen = strlen(data);
 		if (data[datalen - 1] == '\n') {
 			data[datalen - 2] = ' ';
@@ -92,19 +115,19 @@ namespace nemo {
 		data[datalen - 1] = '\n';
 
 		std::string dat_s(data);
-		char *token = strtok(line, tok) +1;
-		char * stred;
+		char* token = strtok(line, tok) + 1;
+		char* stred;
 
 		token = strtok(NULL, tok);
-		core_id = strtol(token,&stred,10);
+		core_id = strtol(token, &stred, 10);
 		token = strtok(NULL, enter_tok);
 		neuron_id = strtol(token, &stred, 10);
-		if (js_core_map[core_id] == nullptr){
-			js_core_map[core_id] = new std::stringstream ();
+		if (js_core_map[core_id] == nullptr) {
+			js_core_map[core_id] = new std::stringstream();
 		}
 
 		*js_core_map[core_id] << data;
-
+		return did_fix;
 	}
 	void  ModelFile::load_model(){
 		auto sz_loaded = read_file(model_file_path);
@@ -121,8 +144,9 @@ namespace nemo {
 
 	std::string ModelFile::get_core_settings(unsigned long core_id) {
 		//return js_core_map[core_id].str();
-		return js_core_map[core_id]->str();
-
+		if (js_core_map.count(core_id))
+			return js_core_map[core_id]->str();
+		return std::string();
 	}
 
 }

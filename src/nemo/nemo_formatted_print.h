@@ -60,7 +60,11 @@ namespace nemo {
 				x_br_mag_89 = 89,
 				x_red_197 = 197,
 				x_red_196 = 196,
-				x_nice_wt = 230
+				x_nice_wt = 230,
+				cust_c1 = 208,
+				cust_c2 = 209,
+				cust_c3 = 39,
+				cust_c4 = 75
 
 			};
 			using namespace std;
@@ -112,8 +116,8 @@ namespace nemo {
 			}
 
 			//auto rowstar = print_as_color<ColorCode::bright_blue>("*");
-			auto rowstar = pr_extd("*", 39);
-			auto star_line = pr_extd(vx, 75);
+			auto rowstar = print_as_color<ColorCode::cust_c3>("*");
+			auto star_line = print_as_color<ColorCode::cust_c4>(vx);
 
 			template<typename T>
 			void print_vec_nlines(int total, T vecname) {
@@ -170,10 +174,10 @@ namespace nemo {
 
 				//ss << setfill('*') << setw(22) << rowstar << print_as_color<ColorCode::green>(" NeMo 2 - The Next Generation ") << setw(17) << right << "" << endl;
 				//ss << setfill('*') << setw(25) << "" << print_as_color<134>(" NeMo 2 - The Next Generation ") << setw(25) << right << "" << endl;
-				auto scolor = print_as_color<39>(std::string(25, '*'));
+				auto scolor = print_as_color<ColorCode::cust_c3>(std::string(25, '*'));
 				std::stringstream nemo_name;
 				//134 too?
-				nemo_name << bold_on << print_as_color<208>(" NeMo ") << bold_on << print_as_color<208>(" 2") << bold_off << print_as_color<254>(" -") << print_as_color<209>(" The Next Generation ");
+				nemo_name << bold_on << print_as_color<ColorCode::x_red_196>(" NeMo ") << bold_on << print_as_color<ColorCode::cust_c1>(" 2") << bold_off << print_as_color<254>(" -") << print_as_color<ColorCode::cust_c2>(" The Next Generation ");
 				ss << scolor << nemo_name.str() << scolor << endl;
 				print_config_element<char>(' ');
 				if (VERBOSE) {

@@ -8,20 +8,36 @@
 namespace nemo {
 
 	namespace neuro_system {
-		/**
-		 * NemoNeuronTrueNorth: A class that wraps the original nemo C implementation of the TrueNorth neuron.
-		 * This class pulls from NemoNeuronGeneric so that it can be used as a drop in for nemo models.
-		 * Bit widths in this version are not dynamic (ditched the typedefs)
-		 */
 
-		struct TNNeuronState{
+/** TODO: Eventually replace this with generic macro and non-branching ABS code. */
+#define IABS(a) (((a) < 0) ? (-a) : (a))//!< Typeless integer absolute value function
+/** TODO: See if there is a non-branching version of the signum function, maybe in MAth libs and use that. */
+#define SGN(x) ((x > 0) - (x < 0))//!< Signum function
+		//#define DT(x) !(x)                    //!<Kronecker Delta function.
+
+		template<typename T>
+		unsigned int DT(T x);
+
+#define BINCOMP(s, p) IABS((s)) >= (p)//!< binary comparison for conditional stochastic evaluation
+
+		/**
+		 * @defgroup TN_System
+		 * True North Neurons
+		 * All TN functionality, states, etc.
+		 * @{
+		 */
+		/**
+		 * TNNeuronState - Original neuron state from $\text{NeMo}_1$
+		 */
+		struct TNNeuronState {
+			TNNeuronState();
 			// 64
 			tw_stime
-					last_active_time;    /**< last time the neuron fired - used for calculating
+					last_active_time; /**< last time the neuron fired - used for calculating
                             leak and reverse functions. Should be a whole number
                             (or very close) since big-ticks happen on whole
                             numbers. */
-			tw_stime last_leak_time; /**< Timestamp for leak functions. Should be a mostly
+			tw_stime last_leak_time;  /**< Timestamp for leak functions. Should be a mostly
                             whole number, since this happens once per big tick.
                             */
 
@@ -112,28 +128,45 @@ namespace nemo {
 			/** stochastic weight mode selection. $b_j^{G_i}$ */
 			std::vector<bool> weight_selection;
 
-//			int axonTypes[AXONS_IN_CORE];
-//			int synapticWeight[NUM_NEURON_WEIGHTS];
-//			bool synapticConnectivity[AXONS_IN_CORE];  //!< is there a connection between axon i and
-//			//!neuron j?
+			//			int axonTypes[AXONS_IN_CORE];
+			//			int synapticWeight[NUM_NEURON_WEIGHTS];
+			//			bool synapticConnectivity[AXONS_IN_CORE];  //!< is there a connection between axon i and
+			//			//!neuron j?
 
-//			bool weightSelection[NUM_NEURON_WEIGHTS];
+			//			bool weightSelection[NUM_NEURON_WEIGHTS];
 		};
 
+		/** Stand Alone constructor / Init a new neuron. assumes that the reset voltage is NOT
+		 *  encoded (i.e., a reset value of -5 is allowed. Sets reset voltage sign from input reset voltage).
+		 */
+		void tn_create_neuron(unsigned int core_id, unsigned int n_id,
+							  bool synaptic_connectivity[],
+							  short G_i[4], short sigma[4], short S[4],
+							  bool b[4], bool epsilon, short sigma_l, short lambda,
+							  bool c, uint32_t alpha, uint32_t beta, short TM, short VR,
+							  short sigma_vr, short gamma, bool kappa,
+							  TNNeuronState* n, int signal_delay,
+							  uint64_t dest_global_id, int dest_axon_id);
+
+		void TN_set_neuron_dest(int signal_delay, uint64_t gid, TNNeuronState* n);
+
+		/**
+		 * NemoNeuronTrueNorth: A class that wraps the original nemo C implementation of the TrueNorth neuron.
+		 * This class pulls from NemoNeuronGeneric so that it can be used as a drop in for nemo models.
+		 * Bit widths in this version are not dynamic (ditched the typedefs)
+		 * */
 		class NemoNeuronTrueNorth final : public NemoNeuronGeneric {
 			std::unique_ptr<TNNeuronState> ns;
 
-
 		public:
-
-
+			NemoNeuronTrueNorth();
+			NemoNeuronTrueNorth(double membrane_pot, const std::vector<double>& weights, double leak_v, double threshold, double reset_val, tw_lp* lp);
 			void integrate(unsigned int source_id) final;
 			bool fire() final;
 			void leak() final;
 			void leak_n(int n_leaks) final;
 			void reset() final;
 			void init_from_json_string(std::string js_string) override;
-
 
 		private:
 
@@ -165,15 +198,11 @@ namespace nemo {
 			bool over_underflow_check();
 			void tn_fire();
 		};
+		/** @} */
 
 		/** \defgroup TN_Function_hdrs True North Function headers
 		 * TrueNorth Neuron leak, integrate, and fire function forward decs.
  		* @{ */
-
-
-
-
-
 
 		/** @} */
 	}

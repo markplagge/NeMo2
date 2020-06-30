@@ -79,7 +79,7 @@ include_directories(${CMAKE_SOURCE_DIR}/external/visit_struct/include/visit_stru
 ####### NLH JSON PARSER
 set(NL_JSON_DIR ${CMAKE_SOURCE_DIR}/external/nlohmann)
 configure_file(config/example_config.json config/example_config.json COPYONLY)
-
+configure_file(config/single_model_config.json config/single_model_config.json COPYONLY)
 ###### ROSS EXTERNAL PROJECT
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/ROSS)
 

@@ -208,9 +208,11 @@ namespace nemo {
 				int check_nums = -1;
 				this->current_model = this->models[m->model_id];
 				auto update_data = this->model_files[this->current_model.id].get_core_settings(this->core_local_id);
-
-				this->init_current_model(update_data);
-			}else {
+				if (update_data.length()) {
+					this->init_current_model(update_data);
+				}
+			}
+			else {
 				this->forward_heartbeat_handler();
 
 				//				auto core_stat_cfg = configuru::parse_string(m->update_message,configuru::FORGIVING,"CORE LOAD");
@@ -220,7 +222,7 @@ namespace nemo {
 						item->integrate(m->dest_axon);
 					}
 				}
-				if (m->message_type == HEARTBEAT) {
+				else if (m->message_type == HEARTBEAT) {
 					//LEAK
 					run_leaks();
 					//Fire

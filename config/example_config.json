@@ -1,17 +1,17 @@
 {
   "nemo_global": {
     "GLOBAL_DEBUG": true,
-    "ns_cores_per_chip": 32,
-    "total_chips": 2,
+    "ns_cores_per_chip": 4096,
+    "total_chips": 1,
     "do_neuro_os": false,
     "sched_type": "FCFS",
     "save_nos_stats": true,
-    "save_all_spikes": false,
+    "save_all_spikes": true,
     "save_membrane_pots": false,
     "neurons_per_core": 256,
     "output_system": 0,
     "output_spike_file": "./model_output.csv",
-    "output_nos_stat_file" : "./output_nos_stat_file.csv",
+    "output_nos_stat_file": "./output_nos_stat_file.csv",
     "output_membrane_pot_file": "./output_membrane_pot.csv",
     "core_type_ids": [
       0,

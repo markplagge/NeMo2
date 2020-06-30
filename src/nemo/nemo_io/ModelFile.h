@@ -29,20 +29,20 @@ namespace nemo {
 		int read_file(const std::string& model_path);
 
 		void load_model();
-		void parse_line(char line[]);
+		bool parse_line(char* line);
 		int num_needed_cores = 0;
 		char core_neuron_id[64] = {'\0'};
 		bool valid_model = true;
 		int model_id = 0;
 		std::string model_name;
 		//std::map<unsigned long, std::map<unsigned long,std::string>> js_map;
-		std::map<unsigned long , std::stringstream * > js_core_map;
+		std::map<unsigned long, std::stringstream*> js_core_map;
 
 		int current_core = 0;
 		int current_neuron = 0;
 		std::string model_file_path;
 
-		void fix_extra_line_dat(char* linep);
+		bool fix_extra_line_dat(char* linep);
 	};
 
 }
