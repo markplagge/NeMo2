@@ -227,7 +227,7 @@ void nemo::neuro_system::NemoNeuronTrueNorth::numeric_leak_calc(tw_stime now) {
 	//        ns->membranePotential + (omega * ((1 - ns->c) * ns->lambda)) +
 	//            (ns->c & (BINCOMP(ns->lambda, ns->drawnRandomNumber)));
 	//ns->membranePotential =
-	new_mp += (omega * ((1 - ns->c) * lamb)) + (c & (BINCOMP(lamb, drawn_random)));
+	new_mp += (omega * ((1 - c) * lamb)) + (c && (BINCOMP(lamb, drawn_random)));
 
 	ns->membrane_potential = new_mp;
 	this->membrane_pot = ns->membrane_potential;
