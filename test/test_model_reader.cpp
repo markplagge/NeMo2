@@ -97,7 +97,7 @@ TEST_CASE("Model Read Test"){
   using namespace nemo;
   auto mdl_file = ModelFile(demo_filename);
   REQUIRE(mdl_file.get_num_needed_cores() == get_num_needed_cores(demo_filename));
-  auto js_dict = mdl_file.get_js_map();
+  auto js_dict = mdl_file.js_core_map;
   std::ifstream infile (demo_filename);
   std::string line;
   while (getline (infile, line)){
@@ -106,7 +106,7 @@ TEST_CASE("Model Read Test"){
     auto nid = neuron_core_id[1];
     auto cid = neuron_core_id[0];
     //direct dict check:
-    auto neuron_str = js_dict[cid][nid];
+    auto neuron_str = js_dict[cid][nid].str();
     INFO("COREID=" << cid);
     INFO("NID=" << nid);
     REQUIRE (neuron_str.length() > 0);

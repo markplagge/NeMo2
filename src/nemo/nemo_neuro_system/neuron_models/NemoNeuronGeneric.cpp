@@ -53,6 +53,9 @@ namespace neuro_system
 		auto cfg = configuru::parse_string(js_string.c_str(),configuru::FORGIVING,"NEMO_GENERIC_INIT");
 		configuru::deserialize(this,cfg,nemo::config::error_reporter);
 	}
+	NemoNeuronGeneric::NemoNeuronGeneric(tw_lp* current_lp) {
+		this->set_cur_lp(current_lp);
+	}
 
 }// namespace neuro_system
 }// namespace nemo

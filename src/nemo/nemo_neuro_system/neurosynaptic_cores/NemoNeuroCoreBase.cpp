@@ -52,13 +52,6 @@ namespace nemo {
 			// then we need to send a heartbeat scheduled for the end of this current epoch.
 			if (cur_message->message_type == NEURON_SPIKE) {// this if statement is a double check on the calling function
 				if (heartbeat_sent && cur_message->intended_neuro_tick > current_neuro_tick) {
-
-					tw_error(TW_LOC, "Got a spike with an out of bounds tick.\n"
-									 "Current core tick: %li\n"
-									 "Current time: %Lf \n",
-							 //this->cur_message->to_string().c_str(),
-							 this->current_neuro_tick,
-							 tw_now(this->my_lp));
 				}
 				evt_stat = BF_Event_Status::Spike_Rec;
 				/**
@@ -240,27 +233,29 @@ namespace nemo {
 		}
 
 		void NemoNeuroCoreBase::core_commit(tw_bf* bf, nemo_message* m, tw_lp* lp) {
-			if (this->evt_stat == BF_Event_Status::Spike_Sent) {
+			if (is_output_spike_sent(this->evt_stat) || is_spike_sent(this->evt_stat)) {
+
 				f_save_spikes(m);
 			}
-			if(this->evt_stat == BF_Event_Status::Heartbeat_Rec && global_config->save_membrane_pots){
-				f_save_mpots(lp);
+			if(is_heartbeat_rec(this->evt_stat) && global_config->save_membrane_pots){
+					f_save_mpots(lp);
 			}
-
-
-
 		}
 
 		void NemoNeuroCoreBase::pre_run(tw_lp* lp) {
 			NemoOutputHandler * output_handler;
+
 			if (!this->is_init) {
+				/** @note: only posix IO right now */
 				if (global_config->output_system == config::POSIX) {
-					output_handler = new NemoPosixOut(global_config->output_spike_file,g_tw_mynode);
+					tw_printf(TW_LOC, "Posix output mode enabled \n");
 				} else{
-
+					tw_printf(TW_LOC, "NON POSIX CODE - NOT IMPLEMENTED SO USING POSIX");
 				}
-
+				output_handler = new NemoPosixOut(global_config->output_spike_file,global_config->output_membrane_pot_file,g_tw_mynode);
+				output_handler->open_comms();
 				NemoNeuroCoreBase::output_system = new NemoCoreOutput(this->core_local_id,output_handler);
+
 				is_init = true;
 			}
 		}
@@ -343,12 +338,13 @@ namespace nemo {
 				neuron_stack.push_back(neuron_array);
 			}
 			for(int i = 0; i < global_config->neurons_per_core; i ++){
-				std::shared_ptr<NemoNeuronGeneric> neuron(get_new_neuron(this->my_core_type));
+				std::shared_ptr<NemoNeuronGeneric> neuron(get_new_neuron(this->my_core_type,this->my_lp,i,this->core_local_id));
 				this->neuron_array.push_back(neuron);
 			}
 		}
 		void NemoNeuroCoreBase::init_current_model(std::string model_def) {
-
+			this->neuron_dest_axons.reserve(global_config->neurons_per_core);
+			this->neuron_dest_cores.reserve(global_config->neurons_per_core);
 			//line-by-line init of neurons
 			std::istringstream mdl_string(model_def);
 			/** @todo: I know this is bad to parse the lines multiple times but I don't want to pass around configuru ojbects
@@ -368,6 +364,8 @@ namespace nemo {
 				auto neuron_id =(unsigned int) core_stat_cfg["localID"];
 
 				this->neuron_array[neuron_id].get()->init_from_json_string(line);
+				this->neuron_dest_cores[neuron_id] = this->neuron_array[neuron_id]->dest_core;
+				this->neuron_dest_axons[neuron_id] = this->neuron_array[neuron_id]->dest_axon;
 			}
 
 

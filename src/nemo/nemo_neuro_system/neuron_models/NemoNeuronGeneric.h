@@ -11,7 +11,7 @@
 #include <configuru.hpp>
 #include <utility>
 #include <vector>
-
+#include "../BenchmarkModelDef.h"
 namespace nemo {
 	//extern config::NemoConfig* global_config;
 	namespace neuro_system {
@@ -25,19 +25,20 @@ namespace nemo {
 
 		class NemoNeuronGeneric {
 
-
 			
 
 		public:
+			NemoNeuronGeneric(tw_lp* current_lp);
 			double 	membrane_pot = 0;
 			std::vector<double>weights;
+
 			double leak_v = -1;
 			double threshold = 1;
 			double reset_val = 0;
 			bool self_manage_spike_events = false;
 			  int 	dest_core;
 			  int 	dest_axon;
-			tw_lp *cur_lp{};
+			tw_lp *cur_lp;
 
 
 

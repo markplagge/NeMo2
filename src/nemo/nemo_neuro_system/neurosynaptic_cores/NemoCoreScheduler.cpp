@@ -48,6 +48,7 @@ namespace nemo {
 		}
 
 		void NemoCoreScheduler::send_process_states(int dest_core, int model_id){
+			static unsigned int num_states_sent = 0;
 
 			struct tw_event* set_state = tw_event_new(get_gid_from_core_local(dest_core,0),JITTER(my_lp->rng),my_lp);
 			auto msg = (nemo_message*) tw_event_data(set_state);
@@ -60,6 +61,10 @@ namespace nemo {
 //			//msg->update_message = core_dat_s;
 			//memcpy(msg->update_message,core_dat_s,core_dat.size());
 			tw_event_send(set_state);
+			num_states_sent ++;
+			if(!global_config->do_neuro_os && num_states_sent > global_config->ns_cores_per_chip * global_config->total_chips){
+				tw_error(TW_LOC,"SENT %ui events - check it \n", num_states_sent);
+			}
 
 
 		}

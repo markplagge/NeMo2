@@ -25,6 +25,8 @@ namespace nemo {
 		bool is_valid_model() const;
 		//const std::map<unsigned long, std::map<unsigned long, std::string>>& get_js_map() const;
 
+		//std::map<unsigned long, std::map<unsigned long,std::string>> js_map;
+		std::map<unsigned long, std::stringstream*> js_core_map;
 	protected:
 		int read_file(const std::string& model_path);
 
@@ -35,8 +37,6 @@ namespace nemo {
 		bool valid_model = true;
 		int model_id = 0;
 		std::string model_name;
-		//std::map<unsigned long, std::map<unsigned long,std::string>> js_map;
-		std::map<unsigned long, std::stringstream*> js_core_map;
 
 		int current_core = 0;
 		int current_neuron = 0;

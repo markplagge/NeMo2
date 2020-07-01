@@ -203,6 +203,8 @@ namespace nemo {
  * Mode 2 is all spikes output
  */
 			int output_mode = 2;
+
+
 		};
 
 	}// namespace neuro_system

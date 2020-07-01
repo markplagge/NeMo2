@@ -6,111 +6,10 @@
 #include "../../include/nemo.h"
 #include <configuru.hpp>
 
-/** setup from Nemo1 */
-namespace nemo {
-	namespace neuro_system {
-
-#define NEURONS_IN_CORE global_config->neurons_per_core//! < patch so neuron config from nemo1 will see global config value
-
-		template<typename T>
-		unsigned int DT(T x) {
-			return x > 0 ? 1 : 0;
-		}
-		void TN_set_neuron_dest(int signalDelay, uint64_t gid, TNNeuronState* n) {
-			n->delay_val = signalDelay;
-			n->output_gid = gid;
-		}
-
-		//--------------------------------------------------------------------------------
-		/** OG NEMO INIT FUNCTIONS
-		  * @relates tn_neuron_struct
-		  * @TODO: Migrate these to the TN Struct, constructor
-		 \defgroup TNNeuronInit TrueNorth Init
-		 * *  TrueNorth Neuron initialization functions
-		 *  TrueNorth Neuron Parameter setting functions. Used as helper functions for
-		 *  * init
-		 *  * @{ */
-		//--------------------------------------------------------------------------------
-
-		/**
-		 * Creates a neuron /w encoded RV from TN init data
-		 * @param core_id
-		 * @param n_id
-		 * @param synaptic_connectivity
-		 * @param G_i
-		 * @param sigma
-		 * @param S
-		 * @param b
-		 * @param epsilon
-		 * @param sigma_l
-		 * @param lambda
-		 * @param c
-		 * @param alpha
-		 * @param beta
-		 * @param TM
-		 * @param VR
-		 * @param sigma_vr
-		 * @param gamma
-		 * @param kappa
-		 * @param n
-		 * @param signal_delay
-		 * @param dest_global_id
-		 * @param dest_axon_id
-		 */
-		void tn_create_neuron_encoded_rv(
-				unsigned int core_id, unsigned int n_id, bool synaptic_connectivity[],
-				short G_i[], short sigma[], short S[], bool b[],
-				bool epsilon, short sigma_l, short lambda, bool c, uint32_t alpha,
-				uint32_t beta, short TM, short VR, short sigma_vr, short gamma, bool kappa,
-				TNNeuronState* n, int signal_delay, uint64_t dest_global_id,
-				int dest_axon_id) {
-			tn_create_neuron(core_id, n_id, synaptic_connectivity, G_i, sigma, S, b, epsilon,
-							 sigma_l, lambda, c, alpha, beta, TM, VR, sigma_vr, gamma,
-							 kappa, n, signal_delay, dest_global_id, dest_axon_id);
-			n->sigma_vr = sigma_vr;
-			n->encoded_reset_voltage = VR;
-			n->reset_voltage = (n->sigma_vr * (pow(2, n->encoded_reset_voltage) - 1));
-		}
-		/**
-		 * Non global connectivity neuron creation function /w encoded RV
-		 * @param core_id
-		 * @param n_id
-		 * @param synaptic_connectivity
-		 * @param G_i
-		 * @param sigma
-		 * @param S
-		 * @param b
-		 * @param epsilon
-		 * @param sigma_l
-		 * @param lambda
-		 * @param c
-		 * @param alpha
-		 * @param beta
-		 * @param TM
-		 * @param VR
-		 * @param sigma_vr
-		 * @param gamma
-		 * @param kappa
-		 * @param n
-		 * @param signal_delay
-		 * @param dest_core_id
-		 * @param dest_axon_id
-		 */
-		void tn_create_neuron_encoded_rv_non_global(
-				int core_id, int n_id, bool synaptic_connectivity[],
-				short G_i[], short sigma[], short S[], bool b[],
-				bool epsilon, int sigma_l, int lambda, bool c, int alpha,
-				int beta, int TM, int VR, int sigma_vr, int gamma, bool kappa,
-				TNNeuronState* n, int signal_delay, int dest_core_id,
-				int dest_axon_id) {
-			uint64_t dest_global = get_gid_from_core_local(dest_core_id, dest_axon_id);
-			tn_create_neuron_encoded_rv(core_id, n_id, synaptic_connectivity, G_i, sigma, S, b, epsilon, sigma_l, lambda, c, alpha, beta, TM, VR, sigma_vr, gamma, kappa, n, signal_delay, dest_global, dest_axon_id);
-		}
-
-		TNNeuronState::TNNeuronState() {}
-
-	}// namespace neuro_system
-}// namespace nemo
+template<typename T>
+unsigned int nemo::neuro_system::DT(T x) {
+	return x > 0 ? 1 : 0;
+}
 
 /**@ }
  * \defgroup TN_Functions TN Functions
@@ -176,7 +75,7 @@ bool nemo::neuro_system::NemoNeuronTrueNorth::fire() {
 	will_fire = (will_fire && fire_timing_check(tw_now(lp)));
 	if (will_fire) {
 		if (!ns->is_output_neuron) {
-			tn_fire();
+			//tn_fire(); // handled by the core now.
 		}
 		else {
 			// used to set the bf here --- should do that
@@ -474,6 +373,7 @@ void nemo::neuro_system::NemoNeuronTrueNorth::reset() {
 	//no reset directly called
 }
 void nemo::neuro_system::NemoNeuronTrueNorth::init_from_json_string(std::string js_string) {
+
 	/* Ref json format (converted)
 	 * {"TN_1_0":{"type":"TN",
 	* "coreID":1,"localID":0,
@@ -546,5 +446,61 @@ void nemo::neuro_system::NemoNeuronTrueNorth::init_from_json_string(std::string 
 	this->dest_axon = dest_axon;
 	this->dest_core = dest_core;
 }
+/**
+ * @brief Direct value constructor for TN Neurons. Use when you have a pre-existing data structure!
+ * @param membrane_pot
+ * @param weights
+ * @param leak_v
+ * @param threshold
+ * @param reset_val
+ * @param lp
+ */
 nemo::neuro_system::NemoNeuronTrueNorth::NemoNeuronTrueNorth(double membrane_pot, const std::vector<double>& weights, double leak_v, double threshold, double reset_val, tw_lp* lp) : NemoNeuronGeneric(membrane_pot, weights, leak_v, threshold, reset_val, lp) {}
 nemo::neuro_system::NemoNeuronTrueNorth::NemoNeuronTrueNorth() {}
+
+#define AXONS_IN_CORE global_config->neurons_per_core
+#define NUM_NEURON_WEIGHTS  this->standard_num_axon_types
+/**
+ * @brief Constructor for TrueNorth neurons. Use this to create one of these large neurons.
+ * Initializes it with a benchmark network of sorts by default. @note The benchmark network (id matrix) is from $\text{NeMo}_1$
+ * @param cur_lp
+ * @param n_id
+ * @param c_id
+ */
+nemo::neuro_system::NemoNeuronTrueNorth::NemoNeuronTrueNorth(tw_lp* cur_lp, int n_id, int c_id) {
+	this->set_cur_lp(cur_lp);
+	this->ns = std::make_unique<TNNeuronState>();
+	/* Original used static arrays
+	 *   int axonTypes[AXONS_IN_CORE];
+	 *   int synapticWeight[NUM_NEURON_WEIGHTS];
+	 *   bool synapticConnectivity[AXONS_IN_CORE];  //!< is there a connection between axon i and
+	 *   //!neuron j?
+	 *   stochastic weight mode selection. $b_j^{G_i}$
+	 *   bool weightSelection[NUM_NEURON_WEIGHTS];
+	 *   */
+
+
+	this->ns->axon_types.reserve(AXONS_IN_CORE);
+	this->ns->synaptic_weight.reserve(NUM_NEURON_WEIGHTS);
+	this->ns->synaptic_connectivity.reserve(AXONS_IN_CORE);
+	this->ns->weight_selection.reserve(NUM_NEURON_WEIGHTS);
+	this->self_manage_spike_events = false;
+
+
+	// TN is from C Nemo, so we do some C style init
+	tn_create_simple_neuron(this->ns.get(),this->get_cur_lp(), n_id, c_id);
+}
+void nemo::neuro_system::NemoNeuronTrueNorth::init_ns_structures() {
+
+	for(int i = 0; i < AXONS_IN_CORE; i ++){
+		if (i < NUM_NEURON_WEIGHTS){
+			ns->synaptic_weight.push_back(0);
+			ns->weight_selection.push_back(0);
+		}
+		ns->synaptic_connectivity.push_back(false);
+		ns->axon_types.push_back(0);
+
+	}
+}
+#undef AXONS_IN_CORE
+#undef NUM_NEURON_WEIGHTS
