@@ -46,10 +46,18 @@ namespace nemo {
 			}
 			//check the current list of processes:
 		}
+		template <typename types>
+		std::string debug_csv(types args){
+			return std::to_string(args) + "\n";
+		}
+		template <typename T, typename ... types>
+		std::string debug_csv(T first, types ... args) {
+			return std::to_string(first) + std::string(",") + debug_csv(args...);
+		}
+
 
 		void NemoCoreScheduler::send_process_states(int dest_core, int model_id){
 			static unsigned int num_states_sent = 0;
-
 			struct tw_event* set_state = tw_event_new(get_gid_from_core_local(dest_core,0),JITTER(my_lp->rng),my_lp);
 			auto msg = (nemo_message*) tw_event_data(set_state);
 			msg->message_type = NOS_LOAD_MODEL;
@@ -65,7 +73,11 @@ namespace nemo {
 			if(!global_config->do_neuro_os && num_states_sent > global_config->ns_cores_per_chip * global_config->total_chips){
 				tw_error(TW_LOC,"SENT %ui events - check it \n", num_states_sent);
 			}
+			if(global_config->DEBUG_FLAG){
 
+				auto msg_type = 'M';
+				debug_log << debug_csv(msg_type,model_id,set_state->recv_ts,get_gid_from_core_local(dest_core,0));
+			}
 
 		}
 		void NemoCoreScheduler::reverse_scheduler_event(tw_bf* bf, nemo::nemo_message* m, tw_lp* lp) {
@@ -202,6 +214,11 @@ namespace nemo {
 				msg->intended_neuro_tick = spk.time;
 				msg->source_core = -1;
 				tw_event_send(os_input_spike_evt);
+				if(global_config->DEBUG_FLAG){
+
+					debug_log << "msg_type,model_id,dest_time,dest_core\n";
+					debug_log << debug_csv('S',model_id,dest_t,get_gid_from_core_local(spk.dest_core,spk.dest_axon));
+				}
 			}
 		}
 
@@ -220,6 +237,10 @@ namespace nemo {
 			msg->debug_time = tw_now(lp);
 			msg->random_call_count = lp->rng->count;
 			tw_event_send(os_tick);
+			if(global_config->DEBUG_FLAG){
+				s->debug_log = std::ofstream ("core_debug.txt");
+				s->debug_log << "msg_type,model_id,dest_time,dest_core\n";
+			}
 			s->init_process_models();
 		}
 		void sched_pre_run(NemoCoreScheduler* s, tw_lp* lp) {
@@ -241,6 +262,7 @@ namespace nemo {
 			s->core_commit(bf, m, lp);
 		}
 		void sched_core_finish(NemoCoreScheduler* s, tw_lp* lp) {
+			s->debug_log.close();
 			s->core_finish(lp);
 		}
 

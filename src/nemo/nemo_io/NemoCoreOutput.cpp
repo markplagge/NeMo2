@@ -95,3 +95,37 @@ nemo::NemoPosixOut::NemoPosixOut(std::string spike_fn, std::string mpot_fn, int 
 													mpot_out(std::move(mpot_fn)),spike_out(spike_fn),rank(rank) {
 
 }
+
+nemo::NemoDebugRecord::NemoDebugRecord(long core_id) : core_id(core_id) {}
+
+
+void nemo::NemoDebugRecord::set_neurons(const std::vector<NemoTNNeuronStats>& neurons) {
+	NemoDebugRecord::neurons = neurons;
+
+}
+
+
+
+nemo::NemoTNNeuronStats::NemoTNNeuronStats(long neuron_id, unsigned long spike_sent_count, unsigned long spike_recv_count, unsigned int core_dest, unsigned int neuron_dest, const std::vector<double>& active_times) : neuron_id(neuron_id), spike_sent_count(spike_sent_count), spike_recv_count(spike_recv_count), core_dest(core_dest), neuron_dest(neuron_dest), active_times(active_times) {}
+
+nemo::NemoDebugJSONHandler::NemoDebugJSONHandler(const std::string& filename) : filename(filename) {}
+nemo::NemoDebugJSONHandler::NemoDebugJSONHandler() {
+	this->filename = std::string("./model_stats.json");
+}
+void nemo::NemoDebugJSONHandler::write_data() {
+	configuru::Config cfg = configuru::serialize(this->get_core_records());
+	auto fmt_ops = configuru::FormatOptions();
+	fmt_ops.object_align_values = true;
+	fmt_ops.sort_keys = true;
+	configuru::dump_file(this->filename,cfg,fmt_ops);
+}
+std::vector<nemo::NemoDebugRecord > nemo::NemoDebugJSONHandler::get_core_records() {
+	std::vector<NemoDebugRecord> records;
+
+	for (const auto& core_record : core_records) {
+		NemoDebugRecord r = NemoDebugRecord(core_records[0].get());
+		records.push_back(r);
+	}
+
+	return records;
+}

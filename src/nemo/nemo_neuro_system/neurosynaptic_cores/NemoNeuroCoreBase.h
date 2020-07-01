@@ -45,7 +45,10 @@ namespace nemo {
 		class NemoNeuroCoreBase {
 
 			//INeuroCoreBase();
+
 		public:
+
+
 			static void core_init(void* s, tw_lp* lp) {
 
 				auto core = static_cast<NemoNeuroCoreBase*>(s);
@@ -102,7 +105,6 @@ namespace nemo {
 
 			void save_spike(nemo_message* m, long dest_core, long neuron_id, double current_time) const;
 
-			void core_init(tw_lp* lp);
 
 			void forward_event(tw_bf* bf, nemo_message* m, tw_lp* lp);
 
@@ -128,6 +130,7 @@ namespace nemo {
 			virtual ~NemoNeuroCoreBase(){};
 
 			static NemoCoreOutput *output_system;
+			static NemoDebugJSONHandler *debug_system;
 			static bool is_init;
 
 

@@ -3,9 +3,10 @@
 //
 #include "NemoNeuroCoreBase.h"
 #include "../neuron_models/neuron_factory.h"
+#include <regex>
+#include <sstream>
 #include <string>
 #include <utility>
-#include <regex>
 namespace nemo {
 	namespace neuro_system {
 
@@ -13,6 +14,8 @@ namespace nemo {
 		bool NemoNeuroCoreBase::is_init = false;
 		std::map<int, nemo::config::NemoModel> NemoNeuroCoreBase::models;
 		std::vector<ModelFile> NemoNeuroCoreBase::model_files;
+
+		NemoDebugJSONHandler *NemoNeuroCoreBase::debug_system;
 		/**
  * Manages a heartbeat message. If this LP has not sent a heartbeat message, send it, and set the
  * heartbeat status to true.
@@ -182,15 +185,14 @@ namespace nemo {
 			//    this->spike_output->save_spike(s);
 		}
 
-		void NemoNeuroCoreBase::core_init(tw_lp* lp) {
-			this->core_local_id = get_core_id_from_gid(lp->gid);
-			this->has_self_firing_neuron = false;
-			auto x = new NemoPosixOut();
-			auto out = new NemoCoreOutput(core_local_id, x);
-			this->output_system = out;
-			// Use the nemo global config to set up this core
-
-		}
+//		void NemoNeuroCoreBase::core_init(tw_lp* lp) {
+//			this->core_local_id = get_core_id_from_gid(lp->gid);
+//			this->has_self_firing_neuron = false;
+//			auto x = new NemoPosixOut();
+//			auto out = new NemoCoreOutput(core_local_id, x);
+//			this->output_system = out;
+			// Use the nemo global config to set up this cor
+		// }
 
 		void NemoNeuroCoreBase::forward_event(tw_bf* bf, nemo_message* m, tw_lp* lp) {
 			this->cur_message = m;
@@ -204,6 +206,17 @@ namespace nemo {
 				if (update_data.length()) {
 					this->init_current_model(update_data);
 				}
+				int num_non_outputs = 0;
+				int num_outputs = 0;
+				for(auto &neuron : this->neuron_array){
+					if (neuron->dest_core >= 0 || neuron -> dest_axon >= 0){
+						num_non_outputs += 1;
+					}else {
+						num_outputs += 1;
+					}
+				}
+
+
 			}
 			else {
 				this->forward_heartbeat_handler();
@@ -227,25 +240,61 @@ namespace nemo {
 					tw_error(TW_LOC, "Error - got message %i in neuro core base", m->message_type);
 				}
 			}
+
 		}
 
 		void NemoNeuroCoreBase::reverse_event(tw_bf* bf, nemo_message* m, tw_lp* lp) {
 		}
 
 		void NemoNeuroCoreBase::core_commit(tw_bf* bf, nemo_message* m, tw_lp* lp) {
+#define nrec cr->neurons[i]
 			if (is_output_spike_sent(this->evt_stat) || is_spike_sent(this->evt_stat)) {
 
 				f_save_spikes(m);
 			}
 			if(is_heartbeat_rec(this->evt_stat) && global_config->save_membrane_pots){
-					f_save_mpots(lp);
+				f_save_mpots(lp);
 			}
-		}
+			if(global_config->DEBUG_FLAG){
+				auto cr = this->debug_system->core_records[core_local_id];
+				for (int i = 0; i <neuron_array.size() ; ++i) {
+					auto n = neuron_array[i];
+						switch (this->evt_stat) {
+						case BF_Event_Status::Spike_Sent:
+							nrec.spike_sent_count ++;
+							break;
+						case BF_Event_Status::Spike_Rec:
+							nrec.spike_recv_count ++;
+							break;
+						}
+						if(is_output_spike_sent(this->evt_stat) || is_spike_sent(this->evt_stat) || is_heartbeat_rec(this->evt_stat) || is_hb_sent(this->evt_stat)){
+						cr->neurons[i].active_times.push_back(tw_now(lp));
+						cr->neurons[i].active_time_msg_rcv.push_back(m->message_type);
 
+					}
+
+				}
+
+			}
+
+		}
+#undef nrec
 		void NemoNeuroCoreBase::pre_run(tw_lp* lp) {
-			NemoOutputHandler * output_handler;
+
 
 			if (!this->is_init) {
+				NemoOutputHandler * output_handler;
+				NemoDebugJSONHandler * debug_handler;
+
+				if(config::NemoConfig::DEBUG_FLAG){
+					std::stringstream s;
+					s << "debug_rank_" << g_tw_mynode << ".json";
+					debug_handler = new NemoDebugJSONHandler(s.str(),(unsigned int)(global_config->ns_cores_per_chip / global_config->world_size));
+					nemo::neuro_system::NemoNeuroCoreBase::debug_system = debug_handler;
+
+				}
+				//@TODO: NOTE - REMOVE THIS FOR PROD //
+
 				/** @note: only posix IO right now */
 				if (global_config->output_system == config::POSIX) {
 					tw_printf(TW_LOC, "Posix output mode enabled \n");
@@ -258,9 +307,19 @@ namespace nemo {
 
 				is_init = true;
 			}
+			if(config::NemoConfig::DEBUG_FLAG){
+					debug_system->core_records.push_back(std::make_shared<NemoDebugRecord>(core_local_id));
+			}
+
 		}
 
 		void NemoNeuroCoreBase::core_finish(tw_lp* lp) {
+			if(this->is_init){
+				this->output_system->output_handler->close_comms();
+				if(global_config->DEBUG_FLAG)
+					this->debug_system->write_data();
+				this->is_init = false;
+			}
 		}
 
 		void NemoNeuroCoreBase::cleanup_output() {
@@ -285,7 +344,9 @@ namespace nemo {
 
 				auto did_fire = item->fire();
 				if (did_fire) {
-					this->evt_stat = add_evt_status(this->evt_stat, BF_Event_Status::Output_Spike_Sent);
+					if (item->dest_axon < 0 || item->dest_core < 0) {
+						this->evt_stat = add_evt_status(this->evt_stat, BF_Event_Status::Output_Spike_Sent);
+					}
 					this->evt_stat = add_evt_status(this->evt_stat, BF_Event_Status::Spike_Sent);
 					if(global_config->save_all_spikes || item->dest_core < 0) {
 						this->neuron_spike_record.push_back(nid);
@@ -354,11 +415,20 @@ namespace nemo {
 			for (std::string line; std::getline(mdl_string, line); ){
 
 
+
 				auto core_stat_cfg = configuru::parse_string(line.c_str(),configuru::FORGIVING,"CORE_INIT");
 				if(check){
 					auto new_core_type = get_core_enum_from_json((std::string)core_stat_cfg["type"]);
 					this->my_core_type = new_core_type;
 					create_blank_neurons();
+					if (global_config->DEBUG_FLAG) {
+						int nid = 0;
+						for (const auto& item : this->neuron_array) {
+							auto stat = NemoTNNeuronStats(nid,item->dest_core,item->dest_axon);
+							this->debug_system->core_records[core_local_id]->neurons.push_back(stat);
+						}
+					}
+
 					check ++;
 				}
 				auto neuron_id =(unsigned int) core_stat_cfg["localID"];
@@ -366,6 +436,7 @@ namespace nemo {
 				this->neuron_array[neuron_id].get()->init_from_json_string(line);
 				this->neuron_dest_cores[neuron_id] = this->neuron_array[neuron_id]->dest_core;
 				this->neuron_dest_axons[neuron_id] = this->neuron_array[neuron_id]->dest_axon;
+
 			}
 
 

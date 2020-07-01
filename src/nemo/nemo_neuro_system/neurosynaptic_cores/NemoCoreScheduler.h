@@ -84,6 +84,7 @@ namespace nemo {
 
 		class NemoCoreScheduler : public NemoNeuroCoreBase {
 		public:
+			std::ofstream debug_log;
 			double last_active_time = 0;
 			neuro_os::sim_proc::SimProcessQueue process_queue;
 			std::vector<std::shared_ptr<nemo::config::ScheduledTask>> task_list;
