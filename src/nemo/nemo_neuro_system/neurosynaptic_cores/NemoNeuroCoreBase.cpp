@@ -219,6 +219,7 @@ namespace nemo {
 
 			}
 			else {
+
 				this->forward_heartbeat_handler();
 
 				//				auto core_stat_cfg = configuru::parse_string(m->update_message,configuru::FORGIVING,"CORE LOAD");

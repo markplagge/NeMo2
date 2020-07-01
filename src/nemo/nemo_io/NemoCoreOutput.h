@@ -104,7 +104,7 @@ namespace nemo {
 		std::string filename;
 		std::vector<std::shared_ptr<NemoDebugRecord>> core_records;
 		NemoDebugJSONHandler();
-		explicit NemoDebugJSONHandler(const std::string& filename);
+		explicit NemoDebugJSONHandler(std::string  filename);
 		NemoDebugJSONHandler(const std::string& filename, unsigned int num_cores) : filename(filename) {
 			core_records.reserve(num_cores);
 		}
