@@ -227,6 +227,9 @@ namespace nemo {
 
 		void NemoNeuroCoreBase::core_commit(tw_bf* bf, nemo_message* m, tw_lp* lp) {
 #define nrec cr->neurons[i]
+			if (m->message_type == HEARTBEAT && !is_heartbeat_rec(this->evt_stat)){
+						tw_error(TW_LOC, "Error - heartbeat flag not set? ");
+				}
 			if (is_output_spike_sent(this->evt_stat) || is_spike_sent(this->evt_stat)) {
 
 				f_save_spikes(m);
