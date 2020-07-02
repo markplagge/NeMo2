@@ -173,26 +173,8 @@ namespace nemo {
 		void NemoNeuroCoreBase::save_spike(nemo_message* m, long dest_core, long neuron_id, double current_time) const {
 			this->output_system->save_spike(m->source_core, dest_core, m->dest_axon, m->debug_time, current_time);
 			this->output_system->output_handler->write();
-			//    SpikeData s = {0};
-			//    s.source_core = core_local_id;
-			//    s.dest_axon = m->dest_axon;
-			//    s.source_neuro_tick = current_neuro_tick;
-			//    s.dest_neuro_tick = m->intended_neuro_tick;
-			//    s.dest_core = dest_core;
-			//    s.source_neuron = neuron_id;
-			//    s.tw_source_time = tw_now(my_lp);
-			//
-			//    this->spike_output->save_spike(s);
 		}
 
-//		void NemoNeuroCoreBase::core_init(tw_lp* lp) {
-//			this->core_local_id = get_core_id_from_gid(lp->gid);
-//			this->has_self_firing_neuron = false;
-//			auto x = new NemoPosixOut();
-//			auto out = new NemoCoreOutput(core_local_id, x);
-//			this->output_system = out;
-			// Use the nemo global config to set up this cor
-		// }
 
 		void NemoNeuroCoreBase::forward_event(tw_bf* bf, nemo_message* m, tw_lp* lp) {
 			this->cur_message = m;
@@ -219,11 +201,7 @@ namespace nemo {
 
 			}
 			else {
-
 				this->forward_heartbeat_handler();
-
-				//				auto core_stat_cfg = configuru::parse_string(m->update_message,configuru::FORGIVING,"CORE LOAD");
-
 				if (m->message_type == NEURON_SPIKE) {
 					for (const auto& item : neuron_array) {
 						item->integrate(m->dest_axon);
