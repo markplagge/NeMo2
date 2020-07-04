@@ -232,7 +232,7 @@ namespace nemo {
 					s << "debug_rank_" << g_tw_mynode << ".json";
 					auto gsv = (unsigned int)(global_config->ns_cores_per_chip / global_config->world_size);
 					debug_handler = new NemoDebugJSONHandler(s.str(),gsv);
-					std::cout << "Rank " << g_tw_mynode << " created debug system with " << gsv << "core slots";
+
 					nemo::neuro_system::NemoNeuroCoreBase::debug_system = debug_handler;
 				}
 				//@TODO: NOTE - REMOVE THIS FOR PROD //
@@ -358,8 +358,14 @@ namespace nemo {
 		void NemoNeuroCoreBase::core_finish(tw_lp* lp) {
 			if (this->is_init) {
 				this->output_system->output_handler->close_comms();
-				if (global_config->DEBUG_FLAG)
+				if (global_config->DEBUG_FLAG) {
 					this->debug_system->write_data();
+
+				}
+
+				delete nemo::neuro_system::NemoNeuroCoreBase::debug_system;
+				delete NemoNeuroCoreBase::output_system;
+
 				this->is_init = false;
 			}
 		}

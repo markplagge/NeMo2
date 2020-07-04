@@ -35,6 +35,10 @@ namespace nemo {
 	}
 	int ModelFile::read_file(const std::string& model_path){
 		std::ifstream is (model_path,std::ifstream::binary);
+		if(!is.is_open()) {
+			tw_error(TW_LOC, "Model with path %s was not opened.",model_path.c_str());
+			exit(-1);
+		}
 		is.seekg (0, is.end);
 		int length = is.tellg();
 		is.seekg (0, is.beg);
