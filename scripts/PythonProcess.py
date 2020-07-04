@@ -76,11 +76,11 @@ class Process:
         return f"P {self.process_id} clock: {self.clock} "
 
     def add_message(self, proc_message = PROC_MESSAGE.SHOULD_WAIT):
-        m = f"{self.msg_tmplate()} says {proc_message.name}"
+        m = f"{self.msg_tmplate()} says {proc_message}"
         self.messages.append(m)
 
     def add_event(self, proc_message = PROC_STATE.PRE_WAIT):
-        m = f"{self.msg_tmplate()} is now {proc_message.name}"
+        m = f"{self.msg_tmplate()} is now {proc_message}"
         self.messages.append(m)
 
 
