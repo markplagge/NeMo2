@@ -13,7 +13,7 @@ std::vector<int> split(const std::string &s, char delimiter){
 std::vector<int> tokens;
 std::string token;
 std::istringstream token_stream(s);
-while (std::__1::getline(token_stream, token, delimiter)) {
+while (std::getline(token_stream, token, delimiter)) {
 tokens.push_back(stoi(token));
 }
 return tokens;
