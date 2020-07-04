@@ -40,11 +40,15 @@ namespace nemo {
 
 	std::vector<SpikeRep> SpikeFile::get_spikes_at_time(unsigned int time) {
 		// if you don't need to allocate a new vector, don't do it (hence the if/else/while)
+		std::vector<SpikeRep> spikes;
 		if (time == 0){
-			return std::move(input_spikes[time]);
-			current_time ++;
+			if (input_spikes.count(current_time) >= 1) {
+				//sp = std::move(input_spikes[current_time]);
+				//current_time ++;
+				spikes = input_spikes[current_time];
+			}
+
 		}else{
-			std::vector<SpikeRep> spikes;
 			while(time){
 				if (input_spikes.count(time) >= 1){
 					auto spx = input_spikes[time];
@@ -53,11 +57,10 @@ namespace nemo {
 				}
 				time --;
 				current_time ++;
-
 			}
-			return std::move(spikes);
-		}
 
+		}
+		return std::move(spikes);
 	}
 
 }

@@ -46,7 +46,7 @@ set(nemo_lib_srcs
         nemo_ross.h mapping_functions.cpp
         nemo_io/ModelFile.cpp nemo_neuro_system/neurosynaptic_cores/NemoCoreScheduler.cpp
         nemo_neuro_system/neuron_models/NemoNeuronTrueNorth.cpp
-        mapping_functions.cpp nemo_io/SpikeFile.cpp nemo_io/SpikeFile.h nemo_neuro_system/neurosynaptic_cores/TaskProcessMap.cpp nemo_io/get_js_mp_file.cpp nemo_io/get_js_mp_file.h nemo_neuro_system/VirtualCore.cpp nemo_neuro_system/VirtualCore.h nemo_neuro_system/neuron_models/neuron_factory.h nemo_neuro_system/neuron_models/TNNeuronState.cpp nemo_neuro_system/neuron_models/TNNeuronState.h nemo_neuro_system/BenchmarkModelDef.cpp nemo_neuro_system/BenchmarkModelDef.h)
+        mapping_functions.cpp nemo_io/SpikeFile.cpp nemo_io/SpikeFile.h nemo_neuro_system/neurosynaptic_cores/TaskProcessMap.cpp nemo_io/get_js_mp_file.cpp nemo_io/get_js_mp_file.h nemo_neuro_system/VirtualCore.cpp nemo_neuro_system/VirtualCore.h nemo_neuro_system/neuron_models/neuron_factory.h nemo_neuro_system/neuron_models/TNNeuronState.cpp nemo_neuro_system/neuron_models/TNNeuronState.h nemo_neuro_system/BenchmarkModelDef.cpp nemo_neuro_system/BenchmarkModelDef.h BF_Event_Status.cpp BF_Event_Status.h)
 
 add_library(nemo2_lib ${nemo_lib_hdrs} ${nemo_lib_srcs})
 #nemo_ross_main.cpp contains main().

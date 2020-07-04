@@ -66,6 +66,7 @@ namespace nemo {
 		 * Uses configuru
 		 */
 		void NemoConfig::init_from_tw_opts(char* config_file) {
+			std::cout << "** Config in rank " << g_tw_mynode << " loading config file \n";
 			world_size = tw_nnodes();
 			auto cli_cfg_file = std::string(config_file);
 			if (cli_cfg_file.length() > 0) {
