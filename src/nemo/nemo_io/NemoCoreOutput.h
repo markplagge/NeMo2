@@ -160,6 +160,8 @@ namespace nemo {
 		void open_comms() override;
 		void close_comms() override;
 		void write() override;
+		void write_spike_data();
+		void write_mp_data();
 	};
 
 

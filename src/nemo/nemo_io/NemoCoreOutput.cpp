@@ -5,6 +5,8 @@
 #include "NemoCoreOutput.h"
 #include <mpi.h>
 
+#include <iostream>
+#include <ross.h>
 #include <utility>
 void nemo::NemoCoreOutput::save_spike(long source_neuron, long dest_core, long dest_axon, double sched_spike_time, double cur_time, bool is_interchip) const {
 	NemoSpikeData s{};
@@ -47,34 +49,54 @@ std::ostream& nemo::operator<<(std::ostream& os, const nemo::NemoCoreOutput& out
 }
 
 void nemo::NemoPosixOut::open_comms() {
+	if(g_tw_mynode == 0) {
+		std::cout << "Opening spike and mp files \n";
+	}
 	sp_f_out.open(spike_out);
 	mp_f_out.open(mpot_out);
 }
 
 void nemo::NemoPosixOut::close_comms() {
+	write_spike_data();
 	sp_f_out.close();
+	write_mp_data();
 	mp_f_out.close();
 }
 
-void nemo::NemoPosixOut::write() {
-	if (spike_data.size() > prewrite_buffer) {
+void nemo::NemoPosixOut::write_spike_data(){
+	if (spike_data.size()) {
 		if (sp_out_hdr == 0) {
 			sp_f_out << spike_data[0].get_header();
 			sp_out_hdr = 1;
 		}
-		for (NemoSpikeData datum : spike_data) {
+		for (auto& datum : spike_data) {
 			sp_f_out << datum.to_csv();
 		}
+		spike_data.clear();
 	}
-	if (mem_data.size() > prewrite_buffer) {
+}
+void nemo::NemoPosixOut::write_mp_data(){
+	if (mem_data.size()){
 		if (mp_out_hdr == 0) {
 			mp_out_hdr = 1;
 			mp_f_out << mem_data[0].get_header();
 		}
-		for (NemoSpikeData datum : spike_data) {
+		for (auto &datum : mem_data) {
 			mp_f_out << datum.to_csv();
 		}
+
+		mem_data.clear();
 	}
+}
+void nemo::NemoPosixOut::write() {
+	if (spike_data.size() > prewrite_buffer) {
+		write_spike_data();
+	}
+	if (mem_data.size() > prewrite_buffer) {
+		write_mp_data();
+	}
+
+
 }
 
 nemo::NemoPosixOut::NemoPosixOut(std::string filename, int rank) : filename(std::move(filename)), rank(rank) {
