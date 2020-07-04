@@ -179,7 +179,7 @@ namespace nemo {
 			auto l_task_list = global_config->scheduler_inputs;
 			auto l_model_list = global_config->models;
 			//std::vector<NemoModel> NemoConfig::models;
-			std::map<int, config::NemoModel> models;
+			//std::map<int, config::NemoModel> models;
 			int max_models = -1;
 			if (!global_config->do_neuro_os){
 				max_models = 1;
@@ -244,7 +244,10 @@ namespace nemo {
 				else {
 					tw_printf(TW_LOC, "NON POSIX CODE - NOT IMPLEMENTED SO USING POSIX");
 				}
-				output_handler = new NemoPosixOut(global_config->output_spike_file, global_config->output_membrane_pot_file, g_tw_mynode);
+				auto rank_hdr = "rank " + std::to_string(g_tw_mynode) + "_";
+				auto output_spike_filename = rank_hdr + global_config->output_spike_file;
+				auto membrane_pot_filename = rank_hdr + global_config->output_membrane_pot_file;
+				output_handler = new NemoPosixOut(output_spike_filename,membrane_pot_filename, g_tw_mynode);
 				output_handler->open_comms();
 				NemoNeuroCoreBase::output_system = new NemoCoreOutput(this->core_local_id, output_handler);
 
@@ -266,40 +269,21 @@ namespace nemo {
 			this->my_lp = lp;
 			this->my_bf = bf;
 			if (m->message_type == NOS_LOAD_MODEL) {
-				std::string tdl_m = "CORE INIT";
-				int check_nums = -1;
-				this->current_model = this->models[m->model_id];
-				auto update_data = this->model_files[this->current_model.id].get_core_settings(this->core_local_id);
-				if (update_data.length()) {
-					this->init_current_model(update_data);
-				}
-				int num_non_outputs = 0;
-				int num_outputs = 0;
-				for (auto& neuron : this->neuron_array) {
-					if (neuron->dest_core >= 0 || neuron->dest_axon >= 0) {
-						num_non_outputs += 1;
-					}
-					else {
-						num_outputs += 1;
-					}
-				}
-			}
-			else {
+				this->model_init_interrupt_resume_handler(m->model_id);
+			}else {
 				this->forward_heartbeat_handler();
 				if (m->message_type == NEURON_SPIKE) {
-					for (const auto& item : neuron_array) {
+					for (const auto& item : *core_neurons) {
 						item->integrate(m->dest_axon);
 					}
-				}
-				else if (m->message_type == HEARTBEAT) {
+				}else if (m->message_type == HEARTBEAT) {
 					//LEAK
 					run_leaks();
 					//Fire
 					run_fires();
 					//Reset
 					run_resets();
-				}
-				else {
+				}else {
 					tw_error(TW_LOC, "Error - got message %i in neuro core base", m->message_type);
 				}
 			}
@@ -332,8 +316,8 @@ namespace nemo {
 			}
 			if (global_config->DEBUG_FLAG) {
 				auto cr = this->debug_system->core_records[core_local_id];
-				for (int i = 0; i < neuron_array.size(); ++i) {
-					auto n = neuron_array[i];
+				for (int i = 0; i < core_neurons->size(); ++i) {
+					auto n = (*core_neurons)[i];
 					switch (this->evt_stat) {
 					case BF_Event_Status::Spike_Sent:
 						nrec.spike_sent_count++;
@@ -362,14 +346,11 @@ namespace nemo {
 					this->debug_system->write_data();
 
 				}
-
 				delete nemo::neuro_system::NemoNeuroCoreBase::debug_system;
 				delete NemoNeuroCoreBase::output_system;
-
 				this->is_init = false;
 			}
 		}
-
 		void NemoNeuroCoreBase::cleanup_output() {
 		}
 
@@ -382,7 +363,7 @@ namespace nemo {
 #endif
 			for (int neuron_id = 0; neuron_id < global_config->neurons_per_core; neuron_id++) {
 				for (int leak_num = 0; leak_num < leak_needed_count; leak_num++) {
-					neuron_array[neuron_id]->leak();
+					(*core_neurons)[neuron_id]->leak();
 				}
 			}
 		}
@@ -391,7 +372,7 @@ namespace nemo {
 		 */
 		void NemoNeuroCoreBase::run_fires() {
 			unsigned int nid = 0;
-			for (const auto& item : neuron_array) {
+			for (const auto& item : *core_neurons) {
 
 				auto did_fire = item->fire();
 				if (did_fire) {
@@ -431,7 +412,7 @@ namespace nemo {
 #ifdef OPEN_MP
 #pragma omp parallel for
 #endif
-			for (const auto& neuron : neuron_array) {
+			for (const auto& neuron : *core_neurons) {
 				neuron->reset();
 			}
 		}
@@ -455,71 +436,112 @@ namespace nemo {
 		}
 
 		void NemoNeuroCoreBase::create_blank_neurons() {
-			if (neurons_init) {
-				neuron_stack.push_back(neuron_array);
+			if (this->core_neurons == nullptr){
+
+				this->core_neurons = std::shared_ptr<std::vector<std::shared_ptr<NemoNeuronGeneric>>>(new std::vector<std::shared_ptr<NemoNeuronGeneric>>() );
+				this->core_neurons->reserve(global_config->neurons_per_core);
 			}
 			for (int i = 0; i < global_config->neurons_per_core; i++) {
 				std::shared_ptr<NemoNeuronGeneric> neuron(get_new_neuron(this->my_core_type, this->my_lp, i, this->core_local_id));
-				this->neuron_array.push_back(neuron);
+				(*this->core_neurons).push_back(neuron);
 			}
 		}
 
-		void NemoNeuroCoreBase::init_current_model(std::string model_def) {
+		void NemoNeuroCoreBase::model_init_interrupt_resume_handler(int model_id) {
+
+
+			/* logic
+			 * First - if there is a model already running, save it in the state queue
+			 * Next -  if the model has already been loaded, resume it
+			 * If the model has not been already loaded, init it
+			 * */
+
+			if(this->current_model_id != 0){
+				this->interrupt_running_model(this->current_model_id);
+			}
+			if(this->is_model_paused(model_id)) {
+				this->resume_model();
+			}else{
+				this->start_new_model(this->model_files[model_id].get_core_settings(this->core_local_id));
+			}
+			this->current_model_id = model_id;
+
+		}
+		bool NemoNeuroCoreBase::is_model_paused(int model_id) {
+			return  this->model_queues.is_model_init(model_id);
+		}
+		void NemoNeuroCoreBase::interrupt_running_model(int model_id) {
+			if (this->core_neurons->size() != 0){ // if there are already neurons, then we can pause the model
+				auto state = std::shared_ptr<NeuroCoreStateHolder<NemoNeuronGeneric>>(new NeuroCoreStateHolder<NemoNeuronGeneric> (this->core_neurons, this->my_core_type,
+						this->neuron_dest_cores,this->neuron_dest_axons));
+				this->model_queues.push(state, model_id);
+			}
+
+		}
+
+		void NemoNeuroCoreBase::resume_model(){
+			auto state = this->model_queues.pop();
+			this->core_neurons = state->neuron_states;
+			this->my_core_type = state->core_type;
+			this->neuron_dest_axons = state->dest_axons;
+			this->neuron_dest_cores = state->dest_cores;
+			//reset heartbeat and state
+			this->heartbeat_sent = false;
+			this->send_heartbeat();
+			this->last_leak_time = tw_now(this->my_lp);
+
+
+
+		}
+		void NemoNeuroCoreBase::start_new_model(std::string model_def){
+
+			std::istringstream mdl_string(model_def);
+			int check = -1;
 			this->neuron_dest_axons.reserve(global_config->neurons_per_core);
 			this->neuron_dest_cores.reserve(global_config->neurons_per_core);
-			//line-by-line init of neurons
-			std::istringstream mdl_string(model_def);
-			/** @todo: I know this is bad to parse the lines multiple times but I don't want to pass around configuru ojbects
-			 */
-
-			int check = -1;
 			for (std::string line; std::getline(mdl_string, line);) {
-
-				auto core_stat_cfg = configuru::parse_string(line.c_str(), configuru::FORGIVING, "CORE_INIT");
+				auto core_stat_cfg = configuru::parse_string(
+						line.c_str(), configuru::FORGIVING, "CORE_INIT");
 				if (check) {
-					auto new_core_type = get_core_enum_from_json((std::string)core_stat_cfg["type"]);
+					auto new_core_type =
+							get_core_enum_from_json((std::string)core_stat_cfg["type"]);
 					this->my_core_type = new_core_type;
 					create_blank_neurons();
 					if (global_config->DEBUG_FLAG) {
 						int nid = 0;
-						for (const auto& item : this->neuron_array) {
+						for (const auto &item : *this->core_neurons) {
 							auto stat = NemoTNNeuronStats(nid, item->dest_core, item->dest_axon);
-							this->debug_system->core_records[core_local_id]->neurons.push_back(stat);
+							this->debug_system->core_records[core_local_id]->neurons.push_back(
+									stat);
 						}
 					}
-
 					check++;
 				}
 				auto neuron_id = (unsigned int)core_stat_cfg["localID"];
-
-				this->neuron_array[neuron_id].get()->init_from_json_string(line);
-				this->neuron_dest_cores[neuron_id] = this->neuron_array[neuron_id]->dest_core;
-				this->neuron_dest_axons[neuron_id] = this->neuron_array[neuron_id]->dest_axon;
+				(*this->core_neurons)[neuron_id].get()->init_from_json_string(line);
+				this->neuron_dest_cores[neuron_id] =
+						(*this->core_neurons)[neuron_id]->dest_core;
+				this->neuron_dest_axons[neuron_id] =
+						(*this->core_neurons)[neuron_id]->dest_axon;
 			}
 		}
 
-		void NemoNeuroCoreBase::interrupt_running_model() {
-		}
 
-		void NemoNeuroCoreBase::resume_running_model() {
-		}
 
 		void NemoNeuroCoreBase::f_save_spikes(nemo_message* m) {
 			for (const auto& spike_record : neuron_spike_record) {//@todo fix neurono spike record vector
-
-				auto n = this->neuron_array[spike_record];
-
+				auto n = (*this->core_neurons)[spike_record];
 				save_spike(m, n->dest_core, n->dest_axon, tw_now(my_lp));
-
 			}
 		}
 		void NemoNeuroCoreBase::f_save_mpots(tw_lp* lp) {
 			int nid = 0;
-			for (const auto& neuron : neuron_array) {
+			for (const auto& neuron :* core_neurons) {
 				this->output_system->save_membrane_pot(nid, neuron->membrane_pot, tw_now(lp));
 				nid++;
 			}
 		}
+
 	}// namespace neuro_system
 
 }// namespace nemo

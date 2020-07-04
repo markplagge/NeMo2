@@ -1,4 +1,3 @@
-#include <climits>
 /**
 * NeMo main file - taken from the main nemo.c program
 * Created by Mark Plagge on 4/30/20.
@@ -29,8 +28,7 @@ namespace nemo {
 		template<>
 		void print_vector_limit<>(std::vector<config::ScheduledTask> elms) {
 			int chk = 0;
-		std:
-			stringstream sb;
+		std::stringstream sb;
 			for (const auto& elm : elms) {
 				if (VERBOSE == 0 || VERBOSE != chk) {
 					sb << tbstop << pr_emph("Scheduler Entry:") << endl

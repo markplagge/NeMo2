@@ -11,12 +11,14 @@
 #include "../../nemo_io/NemoCoreOutput.h"
 #include "../../nemo_io/SpikeFile.h"
 #include "../neuron_models/NemoNeuronGeneric.h"
+#include "NeuroModelQueue.h"
 
 #include <configuru.hpp>
 #include <neuro_os.h>
 #include <ross.h>
 #include <visit_struct/visit_struct.hpp>
 #include <visit_struct/visit_struct_intrusive.hpp>
+#include <queue>
 
 #define RNG_START(lp) auto rng_count = lp->rng->count
 #define RNG_END(lp) msg->random_call_count = (lp->rng->count - rng_count)
@@ -48,22 +50,20 @@ namespace nemo {
 
 		public:
 
-
 			static void core_init(void* s, tw_lp* lp) {
-
 				auto core = static_cast<NemoNeuroCoreBase*>(s);
 				new (core) NemoNeuroCoreBase();
-
 				//determine the type of core we want through mapping
 				for (const auto& model : global_config->models) {
 					core->models[model.id] = model;
 				}
-
 				auto global_id = lp->gid;
 				core->core_local_id = get_core_id_from_gid(global_id);
 				core->my_lp = lp;
-				/* @note using standard POSIX output - one file per PE */
+				auto core_nv = std::shared_ptr<std::vector<std::shared_ptr<NemoNeuronGeneric>>>();
 
+				core->core_neurons = core_nv;
+				/* @note using standard POSIX output - one file per PE */
 			}
 
 			static void pre_run(void* s, tw_lp* lp) {
@@ -95,7 +95,7 @@ namespace nemo {
 				core->core_finish(lp);
 			}
 
-
+			virtual ~NemoNeuroCoreBase(){};
 
 			virtual void forward_heartbeat_handler();
 
@@ -103,49 +103,52 @@ namespace nemo {
 
 			virtual void send_heartbeat();
 
-			void save_spike(nemo_message* m, long dest_core, long neuron_id, double current_time) const;
-
-
-			void forward_event(tw_bf* bf, nemo_message* m, tw_lp* lp);
-
-			void reverse_event(tw_bf* bf, nemo_message* m, tw_lp* lp);
-
-			void core_commit(tw_bf* bf, nemo_message* m, tw_lp* lp);
-
-			void pre_run(tw_lp* lp);
-
-			void core_finish(tw_lp* lp);
+			virtual void save_spike(nemo_message* m, long dest_core, long neuron_id, double current_time) const;
+			virtual void forward_event(tw_bf* bf, nemo_message* m, tw_lp* lp);
+			virtual void reverse_event(tw_bf* bf, nemo_message* m, tw_lp* lp);
+			virtual void core_commit(tw_bf* bf, nemo_message* m, tw_lp* lp);
+			virtual void pre_run(tw_lp* lp);
+			 void core_finish(tw_lp* lp);
 
 			void cleanup_output();
 			void run_leaks();
 			void run_fires();
 			void run_resets();
 			void create_blank_neurons();
-			void init_current_model(std::string model_def);
-			void interrupt_running_model();
-			void resume_running_model();
+
+			int current_model_id = 0;
+			bool is_model_paused(int model_id);
+			void model_init_interrupt_resume_handler(int model_id);
+			void start_new_model(std::string model_def);
+			void interrupt_running_model(int model_id);
+			void resume_model();
+
+
+
 			void f_save_spikes(nemo_message* m);
 			void f_save_mpots(tw_lp* lp);
 			bool is_dest_interchip(int neuron_id);
-			virtual ~NemoNeuroCoreBase(){};
 
-			static NemoCoreOutput *output_system;
-			static NemoDebugJSONHandler *debug_system;
+
+
+
+			void init_model_files();
+
+			/* Static members */
+			static NemoCoreOutput* output_system;
+			static NemoDebugJSONHandler* debug_system;
 			static bool is_init;
 
-
-			std::vector<std::vector<std::shared_ptr<NemoNeuronGeneric>>> neuron_stack;
+			int running_model_swap_status = 0;
 			bool neurons_init = false;
 			bool save_spikes;
 			bool save_mpots;
 			/**
-* The last time that this core had activity. This refers to any  message.
-*/
+			 * * The last time that this core had activity. This refers to any  message.*/
 			long current_neuro_tick = 0;
 			long previous_neuro_tick = -1;
 			/**
-* The last time this core computed the leak.
-*/
+			 * * The last time this core computed the leak.*/
 			long last_leak_time = 0;
 			long leak_needed_count = 0;
 
@@ -184,19 +187,25 @@ namespace nemo {
 			tw_bf* my_bf;
 			NemoNeuronGeneric neuron_template;
 			static std::map<int, nemo::config::NemoModel> models;
-			std::map<int, std::string> test_map;
+
 			nemo::config::NemoModel current_model;
 			std::vector<std::shared_ptr<NemoNeuronGeneric>> state_stack;
 
 			/** NemoNeuroCoreBase contains neurons and neuron states in a structure */
-			std::vector<std::shared_ptr<NemoNeuronGeneric>> neuron_array;
+
+			std::queue<core_types> model_core_type_queue;
+			std::queue<std::shared_ptr<std::vector<std::shared_ptr<NemoNeuronGeneric>>>> model_core_neuron_queue;
+			std::shared_ptr<std::vector<std::shared_ptr<NemoNeuronGeneric>>> core_neurons;
+			NeuroModelQueue<NemoNeuronGeneric> model_queues;
+
+
 			std::vector<unsigned int> neuron_spike_record;
 			std::vector<unsigned int> neuron_dest_cores;
 			std::vector<unsigned int> neuron_dest_axons;
 
 			static std::vector<ModelFile> model_files;
 			std::vector<SpikeFile> spike_files;
-			void init_model_files();
+
 			core_types my_core_type = NO_CORE_TYPE;
 
 			/**
@@ -207,8 +216,8 @@ namespace nemo {
  */
 			int output_mode = 2;
 
-
 		};
+
 
 	}// namespace neuro_system
 }// namespace nemo

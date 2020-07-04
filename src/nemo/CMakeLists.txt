@@ -25,7 +25,6 @@ set(nemo_lib_hdrs
         nemo_globals.h
         # nemo.h is the base header
         include/nemo.h
-
         nemo_neuro_system/neuron_models/NemoNeuronGeneric.h
         nemo_io/NemoCoreOutput.h
         nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreBase.h
@@ -35,18 +34,35 @@ set(nemo_lib_hdrs
         nemo_neuro_system/neurosynaptic_cores/NemoCoreDefs.h
         nemo_neuro_system/neuron_models/NemoNeuronTrueNorth.h
         mapping_functions.h
-        nemo_formatted_print.h)
-set(nemo_lib_srcs
+        nemo_formatted_print.h
+        nemo_io/SpikeFile.cpp nemo_io/SpikeFile.h
+        nemo_io/get_js_mp_file.h
+        nemo_neuro_system/VirtualCore.h
+        nemo_neuro_system/neuron_models/neuron_factory.h
+        nemo_neuro_system/neuron_models/TNNeuronState.h
+        nemo_neuro_system/BenchmarkModelDef.h
+        nemo_neuro_system/neurosynaptic_cores/NeuroModelQueue.h
+        BF_Event_Status.h)
 
+set(nemo_lib_srcs
         nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreBase.cpp
         nemo_neuro_system/neuron_models/NemoNeuronGeneric.cpp
         nemo_io/NemoCoreOutput.cpp
         nemo_globals.cpp
         nemo_config/NemoConfig.cpp
         nemo_ross.h mapping_functions.cpp
-        nemo_io/ModelFile.cpp nemo_neuro_system/neurosynaptic_cores/NemoCoreScheduler.cpp
+        nemo_io/ModelFile.cpp
+        nemo_neuro_system/neurosynaptic_cores/NemoCoreScheduler.cpp
         nemo_neuro_system/neuron_models/NemoNeuronTrueNorth.cpp
-        mapping_functions.cpp nemo_io/SpikeFile.cpp nemo_io/SpikeFile.h nemo_neuro_system/neurosynaptic_cores/TaskProcessMap.cpp nemo_io/get_js_mp_file.cpp nemo_io/get_js_mp_file.h nemo_neuro_system/VirtualCore.cpp nemo_neuro_system/VirtualCore.h nemo_neuro_system/neuron_models/neuron_factory.h nemo_neuro_system/neuron_models/TNNeuronState.cpp nemo_neuro_system/neuron_models/TNNeuronState.h nemo_neuro_system/BenchmarkModelDef.cpp nemo_neuro_system/BenchmarkModelDef.h BF_Event_Status.cpp BF_Event_Status.h)
+        mapping_functions.cpp
+        nemo_neuro_system/neurosynaptic_cores/TaskProcessMap.cpp
+        nemo_io/get_js_mp_file.cpp
+        nemo_neuro_system/VirtualCore.cpp
+        nemo_neuro_system/neuron_models/TNNeuronState.cpp
+        nemo_neuro_system/BenchmarkModelDef.cpp
+        BF_Event_Status.cpp
+        nemo_neuro_system/neurosynaptic_cores/NeuroModelQueue.cpp
+       )
 
 add_library(nemo2_lib ${nemo_lib_hdrs} ${nemo_lib_srcs})
 #nemo_ross_main.cpp contains main().
