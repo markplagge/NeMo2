@@ -102,11 +102,12 @@ namespace nemo {
 	};
 	struct NemoDebugJSONHandler{
 		std::string filename;
-		std::vector<std::shared_ptr<NemoDebugRecord>> core_records;
+		std::map<int, std::shared_ptr<NemoDebugRecord>> core_records;
 		NemoDebugJSONHandler();
 		explicit NemoDebugJSONHandler(std::string  filename);
 		NemoDebugJSONHandler(const std::string& filename, unsigned int num_cores) : filename(filename) {
-			core_records.reserve(num_cores);
+			//core_records.reserve(num_cores);
+
 		}
 		void write_data();
 		std::vector<NemoDebugRecord> get_core_records();

@@ -3,12 +3,14 @@
 //
 
 #include "ModelFile.h"
+#include "get_js_mp_file.h"
 #include <fstream>
 #include <iostream>
+#include <regex>
+#include <ross.h>
 #include <sstream>
 #include <utility>
-#include "get_js_mp_file.h"
-#include <regex>
+#include <ross.h>
 // Global static pointer used to ensure a single instance of the class.
 namespace nemo {
 

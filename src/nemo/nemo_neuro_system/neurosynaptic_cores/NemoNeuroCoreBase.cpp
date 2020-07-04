@@ -174,6 +174,45 @@ namespace nemo {
 			this->output_system->save_spike(m->source_core, dest_core, m->dest_axon, m->debug_time, current_time);
 			this->output_system->output_handler->write();
 		}
+		void NemoNeuroCoreBase::init_model_files(){
+			int model_counter = 0;
+			auto l_task_list = global_config->scheduler_inputs;
+			auto l_model_list = global_config->models;
+			//std::vector<NemoModel> NemoConfig::models;
+			std::map<int, config::NemoModel> models;
+			int max_models = -1;
+			if (!global_config->do_neuro_os){
+				max_models = 1;
+			}
+			for (const auto& model : l_model_list) {
+				/**@todo: handle unlimited runs */
+				if (max_models > 0 and max_models <= model_counter){
+					break;
+				}
+				bool does_model_have_known_runtime = true;
+
+				auto model_id = model.id;
+				models.emplace(model_id, model);
+				if (model.model_file_path.length() != 0) {
+					if (g_tw_mynode == 0)
+						tw_printf(TW_LOC, "Loading Model #%i: %s \n", model_counter, model.model_file_path.c_str());
+					auto model_file = ModelFile(model.model_file_path);
+					if (g_tw_mynode == 0)
+						tw_printf(TW_LOC, "Loading Spike #%i: %s \n", model_counter, model.spike_file_path.c_str());
+					auto spike_file = SpikeFile(model.spike_file_path);
+					model_files.push_back(model_file);
+					spike_files.push_back(spike_file);
+				}
+				else {
+					tw_printf(TW_LOC, "Loading benchmark model %s \n", model.benchmark_model_name.c_str());
+					ModelFile mf;
+					SpikeFile sf;
+					model_files.push_back(mf);
+					spike_files.push_back(sf);
+				}
+				model_counter += 1;
+			}
+		}
 		/**
 		 * Pre-run functions - set up IO, etc.
 		 * @param lp
@@ -184,10 +223,16 @@ namespace nemo {
 				NemoOutputHandler* output_handler;
 				NemoDebugJSONHandler* debug_handler;
 
+				if(g_tw_mynode > 0){
+					init_model_files();
+				}
+
 				if (config::NemoConfig::DEBUG_FLAG) {
 					std::stringstream s;
 					s << "debug_rank_" << g_tw_mynode << ".json";
-					debug_handler = new NemoDebugJSONHandler(s.str(), (unsigned int)(global_config->ns_cores_per_chip / global_config->world_size));
+					auto gsv = (unsigned int)(global_config->ns_cores_per_chip / global_config->world_size);
+					debug_handler = new NemoDebugJSONHandler(s.str(),gsv);
+					std::cout << "Rank " << g_tw_mynode << " created debug system with " << gsv << "core slots";
 					nemo::neuro_system::NemoNeuroCoreBase::debug_system = debug_handler;
 				}
 				//@TODO: NOTE - REMOVE THIS FOR PROD //
@@ -206,7 +251,8 @@ namespace nemo {
 				is_init = true;
 			}
 			if (config::NemoConfig::DEBUG_FLAG) {
-				debug_system->core_records.push_back(std::make_shared<NemoDebugRecord>(core_local_id));
+				auto core_debug = std::make_pair(core_local_id, std::make_shared<NemoDebugRecord>(core_local_id));
+				debug_system->core_records.emplace(core_debug);
 			}
 		}
 		/**
@@ -352,6 +398,7 @@ namespace nemo {
 					}
 					if (is_dest_interchip(nid)) {
 						/** @todo: add cross chip communication recording here */
+						this->evt_stat  = add_evt_status(this->evt_stat, BF_Event_Status::Spike_Sent_Interchip);
 					}
 
 					if (not item->is_self_manage_spike_events()) {
@@ -455,9 +502,9 @@ namespace nemo {
 			for (const auto& spike_record : neuron_spike_record) {//@todo fix neurono spike record vector
 
 				auto n = this->neuron_array[spike_record];
-				if (global_config->save_all_spikes || n->dest_axon < 0) {
-					save_spike(m, n->dest_core, n->dest_axon, tw_now(my_lp));
-				}
+
+				save_spike(m, n->dest_core, n->dest_axon, tw_now(my_lp));
+
 			}
 		}
 		void NemoNeuroCoreBase::f_save_mpots(tw_lp* lp) {
