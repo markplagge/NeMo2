@@ -20,7 +20,7 @@ namespace nemo
 /**
  * JITTER(rng) -> macro for adding a jitter value to sent messages.
  */
-#define JITTER_SCALE 1000
+#define JITTER_SCALE 10
 #define JITTER(rng) tw_rand_unif (rng) / JITTER_SCALE
 /** @} */
 

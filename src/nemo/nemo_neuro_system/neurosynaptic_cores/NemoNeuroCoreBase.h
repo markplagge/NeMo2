@@ -60,6 +60,7 @@ namespace nemo {
 				auto global_id = lp->gid;
 				core->core_local_id = get_core_id_from_gid(global_id);
 				core->my_lp = lp;
+				core->create_blank_neurons();
 				auto core_nv = std::shared_ptr<std::vector<std::shared_ptr<NemoNeuronGeneric>>>();
 
 				core->core_neurons = core_nv;
@@ -193,8 +194,8 @@ namespace nemo {
 
 			/** NemoNeuroCoreBase contains neurons and neuron states in a structure */
 
-			std::queue<core_types> model_core_type_queue;
-			std::queue<std::shared_ptr<std::vector<std::shared_ptr<NemoNeuronGeneric>>>> model_core_neuron_queue;
+//			std::queue<core_types> model_core_type_queue;
+//			std::queue<std::shared_ptr<std::vector<std::shared_ptr<NemoNeuronGeneric>>>> model_core_neuron_queue;
 			std::shared_ptr<std::vector<std::shared_ptr<NemoNeuronGeneric>>> core_neurons;
 			NeuroModelQueue<NemoNeuronGeneric> model_queues;
 

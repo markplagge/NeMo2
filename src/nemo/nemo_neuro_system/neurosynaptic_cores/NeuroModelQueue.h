@@ -10,6 +10,7 @@
 #include <queue>
 #include <map>
 #include "../../nemo_globals.h"
+#include <memory>
 namespace nemo{
 	namespace neuro_system {
 		template<typename T>
@@ -32,6 +33,7 @@ namespace nemo{
 			int size;
 			std::map<int, bool> model_id_init_map;
 			std::queue<std::shared_ptr<NeuroCoreStateHolder<T>>> model_states;
+			std::map<int, std::shared_ptr<NeuroCoreStateHolder<T>>> model_state_map;
 
 
 			std::shared_ptr<NeuroCoreStateHolder<T>> pop(){
@@ -42,10 +44,14 @@ namespace nemo{
 			void push(std::shared_ptr<NeuroCoreStateHolder<T>> state, int model_id){
 				this->model_id_init_map[model_id] = true;
 				model_states.push(state);
+				model_state_map[model_id] = state;
 			}
 			bool is_model_init(int model_id){
 				return model_id_init_map[model_id];
 			}
+			std::shared_ptr<NeuroCoreStateHolder<T>> get_model_at(int model_id){
+				return model_state_map[model_id];
+				}
 
 		};
 

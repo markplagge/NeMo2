@@ -222,10 +222,9 @@ namespace nemo {
 			if (!this->is_init) {
 				NemoOutputHandler* output_handler;
 				NemoDebugJSONHandler* debug_handler;
-
-				if(g_tw_mynode > 0){
-					init_model_files();
-				}
+//				if(g_tw_mynode > 0){
+				init_model_files();
+//				}
 
 				if (config::NemoConfig::DEBUG_FLAG) {
 					std::stringstream s;
@@ -449,7 +448,6 @@ namespace nemo {
 
 		void NemoNeuroCoreBase::model_init_interrupt_resume_handler(int model_id) {
 
-
 			/* logic
 			 * First - if there is a model already running, save it in the state queue
 			 * Next -  if the model has already been loaded, resume it
@@ -493,8 +491,11 @@ namespace nemo {
 
 
 		}
+		////// SWITCH TO A MAP AND JUST KEEP TRACK OF JOB ID /////////
 		void NemoNeuroCoreBase::start_new_model(std::string model_def){
-
+			if (this->core_neurons == nullptr){
+				this->create_blank_neurons();
+			}
 			std::istringstream mdl_string(model_def);
 			int check = -1;
 			this->neuron_dest_axons.reserve(global_config->neurons_per_core);
@@ -506,7 +507,7 @@ namespace nemo {
 					auto new_core_type =
 							get_core_enum_from_json((std::string)core_stat_cfg["type"]);
 					this->my_core_type = new_core_type;
-					create_blank_neurons();
+
 					if (global_config->DEBUG_FLAG) {
 						int nid = 0;
 						for (const auto &item : *this->core_neurons) {
