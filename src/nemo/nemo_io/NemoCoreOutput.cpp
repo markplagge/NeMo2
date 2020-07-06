@@ -113,7 +113,8 @@ nemo::NemoPosixOut::NemoPosixOut() {
 	rank = rnk;
 }
 nemo::NemoPosixOut::NemoPosixOut(std::string spike_fn, std::string mpot_fn, int rank) : filename(spike_fn),
-																						mpot_out(std::move(mpot_fn)), spike_out(spike_fn), rank(rank) {
+																						mpot_out(std::move(mpot_fn)),
+																						spike_out(spike_fn), rank(rank) {
 }
 
 nemo::NemoDebugRecord::NemoDebugRecord(long core_id) : core_id(core_id) {}

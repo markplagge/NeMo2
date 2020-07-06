@@ -96,7 +96,11 @@ namespace nemo {
 		void set_neurons(const std::vector<NemoTNNeuronStats>& neurons);
 		explicit NemoDebugRecord(long core_id);
 		NemoDebugRecord(NemoDebugRecord *old) {
-			this->neurons = old->neurons;
+			for(auto &n : old->neurons){
+				this->neurons.push_back(n);
+			}
+
+			//this->neurons = old->neurons;
 			this->core_id = old->core_id;
 		}
 	};
