@@ -112,7 +112,8 @@ namespace nemo {
 			std::string pr_emph(printable const& value) {
 				//return print_as_color<ColorCode::magenta>(value);
 				//return pr_extd(value, ColorCode::x_nice_wt);
-				return pr_extd(value, 206);
+				//return pr_extd(value, 206);
+				return print_as_color<ColorCode::white>(value);
 			}
 
 			//auto rowstar = print_as_color<ColorCode::bright_blue>("*");
