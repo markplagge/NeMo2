@@ -15,6 +15,7 @@
 #include <iostream>
 #include <ross.h>
 #include <utility>
+#include "./nemo_neuro_system/VirtualCore.h"
 namespace nemo {
 	config::NemoConfig* global_config = NULL;
 	namespace config {
@@ -128,14 +129,23 @@ tw_lptype ne_lps[8] = {
 		 (final_f)neuro_system::sched_core_finish,
 		 (map_f)nemo_map,
 		 sizeof(neuro_system::NemoCoreScheduler)},
-		{(init_f)neuro_system::NemoNeuroCoreBase::core_init,
-		 (pre_run_f)neuro_system::NemoNeuroCoreBase::pre_run,
-		 (event_f)neuro_system::NemoNeuroCoreBase::forward_event,
-		 (revent_f)neuro_system::NemoNeuroCoreBase::reverse_event,
-		 (commit_f)neuro_system::NemoNeuroCoreBase::core_commit,
-		 (final_f)neuro_system::NemoNeuroCoreBase::core_finish,
+
+		{(init_f)	neuro_system::VirtualCore::s_virtual_core_init,
+		 (pre_run_f)neuro_system::VirtualCore::s_virtual_pre_run,
+		 (event_f)	neuro_system::VirtualCore::s_virtual_forward_event,
+		 (revent_f)	neuro_system::VirtualCore::s_virtual_reverse_event,
+		 (commit_f)	neuro_system::VirtualCore::s_virtual_core_commit,
+		 (final_f)	neuro_system::VirtualCore::s_virtual_core_finish,
 		 (map_f)nemo_map,
 		 sizeof(neuro_system::NemoNeuroCoreBase)},
+//		{(init_f)neuro_system::NemoNeuroCoreBase::s_core_init,
+//		 (pre_run_f)neuro_system::NemoNeuroCoreBase::s_pre_run,
+//		 (event_f)neuro_system::NemoNeuroCoreBase::s_forward_event,
+//		 (revent_f)neuro_system::NemoNeuroCoreBase::s_reverse_event,
+//		 (commit_f)neuro_system::NemoNeuroCoreBase::s_core_commit,
+//		 (final_f)neuro_system::NemoNeuroCoreBase::s_core_finish,
+//		 (map_f)nemo_map,
+//		 sizeof(neuro_system::NemoNeuroCoreBase)},
 		{0},
 };
 

@@ -244,7 +244,10 @@ namespace nemo {
 				else {
 					tw_printf(TW_LOC, "NON POSIX CODE - NOT IMPLEMENTED SO USING POSIX");
 				}
-				output_handler = new NemoPosixOut(global_config->output_spike_file, global_config->output_membrane_pot_file, g_tw_mynode);
+				auto rank_hdr = "rank_" + std::to_string(g_tw_mynode) + "_";
+				auto output_spike_filename = rank_hdr + global_config->output_spike_file;
+				auto membrane_pot_filename = rank_hdr + global_config->output_membrane_pot_file;
+				output_handler = new NemoPosixOut(output_spike_filename,membrane_pot_filename, g_tw_mynode);
 				output_handler->open_comms();
 				NemoNeuroCoreBase::output_system = new NemoCoreOutput(this->core_local_id, output_handler);
 
