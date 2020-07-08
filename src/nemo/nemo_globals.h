@@ -19,6 +19,11 @@ namespace nemo
 /** @defgroup global_macros Global Macro helper functions  *{ */
 /**
  * JITTER(rng) -> macro for adding a jitter value to sent messages.
+ * If there are 4096 cores, then there will be a max message population of:
+ * (4096 * 256) between ticks $Tc_1$, $Tc_2$. The jitter is there to ensure that
+ * all of the messages for a particular tick do not collide.
+ *
+ *
  */
 #define JITTER_SCALE 1000
 #define JITTER(rng) tw_rand_unif (rng) / JITTER_SCALE
@@ -31,14 +36,21 @@ namespace nemo
 #define LITTLE_TICK = (double)1 / 1000
 #define BIG_TICK = 1
 
-unsigned long
-get_neurosynaptic_tick (double now);
+	/**
+	 *  gets the current neruosynaptic tick. With double time values, is really just floor(now)
+	 * @param now
+	 * @return
+	 */
+unsigned long get_neurosynaptic_tick (double now);
 
 /** @todo: use this macro rather than calling yet another function and write more macros for timing */
 #define GET_NEUROSYNAPTIC_TICK(now) long (now)
-
-unsigned long
-get_next_neurosynaptic_tick (double now);
+/**
+ * Get next neuro tick - Returns the next tick for scheduling
+ * @param now
+ * @return
+ */
+unsigned long get_next_neurosynaptic_tick (double now);
 
 /**
  * lt_offset - This is the value of the next little tick. Use this when creating events in the

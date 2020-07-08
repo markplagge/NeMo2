@@ -5,6 +5,7 @@
 #ifndef NEMOTNG_NEMOCOREOUTPUT_H
 #define NEMOTNG_NEMOCOREOUTPUT_H
 
+#include <configuru.hpp>
 #include <fstream>
 #include <map>
 #include <ostream>
@@ -12,7 +13,6 @@
 #include <string>
 #include <vector>
 #include <visit_struct/visit_struct.hpp>
-#include <configuru.hpp>
 namespace nemo {
 	/** @defgroup nemoio Nemo IO
  * Nemo IO System -  Defines data structurs and functions for saving and loading files
@@ -34,8 +34,8 @@ namespace nemo {
 		}
 	};
 	template<typename IMPL>
-	struct JsonDataFunctions{
-		std::string to_json(){
+	struct JsonDataFunctions {
+		std::string to_json() {
 			IMPL& underlying = static_cast<IMPL&>(*this);
 			return underlying.get_json();
 		}
@@ -87,37 +87,38 @@ namespace nemo {
 		std::vector<int> active_time_msg_rcv;
 		NemoTNNeuronStats(long neuron_id, unsigned int core_dest, unsigned int neuron_dest) : neuron_id(neuron_id), core_dest(core_dest), neuron_dest(neuron_dest) {}
 		NemoTNNeuronStats(long neuron_id, unsigned long spike_sent_count, unsigned long spike_recv_count, unsigned int core_dest, unsigned int neuron_dest, const std::vector<double>& active_times);
-
-
 	};
 	struct NemoDebugRecord {
 		long core_id;
 		std::vector<NemoTNNeuronStats> neurons;
 		void set_neurons(const std::vector<NemoTNNeuronStats>& neurons);
 		explicit NemoDebugRecord(long core_id);
-		NemoDebugRecord(NemoDebugRecord *old) {
-			for(auto &n : old->neurons){
-				this->neurons.push_back(n);
+		NemoDebugRecord(NemoDebugRecord* old) {
+			if(old == nullptr){
+
+			}else {
+				for (auto& n : old->neurons) {
+					this->neurons.push_back(n);
+				}
+				this->core_id = old->core_id;
 			}
 
+
 			//this->neurons = old->neurons;
-			this->core_id = old->core_id;
+
 		}
 	};
-	struct NemoDebugJSONHandler{
+	struct NemoDebugJSONHandler {
 		std::string filename;
 		std::map<int, std::shared_ptr<NemoDebugRecord>> core_records;
 		NemoDebugJSONHandler();
-		explicit NemoDebugJSONHandler(std::string  filename);
+		explicit NemoDebugJSONHandler(std::string filename);
 		NemoDebugJSONHandler(const std::string& filename, unsigned int num_cores) : filename(filename) {
 			//core_records.reserve(num_cores);
-
 		}
 		void write_data();
 		std::vector<NemoDebugRecord> get_core_records();
 	};
-
-
 
 	class NemoOutputHandler {
 	protected:
@@ -137,9 +138,6 @@ namespace nemo {
 		}
 	};
 
-
-
-
 	class NemoPosixOut : public NemoOutputHandler {
 
 		int sp_out_hdr = 0;
@@ -149,6 +147,7 @@ namespace nemo {
 		int prewrite_buffer = 1024;
 		std::ofstream sp_f_out;
 		std::ofstream mp_f_out;
+
 	protected:
 		std::string filename;
 		std::string spike_out;
@@ -168,8 +167,6 @@ namespace nemo {
 		void write_mp_data();
 	};
 
-
-
 	class NemoCoreOutput {
 	public:
 		long core_id;
@@ -181,12 +178,12 @@ namespace nemo {
 		void save_spike(long source_neuron, long dest_core, long dest_axon, double sched_spike_time, double cur_time, bool is_interchip) const;
 		friend std::ostream& operator<<(std::ostream& os, const NemoCoreOutput& output);
 
-		void 	save_membrane_pot(long source_neuron, double membrane_pot, double cur_time) const;
-		void	save_spike_data(NemoSpikeData d);
-		void	save_membrane_data(NemoMembraneData d);
+		void save_membrane_pot(long source_neuron, double membrane_pot, double cur_time) const;
+		void save_spike_data(NemoSpikeData d);
+		void save_membrane_data(NemoMembraneData d);
 	};
 	/** @} */
 }// namespace nemo
-VISITABLE_STRUCT(nemo::NemoTNNeuronStats, neuron_id, spike_sent_count,spike_recv_count,core_dest,neuron_dest,active_times,active_time_msg_rcv);
-VISITABLE_STRUCT(nemo::NemoDebugRecord, core_id, neurons );
+VISITABLE_STRUCT(nemo::NemoTNNeuronStats, neuron_id, spike_sent_count, spike_recv_count, core_dest, neuron_dest, active_times, active_time_msg_rcv);
+VISITABLE_STRUCT(nemo::NemoDebugRecord, core_id, neurons);
 #endif//NEMOTNG_NEMOCOREOUTPUT_H
