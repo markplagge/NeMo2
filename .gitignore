@@ -64,3 +64,8 @@ CMakeFiles/cmake.check_cache
 cmake-build-debug-system/
 
 cmake-build-debug_triton/
+
+*.aux
+
+docs/
+!docs/Doxyfile
