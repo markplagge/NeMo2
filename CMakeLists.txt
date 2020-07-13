@@ -146,5 +146,5 @@ if(NEMO_DOCS)
     find_package(Doxygen
             REQUIRED dot)
     set(DOXYGEN_EXCLUDE_PATTERNS "*/external/* json.hpp")
-    doxygen_add_docs(nemo2)
+    doxygen_add_docs(nemo2_docs)
 endif() #NEMO_DOCS
