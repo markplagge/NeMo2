@@ -11,6 +11,8 @@
 #include <neuro_os.h>
 #include <visit_struct/visit_struct.hpp>
 #include <visit_struct/visit_struct_intrusive.hpp>
+
+
 namespace nemo {
 	namespace neuro_system {
 
@@ -99,6 +101,10 @@ namespace nemo {
 			void set_task_list(const std::vector<nemo::config::ScheduledTask>& task_list);
 			void init_process_models();
 			void check_waiting_procs();
+			/** nengo_scheduler - instance of the nengo interface to the neuro_os  system*/
+			//neuro_os::NengoInterface nengo_scheduler;
+
+			bool use_nengo_for_scheduling = true;
 
 
 			/**

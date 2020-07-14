@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include "./neurosynaptic_cores/NemoNeuroCoreBase.h"
+#include <neuro_os.h>
 /**
  * Virtual Core - The Scheduler's interface to a neurosynaptic core.
  * Manages stop and start functions
@@ -38,6 +39,7 @@
 					 // create a generic core:
 					 auto core = new NemoNeuroCoreBase();
 					 NemoNeuroCoreBase::s_core_init_from_vcore(core,lp,model_id);
+					 // create a corresponding virtual process
 					 vcore->job_map[model_id] = core;
 					 mx_model_id += 1;
 				 }

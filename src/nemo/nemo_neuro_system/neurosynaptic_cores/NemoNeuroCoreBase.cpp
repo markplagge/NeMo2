@@ -502,6 +502,7 @@ namespace nemo {
 		}
 
 		void NemoNeuroCoreBase::interrupt_running_model() {
+			
 		}
 
 		void NemoNeuroCoreBase::resume_running_model() {
