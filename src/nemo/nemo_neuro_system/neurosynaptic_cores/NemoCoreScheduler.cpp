@@ -5,6 +5,7 @@
 #include "NemoCoreScheduler.h"
 #include <json.hpp>
 namespace nemo {
+	neuro_os::NengoInterface *nengo_scheduler;
 	namespace neuro_system {
 
 
@@ -12,7 +13,9 @@ namespace nemo {
 		void NemoCoreScheduler::forward_scheduler_event(tw_bf* bf, nemo::nemo_message* m, tw_lp* lp) {
 			//Scheduler events are only once per global tick
 			//first queue up next scheduler event
+			this->my_bf = bf;
 			static int did_init = 0;
+			this->cur_message = m;
 			if (! did_init ){
 				std::cout << "GTW EVENTS: " << g_tw_events_per_pe << "\n";
 			}
@@ -175,21 +178,26 @@ namespace nemo {
 
 		std::vector<std::shared_ptr<SimProcess>>   NemoCoreScheduler::get_removable_processes() {
 			auto assigned_processes = this->core_process_map.get_all_assigned_processes();
-			for (int i = 0; i < assigned_processes.size() ; ++i) {
+			for (unsigned long i = 0; i < assigned_processes.size() ; ++i) {
 				auto proc = assigned_processes[i];
 				if(proc->current_state == neuro_os::sim_proc::COMPLETE){
 					auto pid = proc->get_pid();
 
+
 				}
 			}
+			return assigned_processes;
 		}
 		int NemoCoreScheduler::remove_assigned_done_processes() {
-
+			return 0;
 		}
 		void NemoCoreScheduler::scheduler_iteration(){
 			//1. set process queue time:
 			this->process_queue.system_tick();
 			current_scheduler_time ++;
+			if(this->use_nengo_for_scheduling){
+
+			}
 			//2. get_working_cores:
 			auto working_cores = core_process_map.get_working_cores();
 			//3. get processes assigned to cores:
@@ -242,6 +250,14 @@ namespace nemo {
 				s->debug_log << "msg_type,model_id,dest_time,dest_core\n";
 			}
 			s->init_process_models();
+			//Initialize and set up the nengo scheduler
+			if(s->use_nengo_for_scheduling){
+				auto num_cores_in_sim = (global_config->ns_cores_per_chip * global_config->total_chips);
+				nengo_scheduler = new neuro_os::NengoInterface(true,num_cores_in_sim,
+															   s->schedule_mode,4096,config::NemoConfig::main_config_file);
+				neuro_os::run_precompute_sim(*nengo_scheduler,int(g_tw_ts_end));
+			}
+
 		}
 		void sched_pre_run(NemoCoreScheduler* s, tw_lp* lp) {
 		}

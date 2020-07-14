@@ -7,7 +7,7 @@
 //#include "../../external/eigen/Eigen/Dense"
 #include <ross.h>
 #include <cstdint>
-
+#include <neuro_os.h>
 #include <vector>
 #include <string>
 #include "BF_Event_Status.h"
@@ -281,6 +281,8 @@ constexpr int NEURONS_PER_TN_CORE = 256;
 constexpr int WEIGHTS_PER_TN_NEURON = 4;
 constexpr int MAX_OUTPUT_PER_TN_NEURON = 1;
 /** @} */
+
+extern neuro_os::NengoInterface *nengo_scheduler;
 
 
 

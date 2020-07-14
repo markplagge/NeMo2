@@ -69,6 +69,7 @@ namespace nemo {
 				for (const auto& model : global_config->models){
 					if (model.id == model_id){
 						s->models[model_id] = model;
+						s->model_id = model_id;
 					}
 				}
 				auto global_id = lp->gid;
@@ -217,7 +218,7 @@ namespace nemo {
  */
 			int output_mode = 2;
 
-
+			int model_id = 0;
 		};
 
 	}// namespace neuro_system

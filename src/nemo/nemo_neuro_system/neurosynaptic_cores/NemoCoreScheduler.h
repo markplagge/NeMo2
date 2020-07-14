@@ -14,6 +14,7 @@
 
 
 namespace nemo {
+	extern neuro_os::NengoInterface *nengo_scheduler;
 	namespace neuro_system {
 
 			using namespace neuro_os;
@@ -88,6 +89,7 @@ namespace nemo {
 		public:
 			std::ofstream debug_log;
 			double last_active_time = 0;
+
 			neuro_os::sim_proc::SimProcessQueue process_queue;
 			std::vector<std::shared_ptr<nemo::config::ScheduledTask>> task_list;
 			unsigned long current_scheduler_time;
@@ -105,7 +107,11 @@ namespace nemo {
 			//neuro_os::NengoInterface nengo_scheduler;
 
 			bool use_nengo_for_scheduling = true;
-
+			/**
+			 * Schedule Mode:
+			 * 0 = FCFS, 1 = RR
+			 */
+			int schedule_mode = 1;
 
 			/**
 			 * primary function entry point for one scheduler tick. Called every neurosynaptic tick.

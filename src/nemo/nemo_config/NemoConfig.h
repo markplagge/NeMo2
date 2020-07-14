@@ -18,9 +18,11 @@
 #include <map>
 #include <ostream>
 #include <string>
+#include <neuro_os.h>
 
 //#include <rapidjson/rapidjson.h>
 namespace nemo {
+
 	namespace config {
 		typedef enum SchedType {
 			FCFS,
@@ -83,8 +85,8 @@ namespace nemo {
 
 			std::string get_settings();
 			std::string sched_mode_to_string() const;
-
 			NemoModel get_model(int model_id);
+
 		};
 		extern char* primary_config_file;
 		
@@ -95,6 +97,8 @@ namespace nemo {
 
 		void set_sim_size();
 		void error_reporter(std::string str);
+
+
 
 	}// namespace config
 }// namespace nemo

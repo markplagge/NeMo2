@@ -1,4 +1,4 @@
-#include <climits>
+
 /**
 * NeMo main file - taken from the main nemo.c program
 * Created by Mark Plagge on 4/30/20.
@@ -10,12 +10,12 @@
 #include "nemo_formatted_print.h"
 #include "nemo_neuro_system/neurosynaptic_cores/NemoCoreDefs.h"
 
+#include "./nemo_neuro_system/VirtualCore.h"
 #include "nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreBase.h"
 #include <codecvt>
 #include <iostream>
 #include <ross.h>
 #include <utility>
-#include "./nemo_neuro_system/VirtualCore.h"
 namespace nemo {
 	config::NemoConfig* global_config = NULL;
 	namespace config {
@@ -24,13 +24,10 @@ namespace nemo {
 	namespace p {
 		using namespace config;
 
-
-
-
 		template<>
 		void print_vector_limit<>(std::vector<config::ScheduledTask> elms) {
 			int chk = 0;
-		std:
+
 			stringstream sb;
 			for (const auto& elm : elms) {
 				if (VERBOSE == 0 || VERBOSE != chk) {
@@ -98,11 +95,11 @@ namespace nemo {
 			//pr_e("NeuroOS Task Schedule:", " ");
 			print_vector_limit(std::move(elms));
 		}
-//		template<>
-//		void pr_v<config::ScheduledTask>( std::string desc, std::vector<config::ScheduledTask> elms) {
-//			print_vector_limit(std::move(elms));
-//		}
-		void pr_v(std::vector<config::ScheduledTask> elms){
+		//		template<>
+		//		void pr_v<config::ScheduledTask>( std::string desc, std::vector<config::ScheduledTask> elms) {
+		//			print_vector_limit(std::move(elms));
+		//		}
+		void pr_v(std::vector<config::ScheduledTask> elms) {
 			print_vector_limit(std::move(elms));
 		}
 
@@ -120,6 +117,8 @@ unsigned int ::nemo::config::SIM_SIZE = 1;
 unsigned int ::nemo::config::LPS_PER_PE = 1;
 int ::nemo::p::VERBOSE = 1;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-field-initializers"
 tw_lptype ne_lps[8] = {
 		{(init_f)neuro_system::sched_core_init,
 		 (pre_run_f)neuro_system::sched_pre_run,
@@ -130,30 +129,31 @@ tw_lptype ne_lps[8] = {
 		 (map_f)nemo_map,
 		 sizeof(neuro_system::NemoCoreScheduler)},
 
-		{(init_f)	neuro_system::VirtualCore::s_virtual_core_init,
+		{(init_f)neuro_system::VirtualCore::s_virtual_core_init,
 		 (pre_run_f)neuro_system::VirtualCore::s_virtual_pre_run,
-		 (event_f)	neuro_system::VirtualCore::s_virtual_forward_event,
-		 (revent_f)	neuro_system::VirtualCore::s_virtual_reverse_event,
-		 (commit_f)	neuro_system::VirtualCore::s_virtual_core_commit,
-		 (final_f)	neuro_system::VirtualCore::s_virtual_core_finish,
+		 (event_f)neuro_system::VirtualCore::s_virtual_forward_event,
+		 (revent_f)neuro_system::VirtualCore::s_virtual_reverse_event,
+		 (commit_f)neuro_system::VirtualCore::s_virtual_core_commit,
+		 (final_f)neuro_system::VirtualCore::s_virtual_core_finish,
 		 (map_f)nemo_map,
 		 sizeof(neuro_system::NemoNeuroCoreBase)},
-//		{(init_f)neuro_system::NemoNeuroCoreBase::s_core_init,
-//		 (pre_run_f)neuro_system::NemoNeuroCoreBase::s_pre_run,
-//		 (event_f)neuro_system::NemoNeuroCoreBase::s_forward_event,
-//		 (revent_f)neuro_system::NemoNeuroCoreBase::s_reverse_event,
-//		 (commit_f)neuro_system::NemoNeuroCoreBase::s_core_commit,
-//		 (final_f)neuro_system::NemoNeuroCoreBase::s_core_finish,
-//		 (map_f)nemo_map,
-//		 sizeof(neuro_system::NemoNeuroCoreBase)},
+		//		{(init_f)neuro_system::NemoNeuroCoreBase::s_core_init,
+		//		 (pre_run_f)neuro_system::NemoNeuroCoreBase::s_pre_run,
+		//		 (event_f)neuro_system::NemoNeuroCoreBase::s_forward_event,
+		//		 (revent_f)neuro_system::NemoNeuroCoreBase::s_reverse_event,
+		//		 (commit_f)neuro_system::NemoNeuroCoreBase::s_core_commit,
+		//		 (final_f)neuro_system::NemoNeuroCoreBase::s_core_finish,
+		//		 (map_f)nemo_map,
+		//		 sizeof(neuro_system::NemoNeuroCoreBase)},
 		{0},
 };
+#pragma clang diagnostic pop
 
 void init_nemo(nemo::config::NemoConfig* cfg) {
 	using namespace config;
 	CORE_SIZE = cfg->ns_cores_per_chip * cfg->neurons_per_core;
 	SIM_SIZE = cfg->total_chips * CORE_SIZE;
-	LPS_PER_PE  = cfg->lps_per_pe;
+	LPS_PER_PE = cfg->lps_per_pe;
 	SYNAPSES_IN_CORE = 1;// still one due to super-synapse logic from Original nemo
 
 	// configure ROSS
@@ -168,18 +168,17 @@ void init_nemo(nemo::config::NemoConfig* cfg) {
 	g_tw_events_per_pe = cfg->est_events_per_pe;
 
 	/** set up LPs */
-	tw_define_lps(nlp,sizeof(nemo_message));
+	tw_define_lps(nlp, sizeof(nemo_message));
 	int i = 0;
-	if (g_tw_mynode == 0){
-		std::cout <<"DEBUG: creating scheduler core" <<endl;
+	if (g_tw_mynode == 0) {
+		std::cout << "DEBUG: creating scheduler core" << endl;
 		tw_lp_settype(i, &ne_lps[0]);
-		i ++;
+		i++;
 	}
 
-	for(; i < (int) g_tw_nlp; i ++){
+	for (; i < (int)g_tw_nlp; i++) {
 		tw_lp_settype(i, &ne_lps[1]);
 	}
-
 }
 
 void print_sim_config() {
@@ -193,17 +192,17 @@ void print_sim_config() {
 	if (global_config->do_neuro_os) {
 		pr_e("N.O.S. Scheduler Mode: ", global_config->sched_mode_to_string());
 	}
-	else{
+	else {
 		pr_e("N.O.S. Scheduler Mode: ", "DISABLED");
 	}
 	pr_e("Total (SIM) LPs :", global_config->total_lps);
 	pr_e("LPs per PE:", global_config->lps_per_pe);
 	pr_e("Lookahead set at: ", global_config->lookahead);
-	pr_e("Preset events per pe: ",global_config->est_events_per_pe);
-	pr_e("Save spikes? ",global_config->save_all_spikes);
-	pr_e("Save Memb. Pots?",global_config->save_membrane_pots);
-	pr_e("Save N.O.S. Stats?",global_config->save_nos_stats);
-	pr_v("Stat File Locs:",global_config->stat_files());
+	pr_e("Preset events per pe: ", global_config->est_events_per_pe);
+	pr_e("Save spikes? ", global_config->save_all_spikes);
+	pr_e("Save Memb. Pots?", global_config->save_membrane_pots);
+	pr_e("Save N.O.S. Stats?", global_config->save_nos_stats);
+	pr_v("Stat File Locs:", global_config->stat_files());
 	pr_v("Core Types: ", global_config->core_type_ids);
 	pr_e("Debug mode? ", config::NemoConfig::DEBUG_FLAG);
 	pr_e("Save all spikes? ", global_config->save_all_spikes);
@@ -215,18 +214,17 @@ void print_sim_config() {
 
 	p::start_sim_ftr();
 }
-char primary_config_file[4096] =  {'\0'};
+char primary_config_file[4096] = {'\0'};
 tw_optdef loc_nemo_tw_options[] = {
 		TWOPT_GROUP("NeMo 2 - TNG Runtime Options"),
 		TWOPT_FLAG("debug", nemo::config::NemoConfig::DEBUG_FLAG, "Debug mode?"),
 		TWOPT_ULONG("mean", nemo::config::NemoConfig::test, "test_value"),
-		TWOPT_CHAR("cfg",primary_config_file, "Main configuration file"),
-		TWOPT_END()
-};
+		TWOPT_CHAR("cfg", primary_config_file, "Main configuration file"),
+		TWOPT_END()};
 
 int main(int argc, char* argv[]) {
 	//primary_config_file = (char*)calloc(sizeof(char), 1024);
-	std::snprintf(primary_config_file,1000,"./example_config.json");
+	std::snprintf(primary_config_file, 1000, "./example_config.json");
 	p::VERBOSE = 5;
 	using namespace nemo;
 	auto main_config = new nemo::config::NemoConfig();
@@ -245,14 +243,13 @@ int main(int argc, char* argv[]) {
 	nemo::global_config = main_config;
 	// initialize ROSS and NeMo:
 	init_nemo(main_config);
-	if(g_tw_mynode == 0){
+	if (g_tw_mynode == 0) {
 		print_sim_config();
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
-	if(tw_ismaster()) printf("@@@ Calling run...\n");
+	if (tw_ismaster()) printf("@@@ Calling run...\n");
 	MPI_Barrier(MPI_COMM_WORLD);
 	g_tw_ts_end = 5;
-
 
 	tw_run();
 
