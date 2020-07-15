@@ -136,3 +136,15 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
     add_subdirectory(test)
     message("Adding test folders")
 endif()
+
+# ===========================
+# Documentation
+# ===========================
+option(NEMO_DOCS "Build NeMo Documentation?" )
+if(NEMO_DOCS)
+    message("Adding Documentation" )
+    find_package(Doxygen
+            REQUIRED dot)
+    set(DOXYGEN_EXCLUDE_PATTERNS "*/external/* json.hpp")
+    doxygen_add_docs(nemo2_docs)
+endif() #NEMO_DOCS

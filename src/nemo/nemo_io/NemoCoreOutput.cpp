@@ -1,13 +1,15 @@
 //
 // Created by Mark Plagge on 11/1/19.
 //
-
+#include <visit_struct.hpp>
+#include <configuru.hpp>
 #include "NemoCoreOutput.h"
 #include <mpi.h>
 
 #include <iostream>
 #include <ross.h>
 #include <utility>
+
 void nemo::NemoCoreOutput::save_spike(long source_neuron, long dest_core, long dest_axon, double sched_spike_time, double cur_time, bool is_interchip) const {
 	NemoSpikeData s{};
 	s.source_neuron = source_neuron;
@@ -113,7 +115,8 @@ nemo::NemoPosixOut::NemoPosixOut() {
 	rank = rnk;
 }
 nemo::NemoPosixOut::NemoPosixOut(std::string spike_fn, std::string mpot_fn, int rank) : filename(spike_fn),
-																						mpot_out(std::move(mpot_fn)), spike_out(spike_fn), rank(rank) {
+																						mpot_out(std::move(mpot_fn)),
+																						spike_out(spike_fn), rank(rank) {
 }
 
 nemo::NemoDebugRecord::NemoDebugRecord(long core_id) : core_id(core_id) {}
@@ -139,7 +142,7 @@ std::vector<nemo::NemoDebugRecord> nemo::NemoDebugJSONHandler::get_core_records(
 	std::vector<NemoDebugRecord> records;
 
 	for (const auto& core_record : core_records) {
-		NemoDebugRecord r = NemoDebugRecord(core_records[0].get());
+		NemoDebugRecord r = core_records[0].get();
 		records.push_back(r);
 	}
 

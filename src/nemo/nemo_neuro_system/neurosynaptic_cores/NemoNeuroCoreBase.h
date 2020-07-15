@@ -49,7 +49,7 @@ namespace nemo {
 		public:
 
 
-			static void core_init(void* s, tw_lp* lp) {
+			static void s_core_init(void* s, tw_lp* lp) {
 
 				auto core = static_cast<NemoNeuroCoreBase*>(s);
 				new (core) NemoNeuroCoreBase();
@@ -65,32 +65,43 @@ namespace nemo {
 				/* @note using standard POSIX output - one file per PE */
 
 			}
+			static void s_core_init_from_vcore(NemoNeuroCoreBase* s, tw_lp* lp, int model_id){
+				for (const auto& model : global_config->models){
+					if (model.id == model_id){
+						s->models[model_id] = model;
+						s->model_id = model_id;
+					}
+				}
+				auto global_id = lp->gid;
+				s->core_local_id = get_core_id_from_gid(global_id);
+				s->my_lp = lp;
+			}
 
-			static void pre_run(void* s, tw_lp* lp) {
+			static void s_pre_run(void* s, tw_lp* lp) {
 				auto core = static_cast<NemoNeuroCoreBase*>(s);
 				core->pre_run(lp);
 			}
 
-			static void forward_event(void* s, tw_bf* bf, void* m, tw_lp* lp) {
+			static void s_forward_event(void* s, tw_bf* bf, void* m, tw_lp* lp) {
 
 				auto core = static_cast<NemoNeuroCoreBase*>(s);
 				auto ms = static_cast<nemo_message*>(m);
 				core->forward_event(bf, ms, lp);
 			}
 
-			static void reverse_event(void* s, tw_bf* bf, void* m, tw_lp* lp) {
+			static void s_reverse_event(void* s, tw_bf* bf, void* m, tw_lp* lp) {
 				auto core = static_cast<NemoNeuroCoreBase*>(s);
 				auto ms = static_cast<nemo_message*>(m);
 				core->reverse_event(bf, ms, lp);
 			}
 
-			static void core_commit(void* s, tw_bf* bf, void* m, tw_lp* lp) {
+			static void s_core_commit(void* s, tw_bf* bf, void* m, tw_lp* lp) {
 				auto core = static_cast<NemoNeuroCoreBase*>(s);
 				auto ms = static_cast<nemo_message*>(m);
 				core->core_commit(bf, ms, lp);
 			}
 
-			static void core_finish(void* s, tw_lp* lp) {
+			static void s_core_finish(void* s, tw_lp* lp) {
 				auto core = static_cast<NemoNeuroCoreBase*>(s);
 				core->core_finish(lp);
 			}
@@ -207,7 +218,7 @@ namespace nemo {
  */
 			int output_mode = 2;
 
-
+			int model_id = 0;
 		};
 
 	}// namespace neuro_system

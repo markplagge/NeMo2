@@ -14,13 +14,16 @@ namespace nemo {
 		NemoNeuronGeneric *get_new_neuron(core_types neuron_type, tw_lp *lp, int n_id, int core_id) {
 			NemoNeuronGeneric *neuron;
 			switch (neuron_type) {
+			case NO_CORE_TYPE:
 			case LIF:
 				neuron = new NemoNeuronGeneric(lp);
 				break;
 			case TN:
+
 				neuron = new NemoNeuronTrueNorth(lp,n_id, core_id);
 				break;
 			}
+
 
 			return neuron;
 		}

@@ -11,7 +11,10 @@
 #include <neuro_os.h>
 #include <visit_struct/visit_struct.hpp>
 #include <visit_struct/visit_struct_intrusive.hpp>
+
+
 namespace nemo {
+	extern neuro_os::NengoInterface *nengo_scheduler;
 	namespace neuro_system {
 
 			using namespace neuro_os;
@@ -82,15 +85,23 @@ namespace nemo {
 				unsigned long num_cores = 0;
 			};
 
+			/**
+			 * NemoCoreScheduler is the primary scheduling "neurosynaptic core" of nemo.
+			 *
+			 */
 		class NemoCoreScheduler : public NemoNeuroCoreBase {
 		public:
 			std::ofstream debug_log;
 			double last_active_time = 0;
+
 			neuro_os::sim_proc::SimProcessQueue process_queue;
 			std::vector<std::shared_ptr<nemo::config::ScheduledTask>> task_list;
-			unsigned long current_scheduler_time;
+			unsigned long current_scheduler_time = 0;
 			unsigned long time_slice = 1000;
 			TaskProcessMap core_process_map; // Keeps track of what cores are running what processes.
+			std::vector<int> running_models;
+			std::vector<int> waiting_models;
+			std::vector<int> init_models;
 
 			void set_models(const std::map<int, nemo::config::NemoModel>& models);
 			void forward_scheduler_event(tw_bf *bf, nemo_message *m, tw_lp *lp);
@@ -99,6 +110,15 @@ namespace nemo {
 			void set_task_list(const std::vector<nemo::config::ScheduledTask>& task_list);
 			void init_process_models();
 			void check_waiting_procs();
+			/** nengo_scheduler - instance of the nengo interface to the neuro_os  system*/
+			//neuro_os::NengoInterface nengo_scheduler;
+
+			bool use_nengo_for_scheduling = true;
+			/**
+			 * Schedule Mode:
+			 * 0 = FCFS, 1 = RR
+			 */
+			int schedule_mode = 1;
 
 			/**
 			 * primary function entry point for one scheduler tick. Called every neurosynaptic tick.
@@ -106,12 +126,7 @@ namespace nemo {
 			 * and sends cores new state information.
 			 */
 			void scheduler_iteration();
-			/**
-			 * Starts the next process from the waiting process queue. This should be called
-			 * after can_start_waiting_process() has determined if we can start the next process.
 
-			 */
-			void start_process(unsigned int process_id);
 
 			/**
 			 * Gets a list of cores that are idle.
@@ -132,20 +147,22 @@ namespace nemo {
 			 */
 			void send_input_spikes(int model_id, double time_t );
 			/**
+			 * Starts the next process from the waiting process queue. This should be called
+			 * after can_start_waiting_process() has determined if we can start the next process.
+
+			 */
+			void start_process(unsigned int process_id);
+
+			/**
 			 * Function that sends stop messages to the simulated cores and updates the task_process_map
 			 * @param bf
 			 * @param m
 			 * @param lp
 			 */
+
 			void stop_process(unsigned int process_id);
 
-			/** Function that actually sends the stop message. Called from stop_process.
-			 *
-			 * @param bf
-			 * @param m
-			 * @param lp
-			 */
-			void send_stop_process_message(tw_bf *bf, nemo_message *m, tw_lp *lp);
+			void send_start_stop_messages(nemo_message_type type, unsigned int process_id );
 
 			/**
 			 * function that checks if the waiting process can be started based on running cores, scheduler logic, etc.

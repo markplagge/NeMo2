@@ -14,6 +14,17 @@
           </excludedPaths>
         </serverdata>
       </paths>
+      <paths name="Remote Host (cb015c6f-5f2f-4b10-9e5b-3e5a80fa20b5)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/tmp.4R4QQh2z2L" local="$PROJECT_DIR$" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug-system" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug_triton" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
       <paths name="triton raw (7e1f2fd4-8557-4520-a616-33d46f73ed04)">
         <serverdata>
           <mappings>

@@ -19,6 +19,7 @@
 #include <iosfwd>
 
 namespace nemo {
+
 	namespace config {
 		void error_reporter(std::string str) {
 			std::cerr << str << std::endl;// or throw or ignore
@@ -73,8 +74,13 @@ namespace nemo {
 				NemoConfig::main_config_file = cli_cfg_file;
 			}
 			else {
+				std::cout << "**** EXAMPLE CONFIG FILE LOADING ****" << "\n";
 				NemoConfig::main_config_file = std::string("../config/example_config.json");
 			}
+
+			// Check if file exists before continue
+			nemo::check_file_exist(config_file,0,true,TW_LOC);
+
 
 			using namespace configuru;
 			Config cfg = configuru::parse_file(main_config_file, FORGIVING);

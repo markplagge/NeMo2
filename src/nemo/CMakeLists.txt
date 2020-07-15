@@ -59,7 +59,7 @@ set_property(TARGET nemo2_lib PROPERTY CXX_STANDARD 14)
 ## The EIGEN BLAS library is used for neuromorphic matrix math.
 # The SQLITE library is used to store spikes - but eventually will be replaced with JSON
 message("-------------------------------- ${EIGEN_INCLUDE_FLDR}")
-target_include_directories(nemo2_lib PUBLIC  ${NL_JSON_DIR}  ../../external/configuru ../../external/visit_struct/include ../libs/neuro_os/include)
+target_include_directories(nemo2_lib PUBLIC  ${NL_JSON_DIR}  ../../external/configuru ../../external/visit_struct/include ../libs/neuro_os/include ../libs/neuro_os/extern/pybind11/include)
 target_link_libraries(nemo2_lib  neuro_os ROSS m)
 target_include_directories(nemo2 PUBLIC nemo2_lib ${SQL_FOLDER})
 target_link_libraries(nemo2 nemo2_lib ROSS m)

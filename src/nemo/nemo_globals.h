@@ -7,7 +7,7 @@
 //#include "../../external/eigen/Eigen/Dense"
 #include <ross.h>
 #include <cstdint>
-
+#include <neuro_os.h>
 #include <vector>
 #include <string>
 #include "BF_Event_Status.h"
@@ -19,6 +19,11 @@ namespace nemo
 /** @defgroup global_macros Global Macro helper functions  *{ */
 /**
  * JITTER(rng) -> macro for adding a jitter value to sent messages.
+ * If there are 4096 cores, then there will be a max message population of:
+ * (4096 * 256) between ticks $Tc_1$, $Tc_2$. The jitter is there to ensure that
+ * all of the messages for a particular tick do not collide.
+ *
+ *
  */
 #define JITTER_SCALE 1000
 #define JITTER(rng) tw_rand_unif (rng) / JITTER_SCALE
@@ -31,14 +36,21 @@ namespace nemo
 #define LITTLE_TICK = (double)1 / 1000
 #define BIG_TICK = 1
 
-unsigned long
-get_neurosynaptic_tick (double now);
+	/**
+	 *  gets the current neruosynaptic tick. With double time values, is really just floor(now)
+	 * @param now
+	 * @return
+	 */
+unsigned long get_neurosynaptic_tick (double now);
 
 /** @todo: use this macro rather than calling yet another function and write more macros for timing */
 #define GET_NEUROSYNAPTIC_TICK(now) long (now)
-
-unsigned long
-get_next_neurosynaptic_tick (double now);
+/**
+ * Get next neuro tick - Returns the next tick for scheduling
+ * @param now
+ * @return
+ */
+unsigned long get_next_neurosynaptic_tick (double now);
 
 /**
  * lt_offset - This is the value of the next little tick. Use this when creating events in the
@@ -51,9 +63,47 @@ get_next_neurosynaptic_tick (double now);
  */
 #define bt_offset(rng) JITTER (rng) + BIG_TICK
 
-/**@} */
+/**@}
+ * \defgroup ErrorHelp  Various error handling helpers
+ * @{
+ *
+ */
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCInconsistentNamingInspection"
+/** Filetype Error Macro / enum */
+#define ERR_FILETYPES \
+	X(Ecfg, "Config")   \
+	X(Emodel, "Model")  \
+	X(Espike, "Spike")
 
-/** @defgroup types Typedef Vars
+#define X(a, b) a,
+	enum ERR_FILETYPE { ERR_FILETYPES };
+#undef X
+
+#define ERR_FILE_KINDS \
+	X(E_NOEXIST, " File does not exist ") \
+	X(E_INVALID, " File is not a valid config file ")
+
+#define X(a, b) a,
+
+	enum ERR_FILE_KIND { ERR_FILE_KINDS };
+
+#undef X
+
+#pragma clang diagnostic pop
+/**
+ * Checks if a file exists (for configuration options)
+ * @tparam STRING_LIKE A path to the file (char *  or std::string)
+ * @param path_to_file A path to the file (char *  or std::string)
+ * @param type A message to print (what is the file for? 0:CFG  1:Model  2:spike?
+ * @param msg Message storage for error
+ * @return true if the file exists
+ */
+template <typename STRING_LIKE>
+char * check_file_exist(STRING_LIKE path_to_file, int type, bool do_err, const char *file, int line);
+
+
+/** \defgroup types Typedef Vars
  * Typedefs to ensure proper types for the neuron parameters/mapping calculations
  * @{  */
 
@@ -100,34 +150,6 @@ core_types get_core_enum_from_json(std::string core_type);
 #undef X
 
 
-//enum nemo_message_type {
-//	NEURON_SPIKE = 1,
-//	HEARTBEAT = 2,
-//	NOS_LOAD_MODEL = 4,
-//	NOS_TICK = 8,
-//	NOS_START = 16,
-//	NOS_STOP = 32,
-//	NOS_STATUS = 64
-//};
-/** @} */
-
-
-//enum class BF_Event_Status : uint32_t; {
-//  None = 0x00,                  //! No state changes happened
-//  Heartbeat_Sent = (1u << 1),   //! a heartbeat message was sent
-//  Spike_Sent = (1u << 2),       //a spike message was sent
-//  Output_Spike_Sent = (1u << 3),//! a spike message to an output layer was sent
-//  Heartbeat_Rec = (1u << 4),    //! A heartbeat was received
-//  Spike_Rec = (1u << 5),        //! A spike message was received
-//  NS_Tick_Update = (1u << 6),   //! We updated the neurosynaptic tick value
-//  Leak_Update = (1u << 7),      //! We updated the membrane potentials through a leak
-//  FR_Update = (1u << 8),        //! We updated the membrane potentials through fire/reset computations
-//
-//  Process_Stopped = (1u << 9),		//! We have stopped the currently running process
-//  New_Process_Started = (1u << 10)  //! We have started a new process
-//
-//
-//};
 
 /** @defgroup global_help Global Helpers.
  * Global helper functions / classes which are used throughout NeMo @{ */
@@ -191,7 +213,7 @@ typedef struct NemoMessage {
 		double debug_time;
 
 
-		int model_id;
+		unsigned  int model_id;
 		//char update_message[NEMO_MAX_CHAR_DATA_SIZE];
 
 
@@ -269,6 +291,8 @@ constexpr int NEURONS_PER_TN_CORE = 256;
 constexpr int WEIGHTS_PER_TN_NEURON = 4;
 constexpr int MAX_OUTPUT_PER_TN_NEURON = 1;
 /** @} */
+
+extern neuro_os::NengoInterface *nengo_scheduler;
 
 
 
