@@ -225,6 +225,7 @@ tw_optdef loc_nemo_tw_options[] = {
 int main(int argc, char* argv[]) {
 	//primary_config_file = (char*)calloc(sizeof(char), 1024);
 	std::snprintf(primary_config_file, 1000, "./example_config.json");
+
 	p::VERBOSE = 5;
 	using namespace nemo;
 	auto main_config = new nemo::config::NemoConfig();

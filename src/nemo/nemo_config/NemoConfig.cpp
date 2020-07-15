@@ -78,6 +78,10 @@ namespace nemo {
 				NemoConfig::main_config_file = std::string("../config/example_config.json");
 			}
 
+			// Check if file exists before continue
+			nemo::check_file_exist(config_file,0,true,TW_LOC);
+
+
 			using namespace configuru;
 			Config cfg = configuru::parse_file(main_config_file, FORGIVING);
 			auto cgbl = cfg["nemo_global"];

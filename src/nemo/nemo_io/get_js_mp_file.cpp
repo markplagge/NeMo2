@@ -29,7 +29,13 @@ namespace nemo{
 			nlohmann::json js_dat;
 			auto f = get_file(filename);
 			if(filename.find(".json") != std::string::npos){
-				f >> js_dat;
+				std::string contents;
+				f.seekg(0, std::ios::end);
+				contents.resize(f.tellg());
+				f.seekg(0, std::ios::beg);
+				f.read(&contents[0], contents.size());
+				f.close();
+				js_dat = nlohmann::json::parse(contents);
 			}else if (filename.find(".mp") != std::string::npos){
 				js_dat = nlohmann::json::from_msgpack(f);
 			}else{
