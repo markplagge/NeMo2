@@ -69,3 +69,5 @@ cmake-build-debug_triton/
 
 docs/
 !docs/Doxyfile
+
+cmake-build-release/

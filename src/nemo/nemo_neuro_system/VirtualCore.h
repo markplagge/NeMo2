@@ -8,6 +8,7 @@
 #include <map>
 #include <neuro_os.h>
 #include <vector>
+#include "../nemo_io/VirtualCoreReports.h"
 /**
  * Virtual Core - The Scheduler's interface to a neurosynaptic core.
  * Manages stop and start functions
@@ -18,14 +19,19 @@ namespace nemo {
 		struct JobMap{
 			std::map<int, NemoNeuroCoreBase*> job_map;
 			double active_time = 0.0;
+			~JobMap();
 		};
+
 		struct VirtualCore {
 			void assign_core_for_job(NemoNeuroCoreBase * core, int model_id);
-			std::forward_list<JobMap*> forward_list;
-
+			std::shared_ptr<VirtualCoreReports> reporter;
+			std::forward_list<std::shared_ptr<JobMap>> forward_list;
+			std::shared_ptr<JobMap> current_jobs;
+			bool constructed = false;
 			//std::map<int, NemoNeuroCoreBase*> job_map;
 			int current_model_id = 0;
 			int max_model_id = 0;
+			void vc_init_cores_for_models(tw_lp* lp);
 
 			static VirtualCore* cast_from(void* s) {
 				return static_cast<VirtualCore*>(s);
@@ -38,22 +44,14 @@ namespace nemo {
 
 			static void s_virtual_core_init(void* s, tw_lp* lp) {
 				auto vcore = VirtualCore::new_from(s);
-				int mx_model_id = 0;
-				for (const auto& model : global_config->models) {
-					auto model_id = model.id;
-					// create a generic core:
-					auto core = new NemoNeuroCoreBase();
-					NemoNeuroCoreBase::s_core_init_from_vcore(core, lp, model_id);
-					// create a corresponding virtual process
-					vcore->assign_core_for_job(core, model_id);
-					//vcore->job_map->job_map[model_id] = core;
-					mx_model_id += 1;
-				}
+				vcore->vc_init_cores_for_models(lp);
+				vcore->reporter = std::make_shared<VirtualCoreReports>();
+				vcore->reporter->vcore_id = lp->gid;
 
-				vcore->max_model_id = mx_model_id;
 			}
 
 			static void s_virtual_pre_run(void* s, tw_lp* lp) {
+
 				auto vcore = VirtualCore::cast_from(s);
 				for (int i = 0; i < vcore->max_model_id; i++) {
 					auto core = vcore->get_core_for_job(i);
@@ -82,7 +80,8 @@ namespace nemo {
 					//vcore->handle_end_message(bf, v, lp);
 				}
 				else {
-					vcore->save_state(lp);
+					if(g_tw_synchronization_protocol != NO_SYNCH && g_tw_synchronization_protocol != SEQUENTIAL && g_tw_synchronization_protocol != CONSERVATIVE)
+						vcore->save_state(lp);
 					auto core =vcore->get_core_for_job(vcore->current_model_id);
 					core->s_forward_event(core, bf, m, lp);
 				}
@@ -109,10 +108,13 @@ namespace nemo {
 					vcore->handle_end_message(bf, v, lp);
 				}
 				vcore->commit(vcore, bf, v, lp);
-
+				if(v->message_type == NOS_START || v->message_type == NOS_STOP){
+					add_nos_message(vcore->reporter,tw_now(lp),vcore->current_model_id,v->message_type);
+				}
 				//for (int i = 0; i < vcore->max_model_id; i++) {
 					//void* core = vcore->job_map[i];
 				//}
+
 			}
 			static void s_virtual_core_finish(void* s, tw_lp* lp) {
 				auto vcore = cast_from(s);
@@ -120,10 +122,11 @@ namespace nemo {
 					auto core = vcore->get_core_for_job(i);
 					core->s_core_finish(core, lp);
 				}
+				save_messages(vcore->reporter);
 			}
-			NemoNeuroCoreBase* get_core_for_job(unsigned int model_id);
-			void handle_start_message(tw_bf* bf, nemo_message* m, tw_lp* lp);
-			void handle_end_message(tw_bf* bf, nemo_message* m, tw_lp* lp);
+			NemoNeuroCoreBase* get_core_for_job(unsigned int model_id) const;
+			void handle_start_message(tw_bf* bf, nemo_message* m, tw_lp* lp) const;
+			void handle_end_message(tw_bf* bf, nemo_message* m, tw_lp* lp) const;
 			void save_state(tw_lp *lp);
 			void reverse_state(tw_lp *lp);
 			//given a core def (from modelfile), and

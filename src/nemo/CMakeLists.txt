@@ -9,7 +9,7 @@ INCLUDE_DIRECTORIES(${ROSS_SOURCE_DIR} ${ROSS_BINARY_DIR} ${lmdir})
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 #TrueNorth neuron API can output JSON files. The reader of them is a  library, and this flag turns it on or off
 set(USE_MODEL_RDR 1 CACHE BOOL "Use NeMo->TN JSON Model reader lib?")
-
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mtune=native -O3 -flto")
 ## Model Compile-Time Options have been moved to a config file.
 
 #set(NeMo_NEURONS_IN_CORE 256 CACHE STRING "The number of neurons in each simulated core")
@@ -46,7 +46,7 @@ set(nemo_lib_srcs
         nemo_ross.h mapping_functions.cpp
         nemo_io/ModelFile.cpp nemo_neuro_system/neurosynaptic_cores/NemoCoreScheduler.cpp
         nemo_neuro_system/neuron_models/NemoNeuronTrueNorth.cpp
-        mapping_functions.cpp nemo_io/SpikeFile.cpp nemo_io/SpikeFile.h nemo_neuro_system/neurosynaptic_cores/TaskProcessMap.cpp nemo_io/get_js_mp_file.cpp nemo_io/get_js_mp_file.h nemo_neuro_system/VirtualCore.cpp nemo_neuro_system/VirtualCore.h nemo_neuro_system/neuron_models/neuron_factory.h nemo_neuro_system/neuron_models/TNNeuronState.cpp nemo_neuro_system/neuron_models/TNNeuronState.h nemo_neuro_system/BenchmarkModelDef.cpp nemo_neuro_system/BenchmarkModelDef.h BF_Event_Status.cpp BF_Event_Status.h)
+        mapping_functions.cpp nemo_io/SpikeFile.cpp nemo_io/SpikeFile.h nemo_neuro_system/neurosynaptic_cores/TaskProcessMap.cpp nemo_io/get_js_mp_file.cpp nemo_io/get_js_mp_file.h nemo_neuro_system/VirtualCore.cpp nemo_neuro_system/VirtualCore.h nemo_neuro_system/neuron_models/neuron_factory.h nemo_neuro_system/neuron_models/TNNeuronState.cpp nemo_neuro_system/neuron_models/TNNeuronState.h nemo_neuro_system/BenchmarkModelDef.cpp nemo_neuro_system/BenchmarkModelDef.h BF_Event_Status.cpp BF_Event_Status.h nemo_io/VirtualCoreReports.cpp nemo_io/VirtualCoreReports.h nemo_neuro_system/neuron_models/NemoBenchmarkModels.cpp nemo_neuro_system/neuron_models/NemoBenchmarkModels.h)
 
 add_library(nemo2_lib ${nemo_lib_hdrs} ${nemo_lib_srcs})
 #nemo_ross_main.cpp contains main().

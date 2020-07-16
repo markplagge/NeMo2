@@ -291,7 +291,7 @@ namespace nemo {
 			//Initialize and set up the nengo scheduler
 			if (s->use_nengo_for_scheduling) {
 				auto num_cores_in_sim = (global_config->ns_cores_per_chip * global_config->total_chips);
-				nengo_scheduler = new neuro_os::NengoInterface(true, num_cores_in_sim,
+				nengo_scheduler = new neuro_os::NengoInterface(global_config->use_nengo_dl, num_cores_in_sim,
 															   s->schedule_mode, 4096, config::NemoConfig::main_config_file);
 				auto precompute_time = g_tw_ts_end + 10;
 				std::cout << "Precompute scheduler enabled to " << precompute_time << "\n";
@@ -314,6 +314,7 @@ namespace nemo {
  		*/
 		void sched_forward_event(NemoCoreScheduler* s, tw_bf* bf, nemo::nemo_message* m, tw_lp* lp) {
 			s->forward_scheduler_event(bf, m, lp);
+			std::cout << "SCHEDULER CORE AT " << tw_now(lp) << "Message " << m->message_type << "\n";
 		}
 		void sched_reverse_event(NemoCoreScheduler* s, tw_bf* bf, nemo::nemo_message* m, tw_lp* lp) {
 			s->reverse_scheduler_event(bf, m, lp);

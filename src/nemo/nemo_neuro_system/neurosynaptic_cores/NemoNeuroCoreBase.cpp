@@ -9,7 +9,7 @@
 #include <utility>
 namespace nemo {
 	namespace neuro_system {
-
+#define n this->neuron_array[spike_record]
 		NemoCoreOutput* NemoNeuroCoreBase::output_system;
 		bool NemoNeuroCoreBase::is_init = false;
 		std::map<int, nemo::config::NemoModel> NemoNeuroCoreBase::models;
@@ -341,7 +341,7 @@ namespace nemo {
 			if (global_config->DEBUG_FLAG) {
 				auto cr = this->debug_system->core_records[core_local_id];
 				for (int i = 0; i < neuron_array.size(); ++i) {
-					auto n = neuron_array[i];
+					//auto n = neuron_array[i];
 					switch (this->evt_stat) {
 					case BF_Event_Status::Spike_Sent:
 						nrec.spike_sent_count++;
@@ -463,12 +463,12 @@ namespace nemo {
 		}
 
 		void NemoNeuroCoreBase::create_blank_neurons() {
-			if (neurons_init) {
-				neuron_stack.push_back(neuron_array);
-			}
+//			if (neurons_init) {
+//				neuron_stack.push_back(neuron_array);
+//			}
 			for (int i = 0; i < global_config->neurons_per_core; i++) {
-				std::shared_ptr<NemoNeuronGeneric> neuron(get_new_neuron(this->my_core_type, this->my_lp, i, this->core_local_id));
-				this->neuron_array.push_back(neuron);
+				std::unique_ptr<NemoNeuronGeneric> neuron = get_new_neuron<std::unique_ptr<NemoNeuronGeneric>>(this->my_core_type, this->my_lp, i, this->core_local_id);
+				this->neuron_array.push_back(std::move(neuron));
 			}
 		}
 
@@ -525,7 +525,7 @@ namespace nemo {
 		void NemoNeuroCoreBase::f_save_spikes(nemo_message* m) {
 			for (const auto& spike_record : neuron_spike_record) {//@todo fix neurono spike record vector
 
-				auto n = this->neuron_array[spike_record];
+				//auto n = this->neuron_array[spike_record];
 
 				save_spike(m, n->dest_core, n->dest_axon, tw_now(my_lp));
 
@@ -540,6 +540,10 @@ namespace nemo {
 		}
 		void NemoNeuroCoreBase::reverse_start() {
 
+		}
+		void NemoNeuroCoreBase::reverse_stop() {
+		}
+		NemoNeuroCoreBase::~NemoNeuroCoreBase() {
 		}
 	}// namespace neuro_system
 

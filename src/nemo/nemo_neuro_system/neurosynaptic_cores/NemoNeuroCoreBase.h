@@ -141,14 +141,14 @@ namespace nemo {
 			void f_save_spikes(nemo_message* m);
 			void f_save_mpots(tw_lp* lp);
 			bool is_dest_interchip(int neuron_id);
-			virtual ~NemoNeuroCoreBase(){};
+			//virtual ~NemoNeuroCoreBase(){};
 
 			static NemoCoreOutput *output_system;
 			static NemoDebugJSONHandler *debug_system;
 			static bool is_init;
 
 
-			std::vector<std::vector<std::shared_ptr<NemoNeuronGeneric>>> neuron_stack;
+			std::vector<std::vector<std::unique_ptr<NemoNeuronGeneric>>> neuron_stack;
 			bool neurons_init = false;
 			bool save_spikes;
 			bool save_mpots;
@@ -171,7 +171,7 @@ namespace nemo {
    * * the local core id. If linear mapping is enabled, then this will be equal to the GID/PE id
 */
 
-			int core_local_id = 0;
+			unsigned int core_local_id = 0;
 
 			bool has_self_firing_neuron = false;
 
@@ -200,10 +200,11 @@ namespace nemo {
 			static std::map<int, nemo::config::NemoModel> models;
 			std::map<int, std::string> test_map;
 			nemo::config::NemoModel current_model;
-			std::vector<std::shared_ptr<NemoNeuronGeneric>> state_stack;
+			std::vector<std::unique_ptr<NemoNeuronGeneric>> state_stack;
 
 			/** NemoNeuroCoreBase contains neurons and neuron states in a structure */
-			std::vector<std::shared_ptr<NemoNeuronGeneric>> neuron_array;
+			std::vector<std::unique_ptr<NemoNeuronGeneric>> neuron_array;
+			virtual ~NemoNeuroCoreBase();
 			std::vector<unsigned int> neuron_spike_record;
 			std::vector<unsigned int> neuron_dest_cores;
 			std::vector<unsigned int> neuron_dest_axons;

@@ -222,7 +222,9 @@ tw_optdef loc_nemo_tw_options[] = {
 		TWOPT_CHAR("cfg", primary_config_file, "Main configuration file"),
 		TWOPT_END()};
 
+
 int main(int argc, char* argv[]) {
+
 	//primary_config_file = (char*)calloc(sizeof(char), 1024);
 	std::snprintf(primary_config_file, 1000, "./example_config.json");
 
@@ -249,7 +251,7 @@ int main(int argc, char* argv[]) {
 	MPI_Barrier(MPI_COMM_WORLD);
 	if (tw_ismaster()) printf("@@@ Calling run...\n");
 	MPI_Barrier(MPI_COMM_WORLD);
-	g_tw_ts_end = 5;
+	
 
 	tw_run();
 
