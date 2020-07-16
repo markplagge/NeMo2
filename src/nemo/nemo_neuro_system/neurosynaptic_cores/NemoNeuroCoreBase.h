@@ -95,6 +95,7 @@ namespace nemo {
 				core->reverse_event(bf, ms, lp);
 			}
 
+
 			static void s_core_commit(void* s, tw_bf* bf, void* m, tw_lp* lp) {
 				auto core = static_cast<NemoNeuroCoreBase*>(s);
 				auto ms = static_cast<nemo_message*>(m);
@@ -135,6 +136,8 @@ namespace nemo {
 			void init_current_model(std::string model_def);
 			void interrupt_running_model();
 			void resume_running_model();
+			void reverse_start();
+			void reverse_stop();
 			void f_save_spikes(nemo_message* m);
 			void f_save_mpots(tw_lp* lp);
 			bool is_dest_interchip(int neuron_id);
@@ -219,6 +222,7 @@ namespace nemo {
 			int output_mode = 2;
 
 			int model_id = 0;
+			bool is_model_running = false;
 		};
 
 	}// namespace neuro_system

@@ -15,10 +15,15 @@
  */
 namespace nemo {
 	namespace neuro_system {
-
-		struct VirtualCore {
-
+		struct JobMap{
 			std::map<int, NemoNeuroCoreBase*> job_map;
+			double active_time = 0.0;
+		};
+		struct VirtualCore {
+			void assign_core_for_job(NemoNeuroCoreBase * core, int model_id);
+			std::forward_list<JobMap*> forward_list;
+
+			//std::map<int, NemoNeuroCoreBase*> job_map;
 			int current_model_id = 0;
 			int max_model_id = 0;
 
@@ -40,7 +45,8 @@ namespace nemo {
 					auto core = new NemoNeuroCoreBase();
 					NemoNeuroCoreBase::s_core_init_from_vcore(core, lp, model_id);
 					// create a corresponding virtual process
-					vcore->job_map[model_id] = core;
+					vcore->assign_core_for_job(core, model_id);
+					//vcore->job_map->job_map[model_id] = core;
 					mx_model_id += 1;
 				}
 
@@ -50,7 +56,7 @@ namespace nemo {
 			static void s_virtual_pre_run(void* s, tw_lp* lp) {
 				auto vcore = VirtualCore::cast_from(s);
 				for (int i = 0; i < vcore->max_model_id; i++) {
-					auto core = vcore->job_map[i];
+					auto core = vcore->get_core_for_job(i);
 					core->pre_run(lp);
 				}
 			}
@@ -66,37 +72,60 @@ namespace nemo {
 				auto v = (nemo_message*)m;
 				if (v->message_type == NOS_LOAD_MODEL) {
 					vcore->current_model_id = v->model_id;
-					auto core = vcore->job_map[v->model_id];
+					auto core = vcore->get_core_for_job(v->model_id);
 					core->s_forward_event(core, bf, m, lp);
 				}
 				else if (v->message_type == NOS_START) {
-					vcore->handle_start_message(bf, v, lp);
+					//vcore->handle_start_message(bf, v, lp);
 				}
 				else if (v->message_type == NOS_STOP) {
-					vcore->handle_end_message(bf, v, lp);
+					//vcore->handle_end_message(bf, v, lp);
 				}
 				else {
-					auto core = vcore->job_map[vcore->current_model_id];
+					vcore->save_state(lp);
+					auto core =vcore->get_core_for_job(vcore->current_model_id);
 					core->s_forward_event(core, bf, m, lp);
 				}
 			}
 			static void s_virtual_reverse_event(void* s, tw_bf* bf, void* m, tw_lp* lp) {
+				auto vcore = cast_from(s);
+				auto v = (nemo_message*)m;
+				if (v->message_type == NOS_START){
+					//vcore->get_core_for_job(v->model_id)->reverse_start();
+				}else if (v->message_type == NOS_STOP){
+					//vcore->get_core_for_job(v->model_id)->reverse_stop;
+				}else{
+					vcore->reverse_state(lp);
+				}
 			}
+			void commit(VirtualCore* p_core, tw_bf* p_bf, nemo_message* p_message, tw_lp* p_lp);
 			static void s_virtual_core_commit(void* s, tw_bf* bf, void* m, tw_lp* lp) {
 				auto vcore = VirtualCore::cast_from(s);
-				for (int i = 0; i < vcore->max_model_id; i++) {
-					void* core = vcore->job_map[i];
+				auto v = (nemo_message*)m;
+				if (v->message_type == NOS_START){
+					vcore->handle_start_message(bf, v, lp);
+
+				}else if (v->message_type == NOS_STOP){
+					vcore->handle_end_message(bf, v, lp);
 				}
+				vcore->commit(vcore, bf, v, lp);
+
+				//for (int i = 0; i < vcore->max_model_id; i++) {
+					//void* core = vcore->job_map[i];
+				//}
 			}
 			static void s_virtual_core_finish(void* s, tw_lp* lp) {
 				auto vcore = cast_from(s);
 				for (int i = 0; i < vcore->max_model_id; i++) {
-					auto core = vcore->job_map[i];
+					auto core = vcore->get_core_for_job(i);
 					core->s_core_finish(core, lp);
 				}
 			}
+			NemoNeuroCoreBase* get_core_for_job(unsigned int model_id);
 			void handle_start_message(tw_bf* bf, nemo_message* m, tw_lp* lp);
 			void handle_end_message(tw_bf* bf, nemo_message* m, tw_lp* lp);
+			void save_state(tw_lp *lp);
+			void reverse_state(tw_lp *lp);
 			//given a core def (from modelfile), and
 			/*
 	 * original:

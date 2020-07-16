@@ -287,9 +287,14 @@ namespace nemo {
 					}
 				}
 			}
-			else {
+			else if(m->message_type == NOS_START ){
+				this->resume_running_model();
+
+			}else if(m->message_type == NOS_STOP ){
+				this->interrupt_running_model();
+			}else {
 				this->forward_heartbeat_handler();
-				if (m->message_type == NEURON_SPIKE) {
+				if (m->message_type == NEURON_SPIKE && this->is_model_running) {
 					for (const auto& item : neuron_array) {
 						item->integrate(m->dest_axon);
 					}
@@ -502,10 +507,19 @@ namespace nemo {
 		}
 
 		void NemoNeuroCoreBase::interrupt_running_model() {
+			/* STOP MODEL
+			 * Set active flag to false - heartbeat messages can be ignored.
+			 * If active flag is false, ignore messages (possibly warn)
+			 * */
+			this->is_model_running = false;
 			
 		}
 
 		void NemoNeuroCoreBase::resume_running_model() {
+			/*
+			 * Start logic - set active flag to true.
+			 */
+			this->is_model_running = true;
 		}
 
 		void NemoNeuroCoreBase::f_save_spikes(nemo_message* m) {
@@ -523,6 +537,9 @@ namespace nemo {
 				this->output_system->save_membrane_pot(nid, neuron->membrane_pot, tw_now(lp));
 				nid++;
 			}
+		}
+		void NemoNeuroCoreBase::reverse_start() {
+
 		}
 	}// namespace neuro_system
 
