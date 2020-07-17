@@ -5,14 +5,13 @@
 #ifndef NEMOTNG_NEMO_GLOBALS_H
 #define NEMOTNG_NEMO_GLOBALS_H
 //#include "../../external/eigen/Eigen/Dense"
-#include <ross.h>
+#include "BF_Event_Status.h"
 #include <cstdint>
 #include <neuro_os.h>
-#include <vector>
+#include <ross.h>
 #include <string>
-#include "BF_Event_Status.h"
-namespace nemo
-{
+#include <vector>
+namespace nemo {
 
 #define RNG_START(lp) auto rng_count = lp->rng->count
 #define RNG_END(lp) msg->random_call_count = (lp->rng->count - rng_count)
@@ -26,7 +25,7 @@ namespace nemo
  *
  */
 #define JITTER_SCALE 1000
-#define JITTER(rng) tw_rand_unif (rng) / JITTER_SCALE
+#define JITTER(rng) tw_rand_unif(rng) / JITTER_SCALE
 /** @} */
 
 /** @defgroup time_helpers
@@ -41,27 +40,27 @@ namespace nemo
 	 * @param now
 	 * @return
 	 */
-unsigned long get_neurosynaptic_tick (double now);
+	unsigned long get_neurosynaptic_tick(double now);
 
 /** @todo: use this macro rather than calling yet another function and write more macros for timing */
-#define GET_NEUROSYNAPTIC_TICK(now) long (now)
-/**
+#define GET_NEUROSYNAPTIC_TICK(now) long(now)
+	/**
  * Get next neuro tick - Returns the next tick for scheduling
  * @param now
  * @return
  */
-unsigned long get_next_neurosynaptic_tick (double now);
+	unsigned long get_next_neurosynaptic_tick(double now);
 
 /**
  * lt_offset - This is the value of the next little tick. Use this when creating events in the
  * tw_offset.
  */
-#define lt_offset(rng) = JITTER (rng) + LITTLE_TICK
+#define lt_offset(rng) = JITTER(rng) + LITTLE_TICK
 /**
  * bt_offset - This is offset for the next big tick. Can use this when creating events in the tw_offset for
  * the next big tick event.
  */
-#define bt_offset(rng) JITTER (rng) + BIG_TICK
+#define bt_offset(rng) JITTER(rng) + BIG_TICK
 
 /**@}
  * \defgroup ErrorHelp  Various error handling helpers
@@ -71,16 +70,16 @@ unsigned long get_next_neurosynaptic_tick (double now);
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCInconsistentNamingInspection"
 /** Filetype Error Macro / enum */
-#define ERR_FILETYPES \
-	X(Ecfg, "Config")   \
-	X(Emodel, "Model")  \
+#define ERR_FILETYPES  \
+	X(Ecfg, "Config")  \
+	X(Emodel, "Model") \
 	X(Espike, "Spike")
 
 #define X(a, b) a,
 	enum ERR_FILETYPE { ERR_FILETYPES };
 #undef X
 
-#define ERR_FILE_KINDS \
+#define ERR_FILE_KINDS                    \
 	X(E_NOEXIST, " File does not exist ") \
 	X(E_INVALID, " File is not a valid config file ")
 
@@ -91,7 +90,7 @@ unsigned long get_next_neurosynaptic_tick (double now);
 #undef X
 
 #pragma clang diagnostic pop
-/**
+	/**
  * Checks if a file exists (for configuration options)
  * @tparam STRING_LIKE A path to the file (char *  or std::string)
  * @param path_to_file A path to the file (char *  or std::string)
@@ -99,111 +98,101 @@ unsigned long get_next_neurosynaptic_tick (double now);
  * @param msg Message storage for error
  * @return true if the file exists
  */
-template <typename STRING_LIKE>
-char * check_file_exist(STRING_LIKE path_to_file, int type, bool do_err, const char *file, int line);
+	template<typename STRING_LIKE>
+	char* check_file_exist(STRING_LIKE path_to_file, int type, bool do_err, const char* file, int line);
 
-
-/** \defgroup types Typedef Vars
+	/** \defgroup types Typedef Vars
  * Typedefs to ensure proper types for the neuron parameters/mapping calculations
  * @{  */
 
-using ne_weight_t = uint32_t;
-using ne_stats_t = int_least64_t;
-using ne_mapping_t = uint32_t;
-using ne_neuro_param_t = int32_t;
-using ne_id_type = int_fast64_t;  //!< id type is used for local mapping functions - there should be $n$ of them depending on CORE_SIZE
-using ne_size_type = int_fast32_t;//!< nesize_type holds sizes of the sim - core size, neurons per core, etc.
+	using ne_weight_t = uint32_t;
+	using ne_stats_t = int_least64_t;
+	using ne_mapping_t = uint32_t;
+	using ne_neuro_param_t = int32_t;
+	using ne_id_type = int_fast64_t;  //!< id type is used for local mapping functions - there should be $n$ of them depending on CORE_SIZE
+	using ne_size_type = int_fast32_t;//!< nesize_type holds sizes of the sim - core size, neurons per core, etc.
 
-typedef int32_t nemo_volt_type;   //!< volt_type stores voltage values for membrane potential calculations
-typedef int64_t nemo_weight_type; //!< seperate type for synaptic weights.
-typedef int32_t nemo_thresh_type; //!< Type for weights internal to the neurons.
-typedef uint16_t nemo_random_type;//!< Type for random values in neuron models.
+	typedef int32_t nemo_volt_type;   //!< volt_type stores voltage values for membrane potential calculations
+	typedef int64_t nemo_weight_type; //!< seperate type for synaptic weights.
+	typedef int32_t nemo_thresh_type; //!< Type for weights internal to the neurons.
+	typedef uint16_t nemo_random_type;//!< Type for random values in neuron models.
 
-typedef uint64_t stat_type;
+	typedef uint64_t stat_type;
 
-/**@}*/
-template<typename... Args>
-::std::string
-string_format (const ::std::string &format, Args... args);
+	/**@}*/
+	template<typename... Args>
+	::std::string
+	string_format(const ::std::string& format, Args... args);
 
-typedef enum CoreTypes {
-	NO_CORE_TYPE,
-  TN,
-  LIF
-} core_types;
+	typedef enum CoreTypes {
+		NO_CORE_TYPE,
+		TN,
+		LIF
+	} core_types;
 
-core_types get_core_enum_from_json(std::string core_type);
-
+	core_types get_core_enum_from_json(std::string core_type);
 
 #define NEMO_MESSAGE_TYPES \
-	X(NEURON_SPIKE) \
-	X(HEARTBEAT) \
-	X(NOS_LOAD_MODEL) \
-	X(NOS_TICK) \
-	X(NOS_START) \
-	X(NOS_STOP) \
+	X(NEURON_SPIKE)        \
+	X(HEARTBEAT)           \
+	X(NOS_LOAD_MODEL)      \
+	X(NOS_TICK)            \
+	X(NOS_START)           \
+	X(NOS_STOP)            \
 	X(NOS_STATUS)
 
-
 #define X(a) a,
-	enum nemo_message_type { NEMO_MESSAGE_TYPES } ;
+	enum nemo_message_type { NEMO_MESSAGE_TYPES };
 #undef X
 
-
-
-/** @defgroup global_help Global Helpers.
+	/** @defgroup global_help Global Helpers.
  * Global helper functions / classes which are used throughout NeMo @{ */
 
-/**
+	/**
  * crtp helper / basis class. Helps keep static polymorphism function boilerplate code managable.
  * @tparam T
  */
-template<typename T>
-struct crtp {
-  T &underlying ()
-  {
-	return static_cast<T &> (*this);
-  }
+	template<typename T>
+	struct crtp {
+		T& underlying() {
+			return static_cast<T&>(*this);
+		}
 
-  T const &
-  underlying () const
-  {
-	return static_cast<T const &> (*this);
-  }
-};
+		T const&
+		underlying() const {
+			return static_cast<T const&>(*this);
+		}
+	};
 
-/** Gives us the BINCOMP (binary comparison) function used for stochastic weight modes.
+	/** Gives us the BINCOMP (binary comparison) function used for stochastic weight modes.
  * Takes the absolute value of the first value, and compares it to the seocnd. */
-template<typename T1, typename T2>
-bool bincomp (T1 val1, T2 val2)
-{
-  return abs (val1) >= val2;
-}
+	template<typename T1, typename T2>
+	bool bincomp(T1 val1, T2 val2) {
+		return abs(val1) >= val2;
+	}
 
-/** Kroniker Delta Function for TrueNorth */
-template<typename T1>
-constexpr auto
-dt (T1 x)
-{
-  return !(x);
-}
+	/** Kroniker Delta Function for TrueNorth */
+	template<typename T1>
+	constexpr auto
+	dt(T1 x) {
+		return !(x);
+	}
 
-/** SGN Function */
-template<typename T1>
-constexpr auto
-sgn (T1 x)
-{
-  return ((x > 0) - (x < 0));
-}
+	/** SGN Function */
+	template<typename T1>
+	constexpr auto
+	sgn(T1 x) {
+		return ((x > 0) - (x < 0));
+	}
 #define NEMO_MAX_CHAR_DATA_SIZE 927408
-/**
+	/**
  * Main message data structure.
  *
  */
-typedef struct NemoMessage {
+	typedef struct NemoMessage {
 
-	int message_type;
-	uint32_t nemo_event_status;
+		int message_type;
+		uint32_t nemo_event_status;
 
 		int source_core;
 		int dest_axon;
@@ -212,63 +201,62 @@ typedef struct NemoMessage {
 		unsigned int random_call_count;
 		double debug_time;
 
-
-		unsigned  int model_id;
+		unsigned int model_id;
 		//char update_message[NEMO_MAX_CHAR_DATA_SIZE];
 
+	} nemo_message;
 
+	// Helper functon for BF logic:
 
-} nemo_message;
+	inline uint64_t get_gid_from_core_local(ne_id_type dest_core, ne_id_type dest_axon) {
+		//currently, cores are GIDs since this is a strict linear map
+		if (g_tw_mynode == 0)
+			return (uint64_t)dest_core + 1;
+		else
+			return dest_core;
+		//return dest_core / g_tw_nlp;
+	}
+	///**
+	// * 2D Array helper template. Matrix is a 2D array using STD::Array
+	// * @tparam T
+	// * @tparam ROW
+	// * @tparam COL
+	// */
+	//    template<class T, size_t ROW, size_t COL>
+	//    using Matrix = std::array<std::array<T, COL>, ROW>;
 
-// Helper functon for BF logic:
-
-inline uint64_t
-get_gid_from_core_local (ne_id_type dest_core, ne_id_type dest_axon)
-{
-  //currently, cores are GIDs since this is a strict linear map
-  return (uint64_t)dest_core + 1;
-}
-///**
-// * 2D Array helper template. Matrix is a 2D array using STD::Array
-// * @tparam T
-// * @tparam ROW
-// * @tparam COL
-// */
-//    template<class T, size_t ROW, size_t COL>
-//    using Matrix = std::array<std::array<T, COL>, ROW>;
-
-/**
+	/**
  * 2D Matrix helper template. Matrix as a vector. Vectors are as fast as a C heap array,
  * so no reason not to use them.
  * @tparam T type of the data in the matrix
  */
-//template<class T, typename ROW, typename COL>
-//using Matrix = std::vector<std::vector<T>>(ROW, std::vector<T>(COL));
+	//template<class T, typename ROW, typename COL>
+	//using Matrix = std::vector<std::vector<T>>(ROW, std::vector<T>(COL));
 
-//
-//    template<class T>
-//    class Matrix {
-//        unsigned m_rowSize;
-//        unsigned m_colSize;
-//        ::std::vector<::std::vector<T>> matrix;
-//    public:
-//        Matrix(unsigned, unsigned, T);
-//
-//        Matrix(const char *);
-//
-//        Matrix(const Matrix &);
-//
-//        ~Matrix();
-//
-//    };
+	//
+	//    template<class T>
+	//    class Matrix {
+	//        unsigned m_rowSize;
+	//        unsigned m_colSize;
+	//        ::std::vector<::std::vector<T>> matrix;
+	//    public:
+	//        Matrix(unsigned, unsigned, T);
+	//
+	//        Matrix(const char *);
+	//
+	//        Matrix(const Matrix &);
+	//
+	//        ~Matrix();
+	//
+	//    };
 
-extern char *SPIKE_OUTPUT_FILENAME;
-extern int SPIKE_OUTPUT_MODE;
-extern int OUTPUT_MODE;
+	extern char* SPIKE_OUTPUT_FILENAME;
+	extern int SPIKE_OUTPUT_MODE;
+	extern int OUTPUT_MODE;
 
 //@todo: Move this to a config file that will be set up by CMAKE - or make these run-time-options
 #define THREADED_WRITER 1
-extern ::std::vector<core_types> core_type_map;
+	extern ::std::vector<core_types> core_type_map;
 
 /** @} */
 
@@ -277,24 +265,22 @@ extern ::std::vector<core_types> core_type_map;
  * @{
  */
 #define MDL_SET(X)
-// LIF Core settings:
-constexpr int LIF_NEURONS_PER_CORE = 256;
-constexpr int LIF_NUM_OUTPUTS = 256;
+	// LIF Core settings:
+	constexpr int LIF_NEURONS_PER_CORE = 256;
+	constexpr int LIF_NUM_OUTPUTS = 256;
 
-/** @} */
-/**
+	/** @} */
+	/**
  * @defgroup tn_const TrueNorth Neuron Limitations
  * Contains TrueNorth network constants
  * @{
  */
-constexpr int NEURONS_PER_TN_CORE = 256;
-constexpr int WEIGHTS_PER_TN_NEURON = 4;
-constexpr int MAX_OUTPUT_PER_TN_NEURON = 1;
-/** @} */
+	constexpr int NEURONS_PER_TN_CORE = 256;
+	constexpr int WEIGHTS_PER_TN_NEURON = 4;
+	constexpr int MAX_OUTPUT_PER_TN_NEURON = 1;
+	/** @} */
 
-extern neuro_os::NengoInterface *nengo_scheduler;
-
-
+	extern neuro_os::NengoInterface* nengo_scheduler;
 
 }// namespace nemo
 

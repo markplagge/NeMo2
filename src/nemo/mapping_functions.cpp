@@ -12,6 +12,13 @@ namespace nemo {
  * @return
  */
 	unsigned int get_core_id_from_gid(tw_lpid id) {
+		if (g_tw_mynode == 0){
+			if (id == 0){
+				return 0;
+			}else{
+				return id - 1;
+			}
+		}
 		return id;
 	}
 	/**

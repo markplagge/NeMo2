@@ -7,6 +7,11 @@
 namespace nemo {
 	neuro_os::NengoInterface* nengo_scheduler;
 	namespace neuro_system {
+		namespace ns_txt{
+#define X(a) #a
+			static const char *nemo_message_type_strings[] = { NEMO_MESSAGE_TYPES };
+#undef X
+		}
 
 		void NemoCoreScheduler::forward_scheduler_event(tw_bf* bf, nemo::nemo_message* m, tw_lp* lp) {
 			//Scheduler events are only once per global tick
@@ -16,9 +21,11 @@ namespace nemo {
 			this->cur_message = m;
 
 			if (m->message_type == NOS_TICK) {
+				std::cout << "Got NOS TICK at " << tw_now(my_lp) << "\n";
 				if (global_config->do_neuro_os) {
 					//First schedule the next tick of the neuro_os_scheduler
 					auto sched_time = JITTER(lp->rng) + 1;
+					std::cout << "Scheduled NOS TICK for " << sched_time << "\n";
 					struct tw_event* os_tick = tw_event_new(lp->gid, sched_time, my_lp);
 					auto* msg = (nemo_message*)tw_event_data(os_tick);
 					msg->message_type = NOS_TICK;
@@ -48,7 +55,9 @@ namespace nemo {
 				tw_printf(TW_LOC, "INFO: NOS STATUS MESSAGE @ %f\n ", tw_now(this->my_lp));
 			}
 			else {
-				tw_error(TW_LOC, "Nemo Core Scheduler got a non-tick message, %i", m->message_type);
+
+				tw_printf(TW_LOC, "NCS: ERR: %i %d %i",m->source_core, m->dest_axon, m->debug_time );
+				tw_error(TW_LOC, "Nemo Core Scheduler got a non-tick message, %\s", ns_txt::nemo_message_type_strings[m->message_type]);
 			}
 
 			//check the current list of processes:
@@ -64,7 +73,11 @@ namespace nemo {
 
 		void NemoCoreScheduler::send_process_states(int dest_core, int model_id) {
 			static unsigned int num_states_sent = 0;
-			struct tw_event* set_state = tw_event_new(get_gid_from_core_local(dest_core, 0), JITTER(my_lp->rng), my_lp);
+			auto dest_gid = get_gid_from_core_local(dest_core, 0);
+			if(dest_gid >= g_tw_nlp){
+				tw_error(TW_LOC, "CS EVENT TOO BIG");
+			}
+			struct tw_event* set_state = tw_event_new(dest_gid, JITTER(my_lp->rng), my_lp);
 			auto msg = (nemo_message*)tw_event_data(set_state);
 			msg->message_type = NOS_LOAD_MODEL;
 			msg->debug_time = tw_now(my_lp);
@@ -194,14 +207,20 @@ namespace nemo {
 			//1. set process queue time:
 			this->process_queue.system_tick();
 			current_scheduler_time++;
+			neuro_os::increment_pc(*nengo_scheduler);
 			if (this->use_nengo_for_scheduling) {
+				if(!global_config->precompute_nengo)
+					neuro_os::run_precompute_sim(*nengo_scheduler, 3);
 				auto runq = neuro_os::precompute_run_q(*nengo_scheduler);
 				auto waitq = neuro_os::precompute_wait_q(*nengo_scheduler);
 				//find new processes to start
 				for (auto model_id : runq) {
+					std::cout << "Starting process " << model_id <<"\n";
 					this->start_process(model_id);
+					this->send_input_spikes(model_id, tw_now(my_lp));
 				}
 				for (auto model_id : waitq) {
+					std::cout << "Interrupt process " << model_id <<" \n";
 					this->stop_process(model_id);
 				}
 
@@ -221,6 +240,9 @@ namespace nemo {
 			auto spike_r = spike_files[model_id].get_spikes_at_time(time);
 			for (const auto& spk : spike_r) {
 				auto dest = get_gid_from_core_local(spk.dest_core, spk.dest_axon);
+				if(dest >= g_tw_nlp){
+					tw_error(TW_LOC, "CS EVENT TOO BIG");
+				}
 				auto dest_t = JITTER(this->my_lp->rng) + spk.time;
 				struct tw_event* os_input_spike_evt = tw_event_new(dest, dest_t, this->my_lp);
 				auto* msg = (nemo_message*)tw_event_data(os_input_spike_evt);
@@ -250,6 +272,10 @@ namespace nemo {
 			for (int i = 0; i < num_needed_cores; i++) {
 				auto dest_gid = get_gid_from_core_local(i, 1);
 
+				if(dest_gid == this->my_lp->gid){
+					tw_printf(TW_LOC, "NOS ERROR SSTI: dest_id_f: %d, dest_gid_compute %d\n", i, dest_gid);
+					tw_error(TW_LOC, "NOS Sending spike messages to itself.");
+				}
 				auto start_message = tw_event_new(dest_gid, start_time, this->my_lp);
 				auto msg = (nemo_message*)tw_event_data(start_message);
 
@@ -293,10 +319,14 @@ namespace nemo {
 				auto num_cores_in_sim = (global_config->ns_cores_per_chip * global_config->total_chips);
 				nengo_scheduler = new neuro_os::NengoInterface(global_config->use_nengo_dl, num_cores_in_sim,
 															   s->schedule_mode, 4096, config::NemoConfig::main_config_file);
-				auto precompute_time = g_tw_ts_end + 10;
-				std::cout << "Precompute scheduler enabled to " << precompute_time << "\n";
-				neuro_os::run_precompute_sim(*nengo_scheduler, int(precompute_time));
-				std::cout << "Precompute done, gathering wait \n SC EPOCH: " << s->current_scheduler_time << " NG EPOCH: " << nengo_scheduler->nengo_os_iface.attr("precompute_time").cast<int>() << "\n";
+				if(global_config->precompute_nengo) {
+					auto precompute_time = g_tw_ts_end + 10;
+					std::cout << "Precompute scheduler enabled to " << precompute_time << "\n";
+					neuro_os::run_precompute_sim(*nengo_scheduler, int(precompute_time));
+					std::cout << "Precompute done, gathering wait \n SC EPOCH: " << s->current_scheduler_time << " NG EPOCH: " << nengo_scheduler->nengo_os_iface.attr("precompute_time").cast<int>() << "\n";
+				}else{
+					neuro_os::run_sim_n_ticks(*nengo_scheduler, 2);
+				}
 				auto runq = neuro_os::precompute_run_q(*nengo_scheduler);
 				auto waitq = neuro_os::precompute_wait_q(*nengo_scheduler);
 				s->waiting_models = waitq;

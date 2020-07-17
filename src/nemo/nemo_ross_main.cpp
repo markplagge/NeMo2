@@ -88,19 +88,19 @@ namespace nemo {
 		}
 		template<>
 		void print_config_vector<NemoModel>(std::vector<NemoModel> elms) {
-			print_vector_limit(std::move(elms));
+			print_vector_limit(elms);
 		}
 		template<>
 		void print_config_vector<config::ScheduledTask>(std::vector<config::ScheduledTask> elms) {
 			//pr_e("NeuroOS Task Schedule:", " ");
-			print_vector_limit(std::move(elms));
+			print_vector_limit(elms);
 		}
 		//		template<>
 		//		void pr_v<config::ScheduledTask>( std::string desc, std::vector<config::ScheduledTask> elms) {
 		//			print_vector_limit(std::move(elms));
 		//		}
 		void pr_v(std::vector<config::ScheduledTask> elms) {
-			print_vector_limit(std::move(elms));
+			print_vector_limit(elms);
 		}
 
 	}// namespace p
@@ -208,6 +208,9 @@ void print_sim_config() {
 	pr_e("Save all spikes? ", global_config->save_all_spikes);
 	pr_e("Save membrane potentials? ", global_config->save_membrane_pots);
 	pr_e("Save N.O.S. scheduler stats? ", global_config->save_nos_stats);
+	pr_e("Nengo Precompute mode?", global_config->precompute_nengo);
+	pr_e("Nengo GPU mode?", global_config->use_nengo_dl);
+
 
 	pr_v<NemoModel>("", global_config->models);
 	pr_v("Scheduler Inputs", global_config->scheduler_inputs);
@@ -222,7 +225,6 @@ tw_optdef loc_nemo_tw_options[] = {
 		TWOPT_CHAR("cfg", primary_config_file, "Main configuration file"),
 		TWOPT_END()};
 
-
 int main(int argc, char* argv[]) {
 
 	//primary_config_file = (char*)calloc(sizeof(char), 1024);
@@ -234,7 +236,7 @@ int main(int argc, char* argv[]) {
 	tw_opt_add(options);
 	tw_init(&argc, &argv);
 
-	g_tw_lookahead = 0.001;
+
 	auto cw = MPI_COMM_WORLD;
 	int w_size;
 	MPI_Comm_size(cw, &w_size);
@@ -251,7 +253,6 @@ int main(int argc, char* argv[]) {
 	MPI_Barrier(MPI_COMM_WORLD);
 	if (tw_ismaster()) printf("@@@ Calling run...\n");
 	MPI_Barrier(MPI_COMM_WORLD);
-	
 
 	tw_run();
 

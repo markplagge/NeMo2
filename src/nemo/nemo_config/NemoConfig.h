@@ -57,6 +57,7 @@ namespace nemo {
 			bool save_membrane_pots = false;
 			bool save_nos_stats = true;
 			bool use_nengo_dl = false;
+			bool precompute_nengo = true;
 			OutputSystem output_system;
 			SchedType scheduler_type;
 			std::string output_spike_file;
@@ -71,7 +72,7 @@ namespace nemo {
 
 			double jitter_factor = 0.001;//!< This is the range of jitter. Since core-core comms are used lookahead can now be 1 though
 			int est_events_per_pe = 165535;
-			double lookahead = 1.9;
+			double lookahead = .9;
 			int world_size = 0;
 
 

@@ -9,6 +9,7 @@
     "save_all_spikes": false,
     "save_membrane_pots": false,
     "use_nengo_dl": false,
+    "precompute_nengo": false,
     "neurons_per_core": 256,
     "output_system": 0,
     "output_spike_file": "model_output.csv",
@@ -23,8 +24,8 @@
     {
       "id": 0,
       "needed_cores": 0,
-      "model_file_path": "/Users/plaggm/dev/nemo-codes/config/models/cifar_100_model.json",
-      "spike_file_path": "/Users/plaggm/dev/nemo-codes/config/models/cifar_100_spike.json",
+      "model_file_path": "../config/models/cifar_100_model.json",
+      "spike_file_path": "../config/models/cifar_100_spike.json",
       "requested_time": 1024,
       "benchmark_model_name": "NONE"
     },
@@ -33,6 +34,14 @@
       "needed_cores": 2048,
       "requested_time": 1024,
       "benchmark_model_name": "IDENTITY"
+    },
+    {
+      "id": 2,
+      "needed_cores": 0,
+      "model_file_path": "../config/models/sar_model.json",
+      "spike_file_path": "../config/models/sar_model_spike.json",
+      "requested_time": 10,
+      "benchmark_model_name": "NONE"
     }
 
   ],
@@ -50,7 +59,7 @@
     {
       "start_time": 1024,
       "task_id": 2,
-      "model_id": 1
+      "model_id": 2
     }
   ]
 }

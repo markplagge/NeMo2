@@ -349,7 +349,10 @@ namespace nemo {
 					case BF_Event_Status::Spike_Rec:
 						nrec.spike_recv_count++;
 						break;
+					default:
+						break;
 					}
+
 					if (is_output_spike_sent(this->evt_stat) || is_spike_sent(this->evt_stat) || is_heartbeat_rec(this->evt_stat) || is_hb_sent(this->evt_stat)) {
 						cr->neurons[i].active_times.push_back(tw_now(lp));
 						cr->neurons[i].active_time_msg_rcv.push_back(m->message_type);

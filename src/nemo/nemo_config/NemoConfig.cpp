@@ -97,7 +97,7 @@ namespace nemo {
 			this->output_membrane_pot_file =(std::string)cgbl["output_membrane_pot_file"];
 			this->core_type_ids = (std::vector<int>)cgbl["core_type_ids"];
 			this->use_nengo_dl = (bool)cgbl["use_nengo_dl"];
-
+			this->precompute_nengo = (bool)cgbl["precompute_nengo"];
 			auto os = (int)cgbl["output_system"];
 			switch (os) {
 			case 0:
