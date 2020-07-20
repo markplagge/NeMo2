@@ -102,7 +102,7 @@ namespace nemo {
 			std::vector<int> running_models;
 			std::vector<int> waiting_models;
 			std::vector<int> init_models;
-
+			void precompute_nengo_queue_update();
 			void set_models(const std::map<int, nemo::config::NemoModel>& models);
 			void forward_scheduler_event(tw_bf *bf, nemo_message *m, tw_lp *lp);
 			void reverse_scheduler_event(tw_bf *bf, nemo_message *m, tw_lp *lp);

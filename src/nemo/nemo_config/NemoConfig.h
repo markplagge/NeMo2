@@ -58,6 +58,7 @@ namespace nemo {
 			bool save_nos_stats = true;
 			bool use_nengo_dl = false;
 			bool precompute_nengo = true;
+			bool use_non_nengo_sched = true;
 			OutputSystem output_system;
 			SchedType scheduler_type;
 			std::string output_spike_file;

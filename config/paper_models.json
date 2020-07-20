@@ -6,10 +6,13 @@
     "do_neuro_os": false,
     "sched_type": "FCFS",
     "save_nos_stats": true,
-    "output_system": 0,
-    "save_all_spikes": true,
-    "save_membrane_pots": true,
+    "save_all_spikes": false,
+    "save_membrane_pots": false,
+    "use_non_nengo_sched": true,
+    "use_nengo_dl": false,
+    "precompute_nengo": false,
     "neurons_per_core": 256,
+    "output_system": 0,
     "output_spike_file": "model_output.csv",
     "output_nos_stat_file": "output_nos_stat_file.csv",
     "output_membrane_pot_file": "output_membrane_pot.csv",
@@ -21,39 +24,52 @@
   "models": [
     {
       "id": 0,
-      "needed_cores": 0,
-      "model_file_path": "./config/models/cifar_100_model.json",
-      "spike_file_path": "./config/models/cifar_100_spike.json",
-      "requested_time": 1024,
+      "needed_cores": 4038,
+      "model_file_path": "../config/models/cifar_100_model.json",
+      "spike_file_path": "../config/models/cifar_100_spike.json",
+      "requested_time": 4450,
       "benchmark_model_name": "NONE"
     },
     {
       "id": 1,
-      "needed_cores": 2048,
-      "requested_time": 1024,
-      "benchmark_model_name": "IDENTITY"
+      "needed_cores": 3038,
+      "model_file_path": "../config/models/sar_model.json",
+      "spike_file_path": "../config/models/sar_model_spike.json",
+      "requested_time": 1125,
+      "benchmark_model_name": "NONE"
+    },
+    {
+      "id": 2,
+      "needed_cores": 2,
+      "requested_time":  8,
+      "benchmark_model_name": "TONIC"
+    },
+    {
+      "id": 3,
+      "needed_cores": 1439,
+      "requested_time": 81,
+      "benchmark_model_name": "SATURATION"
     }
+
   ],
   "scheduler_inputs": [
     {
       "start_time": 0,
       "task_id": 0,
-      "model_id": 0
+      "model_id": 0,
+      "requested_time": 1125
     },
     {
       "start_time": 0,
       "task_id": 1,
-      "model_id": 0
+      "model_id": 0,
+      "requested_time": 1125
     },
     {
       "start_time": 1024,
-      "task_id": 0,
-      "model_id": 1
-    },
-    {
-      "start_time": 1024,
-      "task_id": 1,
-      "model_id": 1
+      "task_id": 2,
+      "model_id": 2,
+      "requested_time": 1125
     }
   ]
 }

@@ -8,6 +8,7 @@
     "save_nos_stats": true,
     "save_all_spikes": false,
     "save_membrane_pots": false,
+    "use_non_nengo_sched": true
     "use_nengo_dl": false,
     "precompute_nengo": false,
     "neurons_per_core": 256,

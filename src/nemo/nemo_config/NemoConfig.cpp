@@ -99,6 +99,7 @@ namespace nemo {
 			this->use_nengo_dl = (bool)cgbl["use_nengo_dl"];
 			this->precompute_nengo = (bool)cgbl["precompute_nengo"];
 			auto os = (int)cgbl["output_system"];
+			this->use_non_nengo_sched = (bool)cgbl["use_non_nengo_sched"];
 			switch (os) {
 			case 0:
 				this->output_system = POSIX;

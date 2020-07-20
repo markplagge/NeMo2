@@ -3,6 +3,7 @@
 //
 
 #include "NemoCoreScheduler.h"
+#include "../../../libs/neuro_os/src/NemoSchedulerInterface.h"
 #include <json.hpp>
 namespace nemo {
 	neuro_os::NengoInterface* nengo_scheduler;
@@ -57,7 +58,7 @@ namespace nemo {
 			else {
 
 				tw_printf(TW_LOC, "NCS: ERR: %i %d %i",m->source_core, m->dest_axon, m->debug_time );
-				tw_error(TW_LOC, "Nemo Core Scheduler got a non-tick message, %\s", ns_txt::nemo_message_type_strings[m->message_type]);
+				tw_error(TW_LOC, "Nemo Core Scheduler got a non-tick message, %s", ns_txt::nemo_message_type_strings[m->message_type]);
 			}
 
 			//check the current list of processes:
@@ -209,24 +210,26 @@ namespace nemo {
 			current_scheduler_time++;
 			neuro_os::increment_pc(*nengo_scheduler);
 			if (this->use_nengo_for_scheduling) {
-				if(!global_config->precompute_nengo)
+				if(!global_config->precompute_nengo && !global_config->use_non_nengo_sched)
 					neuro_os::run_precompute_sim(*nengo_scheduler, 3);
-				auto runq = neuro_os::precompute_run_q(*nengo_scheduler);
-				auto waitq = neuro_os::precompute_wait_q(*nengo_scheduler);
+
+				precompute_nengo_queue_update();
 				//find new processes to start
-				for (auto model_id : runq) {
+				for (auto model_id : this->running_models) {
 					std::cout << "Starting process " << model_id <<"\n";
 					this->start_process(model_id);
 					this->send_input_spikes(model_id, tw_now(my_lp));
 				}
-				for (auto model_id : waitq) {
+				for (auto model_id : waiting_models) {
 					std::cout << "Interrupt process " << model_id <<" \n";
 					this->stop_process(model_id);
 				}
 
 				//reassign runq and waitq
+/*
 				this->running_models = runq;
 				this->waiting_models = waitq;
+*/
 			}
 			//2. get_working_cores:
 			auto working_cores = core_process_map.get_working_cores();
@@ -294,7 +297,19 @@ namespace nemo {
 			//send start messages:
 			send_start_stop_messages(NOS_START, process_id);
 		}
-
+		void NemoCoreScheduler::precompute_nengo_queue_update() {
+			std::vector<int> runq;
+			std::vector<int> waitq;
+			if (global_config->use_non_nengo_sched){
+				runq = neuro_os::precompute_run_q_non_nengo(*nengo_scheduler);
+				waitq = neuro_os::precompute_wait_q_non_nengo(*nengo_scheduler);
+			}else {
+				runq = neuro_os::precompute_run_q(*nengo_scheduler);
+				waitq = neuro_os::precompute_wait_q(*nengo_scheduler);
+			}
+			this->waiting_models = waitq;
+			this->running_models = runq;
+		}
 		void sched_core_init(NemoCoreScheduler* s, tw_lp* lp) {
 			new (s) NemoCoreScheduler();
 			//Make sure we are running on PE 0
@@ -317,22 +332,33 @@ namespace nemo {
 			//Initialize and set up the nengo scheduler
 			if (s->use_nengo_for_scheduling) {
 				auto num_cores_in_sim = (global_config->ns_cores_per_chip * global_config->total_chips);
-				nengo_scheduler = new neuro_os::NengoInterface(global_config->use_nengo_dl, num_cores_in_sim,
-															   s->schedule_mode, 4096, config::NemoConfig::main_config_file);
-				if(global_config->precompute_nengo) {
+				if(global_config->use_non_nengo_sched)
+					{
+//					nengo_scheduler = new neuro_os::NemoSchedulerInterface(global_config->use_nengo_dl, num_cores_in_sim,
+//								s->schedule_mode, 1000, config::NemoConfig::main_config_file,true);
+					nengo_scheduler = new neuro_os::NemoSchedulerInterface(global_config->use_nengo_dl, num_cores_in_sim,s->schedule_mode, 1000, config::NemoConfig::main_config_file,true,false);
 					auto precompute_time = g_tw_ts_end + 10;
 					std::cout << "Precompute scheduler enabled to " << precompute_time << "\n";
-					neuro_os::run_precompute_sim(*nengo_scheduler, int(precompute_time));
-					std::cout << "Precompute done, gathering wait \n SC EPOCH: " << s->current_scheduler_time << " NG EPOCH: " << nengo_scheduler->nengo_os_iface.attr("precompute_time").cast<int>() << "\n";
-				}else{
-					neuro_os::run_sim_n_ticks(*nengo_scheduler, 2);
+					neuro_os::run_precompute_sim_non_nengo(*nengo_scheduler, precompute_time);
+
+
+					}else {
+						nengo_scheduler = new neuro_os::NengoInterface(global_config->use_nengo_dl, num_cores_in_sim,
+																	   s->schedule_mode, 1000, config::NemoConfig::main_config_file, false, true);
+
+						if(global_config->precompute_nengo) {
+							auto precompute_time = g_tw_ts_end + 10;
+							std::cout << "Precompute scheduler enabled to " << precompute_time << "\n";
+							neuro_os::run_precompute_sim(*nengo_scheduler, int(precompute_time));
+							std::cout << "Precompute done, gathering wait \n SC EPOCH: " << s->current_scheduler_time << " NG EPOCH: " << nengo_scheduler->nengo_os_iface.attr("precompute_time").cast<int>() << "\n";
+					}else{
+						neuro_os::run_sim_n_ticks(*nengo_scheduler, 2);
+					}
 				}
-				auto runq = neuro_os::precompute_run_q(*nengo_scheduler);
-				auto waitq = neuro_os::precompute_wait_q(*nengo_scheduler);
-				s->waiting_models = waitq;
-				s->running_models = runq;
+				s->precompute_nengo_queue_update();
 			}
 		}
+
 		void sched_pre_run(NemoCoreScheduler* s, tw_lp* lp) {
 		}
 		/**
