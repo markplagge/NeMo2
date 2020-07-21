@@ -32,7 +32,7 @@
     },
     {
       "id": 1,
-      "needed_cores": 3038,
+      "needed_cores": 3794,
       "model_file_path": "../config/models/sar_model.json",
       "spike_file_path": "../config/models/sar_model_spike.json",
       "requested_time": 1125,

@@ -1,0 +1,216 @@
+CIFAR 100,1,start_running,1
+CIFAR 100,1,start_running,1
+CIFAR 100,1,interrupted,200
+CIFAR 100,1,interrupted,200
+SAR,2,start_running,201
+SAR,2,start_running,201
+SAR,2,interrupted,400
+SAR,2,interrupted,400
+Tonic,3,start_running,401
+Tonic,3,start_running,401
+Tonic,3,interrupted,600
+Tonic,3,interrupted,600
+Saturation,4,start_running,601
+Saturation,4,start_running,601
+Saturation,4,interrupted,800
+Saturation,4,interrupted,800
+CIFAR 100,1,start_running,1201
+CIFAR 100,1,start_running,1201
+CIFAR 100,1,interrupted,1400
+CIFAR 100,1,interrupted,1400
+SAR,2,start_running,1401
+SAR,2,start_running,1401
+SAR,2,interrupted,1600
+SAR,2,interrupted,1600
+Tonic,3,start_running,1601
+Tonic,3,start_running,1601
+Tonic,3,interrupted,1800
+Tonic,3,interrupted,1800
+Saturation,4,start_running,1801
+Saturation,4,start_running,1801
+Saturation,4,interrupted,2000
+Saturation,4,interrupted,2000
+CIFAR 100,1,start_running,2401
+CIFAR 100,1,start_running,2401
+CIFAR 100,1,interrupted,2600
+CIFAR 100,1,interrupted,2600
+SAR,2,start_running,2601
+SAR,2,start_running,2601
+SAR,2,interrupted,2800
+SAR,2,interrupted,2800
+Tonic,3,start_running,2801
+Tonic,3,start_running,2801
+Tonic,3,interrupted,3000
+Tonic,3,interrupted,3000
+Saturation,4,start_running,3001
+Saturation,4,start_running,3001
+Saturation,4,interrupted,3200
+Saturation,4,interrupted,3200
+CIFAR 100,1,start_running,3601
+CIFAR 100,1,start_running,3601
+CIFAR 100,1,interrupted,3800
+CIFAR 100,1,interrupted,3800
+SAR,2,start_running,3801
+SAR,2,start_running,3801
+SAR,2,interrupted,4000
+SAR,2,interrupted,4000
+Tonic,3,start_running,4001
+Tonic,3,start_running,4001
+Tonic,3,interrupted,4200
+Tonic,3,interrupted,4200
+Saturation,4,start_running,4201
+Saturation,4,start_running,4201
+Saturation,4,interrupted,4400
+Saturation,4,interrupted,4400
+CIFAR 100,1,start_running,4801
+CIFAR 100,1,start_running,4801
+CIFAR 100,1,interrupted,5000
+CIFAR 100,1,interrupted,5000
+SAR,2,start_running,5001
+SAR,2,start_running,5001
+SAR,2,interrupted,5200
+SAR,2,interrupted,5200
+Tonic,3,start_running,5201
+Tonic,3,start_running,5201
+Tonic,3,interrupted,5400
+Tonic,3,interrupted,5400
+Saturation,4,start_running,5401
+Saturation,4,start_running,5401
+Saturation,4,interrupted,5600
+Saturation,4,interrupted,5600
+CIFAR 100,1,start_running,6001
+CIFAR 100,1,start_running,6001
+CIFAR 100,1,interrupted,6200
+CIFAR 100,1,interrupted,6200
+SAR,2,start_running,6201
+SAR,2,start_running,6201
+SAR,2,proc_complete,6206
+SAR,2,proc_complete,6206
+Tonic,3,start_running,6206
+Tonic,3,start_running,6206
+Tonic,3,interrupted,6400
+Tonic,3,interrupted,6400
+Saturation,4,start_running,6401
+Saturation,4,start_running,6401
+Saturation,4,proc_complete,6406
+Saturation,4,proc_complete,6406
+CIFAR 100,1,start_running,6606
+CIFAR 100,1,start_running,6606
+CIFAR 100,1,interrupted,6800
+CIFAR 100,1,interrupted,6800
+Tonic,3,start_running,6801
+Tonic,3,start_running,6801
+Tonic,3,interrupted,7000
+Tonic,3,interrupted,7000
+CIFAR 100,1,start_running,7201
+CIFAR 100,1,start_running,7201
+CIFAR 100,1,interrupted,7400
+CIFAR 100,1,interrupted,7400
+Tonic,3,start_running,7401
+Tonic,3,start_running,7401
+Tonic,3,interrupted,7600
+Tonic,3,interrupted,7600
+CIFAR 100,1,start_running,7801
+CIFAR 100,1,start_running,7801
+CIFAR 100,1,interrupted,8000
+CIFAR 100,1,interrupted,8000
+Tonic,3,start_running,8001
+Tonic,3,start_running,8001
+Tonic,3,interrupted,8200
+Tonic,3,interrupted,8200
+CIFAR 100,1,start_running,8401
+CIFAR 100,1,start_running,8401
+CIFAR 100,1,interrupted,8600
+CIFAR 100,1,interrupted,8600
+Tonic,3,start_running,8601
+Tonic,3,start_running,8601
+Tonic,3,interrupted,8800
+Tonic,3,interrupted,8800
+CIFAR 100,1,start_running,9001
+CIFAR 100,1,start_running,9001
+CIFAR 100,1,interrupted,9200
+CIFAR 100,1,interrupted,9200
+Tonic,3,start_running,9201
+Tonic,3,start_running,9201
+Tonic,3,interrupted,9400
+Tonic,3,interrupted,9400
+CIFAR 100,1,start_running,9601
+CIFAR 100,1,start_running,9601
+CIFAR 100,1,interrupted,9800
+CIFAR 100,1,interrupted,9800
+Tonic,3,start_running,9801
+Tonic,3,start_running,9801
+Tonic,3,interrupted,10000
+Tonic,3,interrupted,10000
+CIFAR 100,1,start_running,10201
+CIFAR 100,1,start_running,10201
+CIFAR 100,1,interrupted,10400
+CIFAR 100,1,interrupted,10400
+Tonic,3,start_running,10401
+Tonic,3,start_running,10401
+Tonic,3,interrupted,10600
+Tonic,3,interrupted,10600
+CIFAR 100,1,start_running,10801
+CIFAR 100,1,start_running,10801
+CIFAR 100,1,interrupted,11000
+CIFAR 100,1,interrupted,11000
+Tonic,3,start_running,11001
+Tonic,3,start_running,11001
+Tonic,3,interrupted,11200
+Tonic,3,interrupted,11200
+CIFAR 100,1,start_running,11401
+CIFAR 100,1,start_running,11401
+CIFAR 100,1,interrupted,11600
+CIFAR 100,1,interrupted,11600
+Tonic,3,start_running,11601
+Tonic,3,start_running,11601
+Tonic,3,interrupted,11800
+Tonic,3,interrupted,11800
+CIFAR 100,1,start_running,12001
+CIFAR 100,1,start_running,12001
+CIFAR 100,1,interrupted,12200
+CIFAR 100,1,interrupted,12200
+Tonic,3,start_running,12201
+Tonic,3,start_running,12201
+Tonic,3,interrupted,12400
+Tonic,3,interrupted,12400
+CIFAR 100,1,start_running,12601
+CIFAR 100,1,start_running,12601
+CIFAR 100,1,interrupted,12800
+CIFAR 100,1,interrupted,12800
+Tonic,3,start_running,12801
+Tonic,3,start_running,12801
+Tonic,3,interrupted,13000
+Tonic,3,interrupted,13000
+CIFAR 100,1,start_running,13201
+CIFAR 100,1,start_running,13201
+CIFAR 100,1,interrupted,13400
+CIFAR 100,1,interrupted,13400
+Tonic,3,start_running,13401
+Tonic,3,start_running,13401
+Tonic,3,interrupted,13600
+Tonic,3,interrupted,13600
+CIFAR 100,1,start_running,13801
+CIFAR 100,1,start_running,13801
+CIFAR 100,1,interrupted,14000
+CIFAR 100,1,interrupted,14000
+Tonic,3,start_running,14001
+Tonic,3,start_running,14001
+Tonic,3,interrupted,14200
+Tonic,3,interrupted,14200
+CIFAR 100,1,start_running,14401
+CIFAR 100,1,start_running,14401
+CIFAR 100,1,interrupted,14600
+CIFAR 100,1,interrupted,14600
+Tonic,3,start_running,14601
+Tonic,3,start_running,14601
+Tonic,3,interrupted,14800
+Tonic,3,interrupted,14800
+CIFAR 100,1,start_running,15001
+CIFAR 100,1,start_running,15001
+CIFAR 100,1,proc_complete,15026
+CIFAR 100,1,proc_complete,15026
+Tonic,3,start_running,15026
+Tonic,3,start_running,15026
+Tonic,3,proc_complete,15051
+Tonic,3,proc_complete,15051
