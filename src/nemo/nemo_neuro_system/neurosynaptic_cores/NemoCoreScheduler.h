@@ -106,7 +106,6 @@ namespace nemo {
 			void set_models(const std::map<int, nemo::config::NemoModel>& models);
 			void forward_scheduler_event(tw_bf *bf, nemo_message *m, tw_lp *lp);
 			void reverse_scheduler_event(tw_bf *bf, nemo_message *m, tw_lp *lp);
-
 			void set_task_list(const std::vector<nemo::config::ScheduledTask>& task_list);
 			void init_process_models();
 			void check_waiting_procs();
@@ -212,8 +211,12 @@ namespace nemo {
 
 
 			int remove_assigned_done_processes();
-
 			virtual std::vector<std::shared_ptr<SimProcess>>  get_removable_processes();
+
+			int precached_get_running_at_time();
+			int precached_get_waiting_at_time();
+			int precached_get_proc_list();
+
 
 		};
 		// This class gets directly init'ed by ROSS through these functions:
@@ -224,6 +227,8 @@ namespace nemo {
 		void sched_reverse_event(NemoCoreScheduler * s, tw_bf* bf, nemo_message* m, tw_lp* lp);
 		void sched_core_commit(NemoCoreScheduler * s, tw_bf* bf, nemo_message* m, tw_lp* lp);
 		void sched_core_finish(NemoCoreScheduler * s, tw_lp* lp);
+
+
 
 
 
