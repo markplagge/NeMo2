@@ -3,12 +3,9 @@
     "GLOBAL_DEBUG": true,
     "ns_cores_per_chip": 4096,
     "total_chips": 1,
-    "do_neuro_os": true,
-
     "save_nos_stats": true,
     "save_all_spikes": false,
     "save_membrane_pots": false,
-
     "neurons_per_core": 256,
     "output_system": 0,
     "output_spike_file": "model_output.csv",
@@ -18,15 +15,15 @@
       0,
       1
     ],
-  },
-  "scheduler_config":{
-    "use_non_nengo_sched": true,
-    "use_nengo_dl": false,
-    "precompute_nengo": false,
-    "use_precomputed_scheduler":true,
-    "use_precomputed_scheduler_from_file":true,
-    "precomputed_scheduler_file":"../config/paper_rr_model",
-    "sched_type": "FCFS"
+    "scheduler_config": {
+      "do_neuro_os": true,
+      "use_non_nengo_sched": true,
+      "use_nengo_dl": false,
+      "precompute_nengo": false,
+      "use_cached_scheduler_data": false,
+      "precomputed_scheduler_file": "../config/paper_rr_cache.json",
+      "sched_type": "RR"
+    }
   },
   "models": [
     {

@@ -3,14 +3,14 @@
 //
 
 #include "ModelFile.h"
-#include "get_js_mp_file.h"
+//#include "get_js_mp_file.h"
+
 #include <fstream>
 #include <iostream>
 #include <regex>
 #include <ross.h>
 #include <sstream>
 #include <utility>
-#include <ross.h>
 // Global static pointer used to ensure a single instance of the class.
 namespace nemo {
 
@@ -33,11 +33,12 @@ namespace nemo {
 
 
 	}
+
+
 	int ModelFile::read_file(const std::string& model_path){
 		std::ifstream is (model_path,std::ifstream::binary);
 		if(!is.is_open()) {
 			tw_error(TW_LOC, "Model with path %s was not opened.",model_path.c_str());
-			exit(-1);
 		}
 		is.seekg (0, is.end);
 		int length = is.tellg();
@@ -47,15 +48,17 @@ namespace nemo {
 		if (is) {
 			std::cout << "Read " << length << " bytes \n";
 			auto current_pos = buffer;
-
 			auto line = buffer;
 			bool did_fix = false;
 			for (int i = 0; i < length; i++) {
-
 				if (*current_pos == '\n') {
 					*current_pos = '\0';
 					if (!did_fix) {
+						errno = 0;
 						did_fix = parse_line(line);
+						if(!did_fix && errno) {
+							tw_error(TW_LOC, "Line %d in file %s was invalid - failing to read model.\n", i, model_path.c_str());
+						}
 					}
 					else {
 						did_fix = false;
@@ -96,44 +99,54 @@ namespace nemo {
 		const char tok[2] = "_";
 		const char enter_tok[3] = "\"";
 		auto data = strchr(line, ':') + 1;
-
+		std::string dat_s(data);
 		bool did_fix = fix_extra_line_dat(data);
+		char* token;
+		char* stred;
 		char* d1;
+		size_t datalen;
+
 		if (did_fix) {
-			auto x = 3;
 			d1 = strchr(data, '#');
-			char dx[strlen(d1) + 5];
-			dx[strlen(d1) + 4] = '\0';
-			char* d2 = dx;
-			strncpy(d2, d1, strlen(d1) + 4);
-			d2[0] = '\0';
-			d2[strlen(d2) + 1] = ' ';
-			d2[strlen(d2) + 2] = ' ';
-			d2++;
-			d1[0] = ' ';
-			d1[1] = '\0';
-			parse_line(d2);
+			if(d1) {
+				char dx[strlen(d1) + 5];
+				dx[strlen(d1) + 4] = '\0';
+				char* d2 = dx;
+				strncpy(d2, d1, strlen(d1) + 4);
+				d2[0] = '\0';
+				d2[strlen(d2) + 1] = ' ';
+				d2[strlen(d2) + 2] = ' ';
+				d2++;
+				d1[0] = ' ';
+				d1[1] = '\0';
+				parse_line(d2);
+			}else{
+				goto ERR_COND;
+			}
+
 		}
-		auto datalen = strlen(data);
+		datalen = strlen(data);
 		if (data[datalen - 1] == '\n') {
 			data[datalen - 2] = ' ';
 		}
 		data[datalen - 1] = '\n';
-
-		std::string dat_s(data);
-		char* token = strtok(line, tok) + 1;
-		char* stred;
-
+		token = strtok(line, tok) + 1;
 		token = strtok(NULL, tok);
+		if(token == NULL){
+			goto ERR_COND;
+		}
 		core_id = strtol(token, &stred, 10);
 		token = strtok(NULL, enter_tok);
+		if(token == NULL){
+			goto ERR_COND;
+		}
 		neuron_id = strtol(token, &stred, 10);
 		if (js_core_map[core_id] == nullptr) {
 			js_core_map[core_id] = new std::stringstream();
 		}
-
 		*js_core_map[core_id] << data;
 		return did_fix;
+		ERR_COND: errno = 1; return false;
 	}
 	void  ModelFile::load_model(){
 		auto sz_loaded = read_file(model_file_path);

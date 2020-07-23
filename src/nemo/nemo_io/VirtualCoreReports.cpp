@@ -8,7 +8,7 @@
 #include <fstream>
 namespace nemo {
 	std::string filename = std::string("_") + std::to_string(g_tw_mynode) + "vcore_report.rpt";;
-#define X(a) #a
+#define X(a) #a,
 	static const char* nemo_message_type_strings[] = {NEMO_MESSAGE_TYPES};
 #undef X
 

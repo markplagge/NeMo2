@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataSource name="run_result">
+  <database-model serializer="dbm" dbms="SQLITE" family-id="SQLITE" format-version="4.18">
+    <root id="1">
+      <ServerVersion>3.25.1</ServerVersion>
+    </root>
+    <schema id="2" parent="1" name="main">
+      <Current>1</Current>
+    </schema>
+    <collation id="3" parent="1" name="BINARY"/>
+    <collation id="4" parent="1" name="NOCASE"/>
+    <collation id="5" parent="1" name="RTRIM"/>
+    <table id="6" parent="2" name="job_event_types"/>
+    <table id="7" parent="2" name="jobs"/>
+    <table id="8" parent="2" name="models"/>
+    <table id="9" parent="2" name="run_job_events"/>
+    <table id="10" parent="2" name="run_job_list"/>
+    <table id="11" parent="2" name="run_job_stats"/>
+    <table id="12" parent="2" name="runs"/>
+    <table id="13" parent="2" name="sqlite_master">
+      <System>1</System>
+    </table>
+    <table id="14" parent="2" name="sqlite_sequence">
+      <System>1</System>
+    </table>
+    <column id="15" parent="6" name="type_id">
+      <Position>1</Position>
+      <DataType>integer|0s</DataType>
+      <SequenceIdentity>1</SequenceIdentity>
+    </column>
+    <column id="16" parent="6" name="event_name">
+      <Position>2</Position>
+      <DataType>varchar|0s</DataType>
+    </column>
+    <key id="17" parent="6">
+      <ColNames>type_id</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <column id="18" parent="7" name="job_id">
+      <Position>1</Position>
+      <DataType>integer|0s</DataType>
+      <SequenceIdentity>1</SequenceIdentity>
+    </column>
+    <column id="19" parent="7" name="model_id">
+      <Position>2</Position>
+      <DataType>int|0s</DataType>
+    </column>
+    <column id="20" parent="7" name="arrival_time">
+      <Position>3</Position>
+      <DataType>int|0s</DataType>
+    </column>
+    <column id="21" parent="7" name="requested_run_time">
+      <Position>4</Position>
+      <DataType>int|0s</DataType>
+    </column>
+    <column id="22" parent="7" name="task_id">
+      <Position>5</Position>
+      <DataType>integer|0s</DataType>
+    </column>
+    <key id="23" parent="7">
+      <ColNames>job_id</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <foreign-key id="24" parent="7">
+      <ColNames>model_id</ColNames>
+      <RefTableName>models</RefTableName>
+      <RefColNames>model_id</RefColNames>
+    </foreign-key>
+    <column id="25" parent="8" name="model_id">
+      <Position>1</Position>
+      <DataType>integer|0s</DataType>
+      <SequenceIdentity>1</SequenceIdentity>
+    </column>
+    <column id="26" parent="8" name="model_name">
+      <Position>2</Position>
+      <DataType>string|0s</DataType>
+    </column>
+    <column id="27" parent="8" name="needed_cores">
+      <Position>3</Position>
+      <DataType>int|0s</DataType>
+    </column>
+    <key id="28" parent="8">
+      <ColNames>model_id</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <column id="29" parent="9" name="job_event_id">
+      <Position>1</Position>
+      <DataType>integer|0s</DataType>
+      <SequenceIdentity>1</SequenceIdentity>
+    </column>
+    <column id="30" parent="9" name="event_type">
+      <Position>2</Position>
+      <DataType>integer|0s</DataType>
+    </column>
+    <column id="31" parent="9" name="run">
+      <Position>3</Position>
+      <DataType>integer|0s</DataType>
+    </column>
+    <column id="32" parent="9" name="job">
+      <Position>4</Position>
+      <DataType>integer|0s</DataType>
+    </column>
+    <column id="33" parent="9" name="sched_event_time">
+      <Position>5</Position>
+      <DataType>numeric|0s</DataType>
+    </column>
+    <key id="34" parent="9">
+      <ColNames>job_event_id</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <foreign-key id="35" parent="9">
+      <ColNames>event_type</ColNames>
+      <RefTableName>job_event_types</RefTableName>
+      <RefColNames>type_id</RefColNames>
+    </foreign-key>
+    <foreign-key id="36" parent="9">
+      <ColNames>run</ColNames>
+      <RefTableName>runs</RefTableName>
+      <RefColNames>run_id</RefColNames>
+    </foreign-key>
+    <foreign-key id="37" parent="9">
+      <ColNames>job</ColNames>
+      <RefTableName>jobs</RefTableName>
+      <RefColNames>job_id</RefColNames>
+    </foreign-key>
+    <column id="38" parent="10" name="job_id">
+      <Position>1</Position>
+      <DataType>integer|0s</DataType>
+    </column>
+    <column id="39" parent="10" name="run_id">
+      <Position>2</Position>
+      <DataType>integer|0s</DataType>
+    </column>
+    <column id="40" parent="10" name="run_job_id">
+      <Position>3</Position>
+      <DataType>integer|0s</DataType>
+      <SequenceIdentity>1</SequenceIdentity>
+    </column>
+    <key id="41" parent="10" name="run_job_list_pk">
+      <ColNames>run_job_id</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <foreign-key id="42" parent="10">
+      <ColNames>job_id</ColNames>
+      <RefTableName>jobs</RefTableName>
+      <RefColNames>job_id</RefColNames>
+    </foreign-key>
+    <foreign-key id="43" parent="10">
+      <ColNames>run_id</ColNames>
+      <RefTableName>runs</RefTableName>
+      <RefColNames>run_id</RefColNames>
+    </foreign-key>
+    <column id="44" parent="11" name="run_job_stat_id">
+      <Position>1</Position>
+      <DataType>integer|0s</DataType>
+      <SequenceIdentity>1</SequenceIdentity>
+    </column>
+    <column id="45" parent="11" name="job_id">
+      <Position>2</Position>
+      <DataType>int|0s</DataType>
+    </column>
+    <column id="46" parent="11" name="run_id">
+      <Position>3</Position>
+      <DataType>int|0s</DataType>
+    </column>
+    <column id="47" parent="11" name="pre_wait_time">
+      <Position>4</Position>
+      <DataType>int|0s</DataType>
+    </column>
+    <column id="48" parent="11" name="current_wait_time">
+      <Position>5</Position>
+      <DataType>numeric|0s</DataType>
+    </column>
+    <column id="49" parent="11" name="actual_start_time">
+      <Position>6</Position>
+      <DataType>numeric|0s</DataType>
+    </column>
+    <column id="50" parent="11" name="current_run_time">
+      <Position>7</Position>
+      <DataType>numeric|0s</DataType>
+    </column>
+    <column id="51" parent="11" name="current_scheduler_time">
+      <Position>8</Position>
+      <DataType>numeric|0s</DataType>
+    </column>
+    <column id="52" parent="11" name="current_state">
+      <Position>9</Position>
+      <DataType>TEXT|0s</DataType>
+    </column>
+    <index id="53" parent="11" name="run_job_stats_run_job_stat_id_uindex">
+      <ColNames>run_job_stat_id</ColNames>
+      <ColumnCollations></ColumnCollations>
+      <Unique>1</Unique>
+    </index>
+    <key id="54" parent="11" name="run_job_stats_pk">
+      <ColNames>run_job_stat_id</ColNames>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>run_job_stats_run_job_stat_id_uindex</UnderlyingIndexName>
+    </key>
+    <foreign-key id="55" parent="11">
+      <ColNames>job_id</ColNames>
+      <RefTableName>jobs</RefTableName>
+      <RefColNames>job_id</RefColNames>
+    </foreign-key>
+    <foreign-key id="56" parent="11">
+      <ColNames>run_id</ColNames>
+      <RefTableName>runs</RefTableName>
+      <RefColNames>run_id</RefColNames>
+    </foreign-key>
+    <column id="57" parent="12" name="run_id">
+      <Position>1</Position>
+      <DataType>integer|0s</DataType>
+      <SequenceIdentity>1</SequenceIdentity>
+    </column>
+    <column id="58" parent="12" name="sched_type">
+      <Position>2</Position>
+      <DataType>varchar|0s</DataType>
+    </column>
+    <column id="59" parent="12" name="rr_time_slice">
+      <Position>3</Position>
+      <DataType>int|0s</DataType>
+    </column>
+    <column id="60" parent="12" name="nemo_stats">
+      <Position>4</Position>
+      <DataType>text|0s</DataType>
+    </column>
+    <key id="61" parent="12">
+      <ColNames>run_id</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <column id="62" parent="13" name="type">
+      <Position>1</Position>
+      <DataType>text|0s</DataType>
+    </column>
+    <column id="63" parent="13" name="name">
+      <Position>2</Position>
+      <DataType>text|0s</DataType>
+    </column>
+    <column id="64" parent="13" name="tbl_name">
+      <Position>3</Position>
+      <DataType>text|0s</DataType>
+    </column>
+    <column id="65" parent="13" name="rootpage">
+      <Position>4</Position>
+      <DataType>int|0s</DataType>
+    </column>
+    <column id="66" parent="13" name="sql">
+      <Position>5</Position>
+      <DataType>text|0s</DataType>
+    </column>
+    <column id="67" parent="14" name="name">
+      <Position>1</Position>
+    </column>
+    <column id="68" parent="14" name="seq">
+      <Position>2</Position>
+    </column>
+  </database-model>
+</dataSource>

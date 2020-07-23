@@ -22,6 +22,10 @@ namespace nemo {
 			~JobMap();
 		};
 
+		struct CoreRCStates{
+
+		};
+
 		struct VirtualCore {
 			void assign_core_for_job(NemoNeuroCoreBase * core, int model_id);
 			std::shared_ptr<VirtualCoreReports> reporter;
@@ -69,6 +73,9 @@ namespace nemo {
 				auto vcore = cast_from(s);
 				auto v = (nemo_message*)m;
 				if (v->message_type == NOS_LOAD_MODEL) {
+					if(g_tw_mynode == 0){
+						tw_printf(TW_LOC, "VC CORE# %d init model ID %d ",lp->id, v->model_id);
+					}
 					vcore->current_model_id = v->model_id;
 					auto core = vcore->get_core_for_job(v->model_id);
 					core->s_forward_event(core, bf, m, lp);
@@ -79,11 +86,13 @@ namespace nemo {
 				else if (v->message_type == NOS_STOP) {
 					//vcore->handle_end_message(bf, v, lp);
 				}
-				else {
+				else if (v->message_type == NEURON_SPIKE || v->message_type == HEARTBEAT) {
 					if(g_tw_synchronization_protocol != NO_SYNCH && g_tw_synchronization_protocol != SEQUENTIAL && g_tw_synchronization_protocol != CONSERVATIVE)
 						vcore->save_state(lp);
 					auto core =vcore->get_core_for_job(vcore->current_model_id);
 					core->s_forward_event(core, bf, m, lp);
+				}else{
+					tw_printf(TW_LOC,"VC CORE GOT WEIRD MESSAGE %i", v->message_type);
 				}
 			}
 			static void s_virtual_reverse_event(void* s, tw_bf* bf, void* m, tw_lp* lp) {

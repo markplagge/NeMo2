@@ -17,7 +17,7 @@
 #include <ross.h>
 #include <utility>
 namespace nemo {
-	config::NemoConfig* global_config = NULL;
+	config::NemoConfig* global_config = nullptr;
 	namespace config {
 		extern unsigned int LPS_PER_PE;
 	}
@@ -158,9 +158,9 @@ void init_nemo(nemo::config::NemoConfig* cfg) {
 
 	// configure ROSS
 	auto nlp = cfg->lps_per_pe;
-	if (g_tw_mynode == 0) {
-		nlp++;
-	}
+//	if (g_tw_mynode == 0) {
+//		nlp++;
+//	}
 	g_tw_nlp = nlp;
 	g_tw_lookahead = cfg->lookahead;
 	g_tw_lp_types = ne_lps;

@@ -4,6 +4,7 @@
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCUnusedMacroInspection"
+#include "../nemo_io/get_js_mp_file.h"
 #include "NemoConfig.h"
 
 #include <iostream>
@@ -87,7 +88,7 @@ namespace nemo {
 			auto cgbl = cfg["nemo_global"];
 			this->ns_cores_per_chip = (u_long)cgbl["ns_cores_per_chip"];
 			this->total_chips = (u_int)cgbl["total_chips"];
-			this->do_neuro_os = (bool)cgbl["do_neuro_os"];
+
 			this->neurons_per_core = (u_int64_t)cgbl["neurons_per_core"];
 			this->save_all_spikes = (bool)cgbl["save_all_spikes"];
 			this->save_membrane_pots = (bool)cgbl["save_membrane_pots"];
@@ -96,10 +97,21 @@ namespace nemo {
 			this->output_nos_stat_file =(std::string)cgbl["output_nos_stat_file"];
 			this->output_membrane_pot_file =(std::string)cgbl["output_membrane_pot_file"];
 			this->core_type_ids = (std::vector<int>)cgbl["core_type_ids"];
-			this->use_nengo_dl = (bool)cgbl["use_nengo_dl"];
-			this->precompute_nengo = (bool)cgbl["precompute_nengo"];
+
 			auto os = (int)cgbl["output_system"];
-			this->use_non_nengo_sched = (bool)cgbl["use_non_nengo_sched"];
+			auto cfg_nos = cgbl["scheduler_config"];
+
+			this->do_neuro_os = (bool)cfg_nos["do_neuro_os"];
+			this->use_non_nengo_sched = (bool)cfg_nos["use_non_nengo_sched"];
+			this->use_nengo_dl = (bool)cfg_nos["use_nengo_dl"];
+			this->precompute_nengo = (bool)cfg_nos["precompute_nengo"];
+			this->use_cached_scheduler_data = (bool)cfg_nos["use_cached_scheduler_data"];
+			if (this->use_non_nengo_sched && this->use_cached_scheduler_data) {
+				this->precomputed_scheduler_file = (std::string)cfg_nos["precomputed_scheduler_file"];
+				file_help::get_file(this->precomputed_scheduler_file); // Test if the file exists before continue
+			}
+
+
 			switch (os) {
 			case 0:
 				this->output_system = POSIX;
@@ -110,7 +122,7 @@ namespace nemo {
 			DEBUG_FLAG = ((bool)cgbl["GLOBAL_DEBUG"]);
 
 			if (this->do_neuro_os) {
-				auto sched_type = (std::string)cgbl["sched_type"];
+				auto sched_type = (std::string)cgbl["scheduler_config"]["sched_type"];
 				if ("FCFS" == sched_type) {
 					this->scheduler_type = SchedType::FCFS;
 				}

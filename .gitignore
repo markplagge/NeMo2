@@ -71,3 +71,7 @@ docs/
 !docs/Doxyfile
 
 cmake-build-release/
+
+cmake-build-debug_triton_remote/CMakeFiles/clion-log.txt
+
+cmake-build-debug-triton-pi/

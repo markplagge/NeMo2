@@ -50,15 +50,26 @@ namespace nemo {
 
 			u_int64_t total_neurons_in_sim = 0;
 
-			//read in again
-			bool do_neuro_os = false;
-
 			bool save_all_spikes = false;
 			bool save_membrane_pots = false;
 			bool save_nos_stats = true;
-			bool use_nengo_dl = false;
-			bool precompute_nengo = true;
+
+			/** @defgroup OS_OPTS NeMo2 OS Config options. Manage the way the scheduler runs  @{*/
+			bool do_neuro_os = false;
+			/** Do we use the non-nengo based scheduler system? */
 			bool use_non_nengo_sched = true;
+			/** Do we use nengo_dl for nengo simulation (GPU support) ? */
+			bool use_nengo_dl = false;
+			/** if using nengo (use_non_nengo_sched=false), do we precompute the nengo sim at the start of the sim?*/
+			bool precompute_nengo = true;
+
+			/** do we use a previously computed scheduler run (use cached sched)? */
+			bool use_cached_scheduler_data = true;
+			/** if use_cached_scheduler==true, then what file do we load with instructions? */
+			std::string precomputed_scheduler_file;
+			/**@}*/
+
+
 			OutputSystem output_system;
 			SchedType scheduler_type;
 			std::string output_spike_file;

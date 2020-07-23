@@ -28,7 +28,7 @@ get_neurosynaptic_tick (double now)
   return (unsigned long)now;
 }
 nemo_message_type x;
-#define X(a) #a
+#define X(a) #a,
 	static const char *nemo_message_type_strings[] = { NEMO_MESSAGE_TYPES };
 #undef X
 

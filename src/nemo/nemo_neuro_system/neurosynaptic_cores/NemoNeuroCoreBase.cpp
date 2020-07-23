@@ -3,6 +3,7 @@
 //
 #include "NemoNeuroCoreBase.h"
 #include "../neuron_models/neuron_factory.h"
+#include "../../mapping_functions.h"
 #include <regex>
 #include <sstream>
 #include <string>
@@ -166,7 +167,6 @@ namespace nemo {
 			msg->dest_axon = -1;
 
 			RNG_END(my_lp);
-
 			tw_event_send(heartbeat_event);
 		}
 
@@ -428,6 +428,9 @@ namespace nemo {
 						msg->source_core = this->core_local_id;
 						msg->dest_axon = -1;
 						msg->debug_time = tw_now(my_lp);
+//						if(dest_gid >= 1024){
+//							std::cout << "EVENT SEND > 1024 at line 432 CORE\n";
+//						}
 						tw_event_send(spike);
 					}
 					nid++;

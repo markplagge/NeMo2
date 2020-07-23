@@ -208,14 +208,6 @@ namespace nemo {
 
 	// Helper functon for BF logic:
 
-	inline uint64_t get_gid_from_core_local(ne_id_type dest_core, ne_id_type dest_axon) {
-		//currently, cores are GIDs since this is a strict linear map
-		if (g_tw_mynode == 0)
-			return (uint64_t)dest_core + 1;
-		else
-			return dest_core;
-		//return dest_core / g_tw_nlp;
-	}
 	///**
 	// * 2D Array helper template. Matrix is a 2D array using STD::Array
 	// * @tparam T

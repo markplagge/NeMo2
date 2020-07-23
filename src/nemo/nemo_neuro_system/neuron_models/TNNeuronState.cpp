@@ -4,6 +4,7 @@
 #include "TNNeuronState.h"
 #include "../../include/nemo.h"
 #include "NemoNeuronTrueNorth.h"
+#include "../../mapping_functions.h"
 
 namespace nemo {
 	namespace neuro_system {
