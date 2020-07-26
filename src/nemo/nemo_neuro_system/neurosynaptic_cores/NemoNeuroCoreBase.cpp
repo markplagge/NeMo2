@@ -3,7 +3,6 @@
 //
 #include "NemoNeuroCoreBase.h"
 #include "../neuron_models/neuron_factory.h"
-#include "../../mapping_functions.h"
 #include <regex>
 #include <sstream>
 #include <string>
@@ -58,27 +57,7 @@ namespace nemo {
 				if (heartbeat_sent && cur_message->intended_neuro_tick > current_neuro_tick) {
 				}
 				evt_stat = BF_Event_Status::Spike_Rec;
-				/**
-	   * from tick 0->1:
-	   * current_neuro_tick = previous_neuro_tick = 0;
-	   * messages come in from t= 0.0...1 to t = 0.9;
-	   * if we get a spike and current_neuro_tick is < t:
-	   *  t = next_neuro_tick (gathered from the intended neuro tick in the message)
-	   * if no heartbeat is sent:
-	   *  heartbeat scheduled for t = 1
-	   * --
-	   * if message is a heartbeat:
-	   * if heartbeat intended neuro tick == current_neuro_tick:
-	   *  leak_needed_count = current_neuro_tick - last_leak_time
-	   *  previous_neuro_tick = current_neuro_tick
-	   *  last_leak_time = current_neuro_tick  <- this could be updated, but left in for possible different ways of calculating leak_needed_count
-	   *  do leak, reset, fire funs.
-	   *  fire messages are scheduled for current_neuro_tick + delay + JITTER (but this is handled by the implementation of this class)
-	   * else:7
-	   *  This is an error condition.
-	   *
-	   */
-				/**neurosynaptic tick manager: @todo: may want to move this to an external function, as the ticks might be different depending on the underlying model. */
+
 				if (current_neuro_tick < cur_message->intended_neuro_tick) {
 					previous_neuro_tick = current_neuro_tick;//lossy operation - check for reverse computation errors
 					my_bf->c0 = 1;                           //big tick change
@@ -179,7 +158,7 @@ namespace nemo {
 			auto l_task_list = global_config->scheduler_inputs;
 			auto l_model_list = global_config->models;
 			//std::vector<NemoModel> NemoConfig::models;
-			std::map<int, config::NemoModel> models;
+			//std::map<int, config::NemoModel> models;
 			int max_models = -1;
 			if (!global_config->do_neuro_os){
 				max_models = 1;
@@ -201,14 +180,14 @@ namespace nemo {
 						tw_printf(TW_LOC, "Loading Spike #%i: %s \n", model_counter, model.spike_file_path.c_str());
 					auto spike_file = SpikeFile(model.spike_file_path);
 					model_files.push_back(model_file);
-					spike_files.push_back(spike_file);
+					//spike_files.push_back(spike_file);
 				}
 				else {
 					tw_printf(TW_LOC, "Loading benchmark model %s \n", model.benchmark_model_name.c_str());
 					ModelFile mf;
 					SpikeFile sf;
 					model_files.push_back(mf);
-					spike_files.push_back(sf);
+					//spike_files.push_back(sf);
 				}
 				model_counter += 1;
 			}
@@ -223,19 +202,17 @@ namespace nemo {
 				NemoOutputHandler* output_handler;
 				NemoDebugJSONHandler* debug_handler;
 
-				if(g_tw_mynode > 0){
-					init_model_files();
-				}
+				//if(g_tw_mynode > 0){
+				init_model_files();
+				//}
 
 				if (config::NemoConfig::DEBUG_FLAG) {
 					std::stringstream s;
 					s << "debug_rank_" << g_tw_mynode << ".json";
 					auto gsv = (unsigned int)(global_config->ns_cores_per_chip / global_config->world_size);
 					debug_handler = new NemoDebugJSONHandler(s.str(),gsv);
-
 					nemo::neuro_system::NemoNeuroCoreBase::debug_system = debug_handler;
 				}
-				//@TODO: NOTE - REMOVE THIS FOR PROD //
 
 				/** @note: only posix IO right now */
 				if (global_config->output_system == config::POSIX) {
@@ -259,7 +236,37 @@ namespace nemo {
 			}
 		}
 		/**
-		 * Static forward event handler
+		 * This function sets the state of the core based on the selected model_id nubmer
+		 * It loads and initializes new neuron states. Scheduler core sends this message
+		 * @param model_id
+		 */
+		void NemoNeuroCoreBase::init_load_model_into_core(int model_id){
+
+			this->current_model = this->models[model_id];
+			auto update_data = this->model_files[this->current_model.id].get_core_settings(this->core_local_id);
+			if (update_data.length()) {
+				this->init_current_model(update_data);
+			}else{
+				//tw_error(TW_LOC, "Error - update from model_files was null - model_id %d core_id %d \n",model_id, this->core_local_id);
+				//// set  it to zero neurons!
+				for(auto &neuron : this->neuron_array) {
+					neuron->dest_core = 0;
+					neuron->dest_axon = 0;
+				}
+			}
+			int num_non_outputs = 0;
+			int num_outputs = 0;
+			for (auto& neuron : this->neuron_array) {
+				if (neuron->dest_core >= 0 || neuron->dest_axon >= 0) {
+					num_non_outputs += 1;
+				}
+				else {
+					num_outputs += 1;
+				}
+			}
+		}
+		/**
+		 *  forward event handler
 		 * @param bf
 		 * @param m
 		 * @param lp
@@ -268,24 +275,11 @@ namespace nemo {
 			this->cur_message = m;
 			this->my_lp = lp;
 			this->my_bf = bf;
+			static bool model_was_inited = false;
 			if (m->message_type == NOS_LOAD_MODEL) {
 				std::string tdl_m = "CORE INIT";
-				int check_nums = -1;
-				this->current_model = this->models[m->model_id];
-				auto update_data = this->model_files[this->current_model.id].get_core_settings(this->core_local_id);
-				if (update_data.length()) {
-					this->init_current_model(update_data);
-				}
-				int num_non_outputs = 0;
-				int num_outputs = 0;
-				for (auto& neuron : this->neuron_array) {
-					if (neuron->dest_core >= 0 || neuron->dest_axon >= 0) {
-						num_non_outputs += 1;
-					}
-					else {
-						num_outputs += 1;
-					}
-				}
+				init_load_model_into_core(m->model_id);
+				model_was_inited = true;
 			}
 			else if(m->message_type == NOS_START ){
 				this->resume_running_model();
@@ -294,7 +288,20 @@ namespace nemo {
 				this->interrupt_running_model();
 			}else {
 				this->forward_heartbeat_handler();
-				if (m->message_type == NEURON_SPIKE && this->is_model_running) {
+				if ((m->message_type == NEURON_SPIKE && this->is_model_running ) || m->message_type == 0) {
+					if (neuron_array.size() == 0){
+						this->init_load_model_into_core(m->model_id);
+
+						const char * em1 = "Neuron array size is zero in core ";
+						const char * em2 = "got neuron spike ";
+						const char * em3 = "sched. init message.";
+//						if(model_was_inited){
+//							tw_error(TW_LOC,"%s %i %s WITHOUT %s", em1, core_local_id, em2, em3);
+//						}else{
+//							tw_error(TW_LOC,"%s %i %s WITH %s\n Current model: %d and msg model: %d",
+//									 em1, core_local_id, em2, em3, this->model_id,m->model_id);
+//						}
+					}
 					for (const auto& item : neuron_array) {
 						item->integrate(m->dest_axon);
 					}
@@ -307,7 +314,7 @@ namespace nemo {
 					//Reset
 					run_resets();
 				}
-				else {
+				else  {
 					tw_error(TW_LOC, "Error - got message %i in neuro core base", m->message_type);
 				}
 			}
@@ -352,7 +359,6 @@ namespace nemo {
 					default:
 						break;
 					}
-
 					if (is_output_spike_sent(this->evt_stat) || is_spike_sent(this->evt_stat) || is_heartbeat_rec(this->evt_stat) || is_hb_sent(this->evt_stat)) {
 						cr->neurons[i].active_times.push_back(tw_now(lp));
 						cr->neurons[i].active_time_msg_rcv.push_back(m->message_type);
@@ -371,19 +377,14 @@ namespace nemo {
 				this->output_system->output_handler->close_comms();
 				if (global_config->DEBUG_FLAG) {
 					this->debug_system->write_data();
-
 				}
-
 				delete nemo::neuro_system::NemoNeuroCoreBase::debug_system;
 				delete NemoNeuroCoreBase::output_system;
-
 				this->is_init = false;
 			}
 		}
 
-		void NemoNeuroCoreBase::cleanup_output() {
-		}
-
+		void NemoNeuroCoreBase::cleanup_output() {}
 		/**
  * run_leaks - iterates through the neurons and runs the leak function.
  */
@@ -428,9 +429,6 @@ namespace nemo {
 						msg->source_core = this->core_local_id;
 						msg->dest_axon = -1;
 						msg->debug_time = tw_now(my_lp);
-//						if(dest_gid >= 1024){
-//							std::cout << "EVENT SEND > 1024 at line 432 CORE\n";
-//						}
 						tw_event_send(spike);
 					}
 					nid++;
@@ -483,10 +481,9 @@ namespace nemo {
 			this->neuron_dest_cores.reserve(global_config->neurons_per_core);
 			//line-by-line init of neurons
 			std::istringstream mdl_string(model_def);
-			/** @todo: I know this is bad to parse the lines multiple times but I don't want to pass around configuru ojbects
-			 */
 
-			int check = -1;
+
+			int check = 1;
 			for (std::string line; std::getline(mdl_string, line);) {
 
 				auto core_stat_cfg = configuru::parse_string(line.c_str(), configuru::FORGIVING, "CORE_INIT");
@@ -499,6 +496,14 @@ namespace nemo {
 						for (const auto& item : this->neuron_array) {
 							auto stat = NemoTNNeuronStats(nid, item->dest_core, item->dest_axon);
 							this->debug_system->core_records[core_local_id]->neurons.push_back(stat);
+							int ws;
+							auto cw = MPI_COMM_WORLD;
+							int w_size;
+							MPI_Comm_size(cw, &w_size);
+							if(item->dest_core > g_tw_nlp * w_size){
+								//tw_error(TW_LOC, "DEST CORE %i IS OUTSIZE WORLD SIZE\n FROM Line: \n %s", item->dest_core,line.c_str());
+								item->dest_core = this->core_local_id;
+							}
 						}
 					}
 
@@ -509,6 +514,10 @@ namespace nemo {
 				this->neuron_array[neuron_id].get()->init_from_json_string(line);
 				this->neuron_dest_cores[neuron_id] = this->neuron_array[neuron_id]->dest_core;
 				this->neuron_dest_axons[neuron_id] = this->neuron_array[neuron_id]->dest_axon;
+				if (this->neuron_array.size() == 0 ) {
+					tw_error(TW_LOC, "failed to initialize neuron array!!!");
+				}
+
 			}
 		}
 

@@ -90,6 +90,7 @@ namespace nemo {
 					if(g_tw_synchronization_protocol != NO_SYNCH && g_tw_synchronization_protocol != SEQUENTIAL && g_tw_synchronization_protocol != CONSERVATIVE)
 						vcore->save_state(lp);
 					auto core =vcore->get_core_for_job(vcore->current_model_id);
+					((nemo_message *)m)->model_id = v->model_id;
 					core->s_forward_event(core, bf, m, lp);
 				}else{
 					tw_printf(TW_LOC,"VC CORE GOT WEIRD MESSAGE %i", v->message_type);

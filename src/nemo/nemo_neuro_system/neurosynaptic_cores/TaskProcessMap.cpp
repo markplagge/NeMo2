@@ -51,7 +51,7 @@ namespace nemo{
 		}
 		std::vector<std::shared_ptr<sim_proc::SimProcess>> TaskProcessMap::get_all_assigned_processes() {
 			 std::vector<std::shared_ptr<sim_proc::SimProcess>> smp;
-			for (int i =0; i < num_cores; i ++) {
+			for (long unsigned int i =0; i < num_cores; i ++) {
 				if(task_process_map[i]->current_state != neuro_os::sim_proc::NO_OP) {
 					smp.push_back(task_process_map[i]);
 				}

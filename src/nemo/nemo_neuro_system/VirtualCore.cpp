@@ -50,6 +50,7 @@ namespace nemo {
 				auto model_id = model.id;
 				// create a generic core:
 				auto core = new NemoNeuroCoreBase();
+				NemoNeuroCoreBase::s_core_init(core, lp);
 				NemoNeuroCoreBase::s_core_init_from_vcore(core, lp, model_id);
 				// create a corresponding virtual process
 				assign_core_for_job(core, model_id);

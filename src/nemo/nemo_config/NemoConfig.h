@@ -19,6 +19,7 @@
 #include <ostream>
 #include <string>
 #include <neuro_os.h>
+#include "../../libs/neuro_os/src/NemoSchedulerInterface.h"
 
 //#include <rapidjson/rapidjson.h>
 namespace nemo {
@@ -66,7 +67,9 @@ namespace nemo {
 			/** do we use a previously computed scheduler run (use cached sched)? */
 			bool use_cached_scheduler_data = true;
 			/** if use_cached_scheduler==true, then what file do we load with instructions? */
-			std::string precomputed_scheduler_file;
+			std::string precomputed_scheduler_file = "../config/sched_pc1.json" ;
+
+			int rr_time_slice = 1000;
 			/**@}*/
 
 
@@ -81,6 +84,7 @@ namespace nemo {
 			std::vector<int> core_type_ids;
 			std::vector<ScheduledTask> scheduler_inputs;
 			std::vector<NemoModel> models;
+
 
 			double jitter_factor = 0.001;//!< This is the range of jitter. Since core-core comms are used lookahead can now be 1 though
 			int est_events_per_pe = 165535;
@@ -111,7 +115,7 @@ namespace nemo {
 
 		void set_sim_size();
 		void error_reporter(std::string str);
-
+		std::vector<neuro_os::ProcEvent> generate_pc_schedule(std::string file_path);
 
 
 	}// namespace config

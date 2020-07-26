@@ -213,7 +213,7 @@ namespace nemo {
 			bool kappa = 0;
 			int signal_delay = 0;// tw_rand_integer(lp->rng, 0,5);
 
-			for (int i = 0; i < NEURONS_IN_CORE; i++) {
+			for (unsigned int i = 0; i < NEURONS_IN_CORE; i++) {
 				// s->synapticConnectivity[i] = tw_rand_integer(lp->rng, 0, 1);
 				tn_neuron_state->axon_types[i] = 1;
 				g_i[i] = 0;

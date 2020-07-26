@@ -20,6 +20,7 @@ namespace nemo {
 		bool operator!=(const SpikeRep& rhs) const {
 			return !(rhs == *this);
 		}
+		int spike_offset;
 
 	};
 
@@ -28,6 +29,7 @@ namespace nemo {
 	class SpikeFile {
 	public:
 		SpikeFile(const std::string& spike_filename);
+		int spike_offset = 0;
 		SpikeFile(){
 			valid_spike = false;
 		}
@@ -37,6 +39,7 @@ namespace nemo {
 		std::vector<SpikeRep> get_spikes_at_time(unsigned int time);
 		/* Public for testing */
 		std::map<int, std::vector<SpikeRep>> input_spikes;
+		void parent_process_wait();
 	private:
 		bool valid_spike = true;
 		std::string spike_filename;

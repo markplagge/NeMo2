@@ -8,6 +8,14 @@
 #include <json.hpp>
 
 namespace nemo {
+	namespace util{
+		/* x-macro constructors for error and type
+   enums and string tables */
+	#define AS_BARE(a) a ,
+	#define AS_STR(a) #a ,
+
+
+	}
 
 	class ModelFile {
 	public:
@@ -33,7 +41,7 @@ namespace nemo {
 		void load_model();
 		bool parse_line(char* line);
 		int num_needed_cores = 0;
-		char core_neuron_id[64] = {'\0'};
+		//char core_neuron_id[64] = {'\0'};
 		bool valid_model = true;
 		int model_id = 0;
 		std::string model_name;

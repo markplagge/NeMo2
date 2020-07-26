@@ -202,6 +202,18 @@ namespace nemo {
 			   << "start_time: " << task.start_time << " task_id: " << task.task_id;
 			return os;
 		}
+
+		std::vector<neuro_os::ProcEvent> generate_pc_schedule(std::string file_path) {
+			using namespace configuru;
+			auto events = std::vector<neuro_os::ProcEvent>();
+			Config cfg = configuru::parse_file(file_path, FORGIVING);
+			for (auto js_obj : cfg.as_array()) {
+				auto ev = neuro_os::ProcEvent((int)js_obj["model_id"],(int)js_obj["task_id"],(int)js_obj["event_type"],
+											  (int)js_obj["current_scheduler_time"]);
+				events.push_back(ev);
+			}
+			return events;
+		}
 	}// namespace config
 }// namespace nemo
 

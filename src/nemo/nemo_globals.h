@@ -42,8 +42,7 @@ namespace nemo {
 	 */
 	unsigned long get_neurosynaptic_tick(double now);
 
-/** @todo: use this macro rather than calling yet another function and write more macros for timing */
-#define GET_NEUROSYNAPTIC_TICK(now) long(now)
+
 	/**
  * Get next neuro tick - Returns the next tick for scheduling
  * @param now
@@ -184,7 +183,7 @@ namespace nemo {
 	sgn(T1 x) {
 		return ((x > 0) - (x < 0));
 	}
-#define NEMO_MAX_CHAR_DATA_SIZE 927408
+
 	/**
  * Main message data structure.
  *
@@ -202,53 +201,18 @@ namespace nemo {
 		double debug_time;
 
 		unsigned int model_id;
+		unsigned int task_id;
 		//char update_message[NEMO_MAX_CHAR_DATA_SIZE];
 
 	} nemo_message;
 
-	// Helper functon for BF logic:
 
-	///**
-	// * 2D Array helper template. Matrix is a 2D array using STD::Array
-	// * @tparam T
-	// * @tparam ROW
-	// * @tparam COL
-	// */
-	//    template<class T, size_t ROW, size_t COL>
-	//    using Matrix = std::array<std::array<T, COL>, ROW>;
-
-	/**
- * 2D Matrix helper template. Matrix as a vector. Vectors are as fast as a C heap array,
- * so no reason not to use them.
- * @tparam T type of the data in the matrix
- */
-	//template<class T, typename ROW, typename COL>
-	//using Matrix = std::vector<std::vector<T>>(ROW, std::vector<T>(COL));
-
-	//
-	//    template<class T>
-	//    class Matrix {
-	//        unsigned m_rowSize;
-	//        unsigned m_colSize;
-	//        ::std::vector<::std::vector<T>> matrix;
-	//    public:
-	//        Matrix(unsigned, unsigned, T);
-	//
-	//        Matrix(const char *);
-	//
-	//        Matrix(const Matrix &);
-	//
-	//        ~Matrix();
-	//
-	//    };
-
-	extern char* SPIKE_OUTPUT_FILENAME;
 	extern int SPIKE_OUTPUT_MODE;
 	extern int OUTPUT_MODE;
 
-//@todo: Move this to a config file that will be set up by CMAKE - or make these run-time-options
+
 #define THREADED_WRITER 1
-	extern ::std::vector<core_types> core_type_map;
+
 
 /** @} */
 

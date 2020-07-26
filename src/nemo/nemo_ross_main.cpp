@@ -4,13 +4,12 @@
 * Created by Mark Plagge on 4/30/20.
 */
 
+#include "./nemo_neuro_system/VirtualCore.h"
 #include "include/nemo.h"
 #include "mapping_functions.h"
 #include "nemo_config/NemoConfig.h"
 #include "nemo_formatted_print.h"
 #include "nemo_neuro_system/neurosynaptic_cores/NemoCoreDefs.h"
-
-#include "./nemo_neuro_system/VirtualCore.h"
 #include "nemo_neuro_system/neurosynaptic_cores/NemoNeuroCoreBase.h"
 #include <codecvt>
 #include <iostream>
@@ -23,11 +22,9 @@ namespace nemo {
 	}
 	namespace p {
 		using namespace config;
-
 		template<>
 		void print_vector_limit<>(std::vector<config::ScheduledTask> elms) {
 			int chk = 0;
-
 			stringstream sb;
 			for (const auto& elm : elms) {
 				if (VERBOSE == 0 || VERBOSE != chk) {
@@ -60,11 +57,8 @@ namespace nemo {
 				if (VERBOSE != 0 && VERBOSE == chk) {
 				}
 				else {
-
-					//print_config_element(e);
 					sb << tbstop << pr_emph("Model: ") << chk << endl
 					   << tbstop << e;
-					//ss << setw(22) << rowstar  <<endl;
 					std::string nm("NONE");
 					if (not e.benchmark_model_name.compare("NONE")) {
 						sb << endl;
@@ -79,7 +73,6 @@ namespace nemo {
 
 					sb << line << endl;
 				}
-
 				chk += 1;
 			}
 			ss << pr_loc_h("Models in Sim", chk);
@@ -92,13 +85,8 @@ namespace nemo {
 		}
 		template<>
 		void print_config_vector<config::ScheduledTask>(std::vector<config::ScheduledTask> elms) {
-			//pr_e("NeuroOS Task Schedule:", " ");
 			print_vector_limit(elms);
 		}
-		//		template<>
-		//		void pr_v<config::ScheduledTask>( std::string desc, std::vector<config::ScheduledTask> elms) {
-		//			print_vector_limit(std::move(elms));
-		//		}
 		void pr_v(std::vector<config::ScheduledTask> elms) {
 			print_vector_limit(elms);
 		}
@@ -115,20 +103,20 @@ unsigned int ::nemo::config::SYNAPSES_IN_CORE = 1;//(NEURONS_IN_CORE * AXONS_IN_
 unsigned int ::nemo::config::CORE_SIZE = 1;
 unsigned int ::nemo::config::SIM_SIZE = 1;
 unsigned int ::nemo::config::LPS_PER_PE = 1;
+
 int ::nemo::p::VERBOSE = 1;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-field-initializers"
 tw_lptype ne_lps[8] = {
-		{(init_f)neuro_system::sched_core_init,
-		 (pre_run_f)neuro_system::sched_pre_run,
-		 (event_f)neuro_system::sched_forward_event,
-		 (revent_f)neuro_system::sched_reverse_event,
-		 (commit_f)neuro_system::sched_core_commit,
-		 (final_f)neuro_system::sched_core_finish,
+		{(init_f)neuro_system::NemoCoreSchedulerLight::sched_core_init,
+		 (pre_run_f)neuro_system::NemoCoreSchedulerLight::sched_pre_run,
+		 (event_f)neuro_system::NemoCoreSchedulerLight::sched_forward_event,
+		 (revent_f)neuro_system::NemoCoreSchedulerLight::sched_reverse_event,
+		 (commit_f)neuro_system::NemoCoreSchedulerLight::sched_core_commit,
+		 (final_f)neuro_system::NemoCoreSchedulerLight::sched_core_finish,
 		 (map_f)nemo_map,
-		 sizeof(neuro_system::NemoCoreScheduler)},
-
+		 sizeof(neuro_system::NemoCoreSchedulerLight)},
 		{(init_f)neuro_system::VirtualCore::s_virtual_core_init,
 		 (pre_run_f)neuro_system::VirtualCore::s_virtual_pre_run,
 		 (event_f)neuro_system::VirtualCore::s_virtual_forward_event,
@@ -158,9 +146,9 @@ void init_nemo(nemo::config::NemoConfig* cfg) {
 
 	// configure ROSS
 	auto nlp = cfg->lps_per_pe;
-//	if (g_tw_mynode == 0) {
-//		nlp++;
-//	}
+	//	if (g_tw_mynode == 0) {
+	//		nlp++;
+	//	}
 	g_tw_nlp = nlp;
 	g_tw_lookahead = cfg->lookahead;
 	g_tw_lp_types = ne_lps;
@@ -211,7 +199,6 @@ void print_sim_config() {
 	pr_e("Nengo Precompute mode?", global_config->precompute_nengo);
 	pr_e("Nengo GPU mode?", global_config->use_nengo_dl);
 
-
 	pr_v<NemoModel>("", global_config->models);
 	pr_v("Scheduler Inputs", global_config->scheduler_inputs);
 
@@ -224,18 +211,48 @@ tw_optdef loc_nemo_tw_options[] = {
 		TWOPT_ULONG("mean", nemo::config::NemoConfig::test, "test_value"),
 		TWOPT_CHAR("cfg", primary_config_file, "Main configuration file"),
 		TWOPT_END()};
+#include "../../neuro_os/src/NemoNosScheduler.h"
+#define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
+#define PBWIDTH 60
 
+void printProgress(double percentage) {
+	int val = (int)(percentage * 100);
+	int lpad = (int)(percentage * PBWIDTH);
+	int rpad = PBWIDTH - lpad;
+	printf("\r%3d%% [%.*s%*s]", val, lpad, PBSTR, rpad, "");
+	fflush(stdout);
+}
+void test_new_iface() {
+	auto sched_mode = neuro_os::SC_MD_CONVENT | neuro_os::SC_MD_CACHED | neuro_os::SC_MD_RR;
+	int rr_time_slice = 100;
+	int cores_in_sim = 4096;
+	std::string json_path = "/Users/plaggm/dev/nemo-codes/config/example_config.json";
+	bool debug_print = false;
+	neuro_os::NemoNosScheduler nos_scheduler(static_cast<neuro_os::scheduler_mode>(sched_mode), rr_time_slice, cores_in_sim, json_path, debug_print);//(sched_mode, rr_time_slice, cores_in_sim, json_path, debug_print);
+	std::cout << "At time: ";
+	int end_time = 5000;
+	for (int tick = 0; tick < end_time; tick++) {
+		auto start_evts = nos_scheduler.get_start_events();
+		auto end_evts = nos_scheduler.get_stop_events();
+		auto wait_procs = nos_scheduler.get_waiting_procs();
+		auto run_procs = nos_scheduler.get_running_procs();
+		double per = tick / end_time;
+		printProgress(per);
+		nos_scheduler.increment_scheduler_tick();
+	}
+	std::cout << "\n";
+}
 int main(int argc, char* argv[]) {
 
 	//primary_config_file = (char*)calloc(sizeof(char), 1024);
 	std::snprintf(primary_config_file, 1000, "./example_config.json");
 
 	using namespace nemo;
+
 	auto main_config = new nemo::config::NemoConfig();
 	auto options = loc_nemo_tw_options;
 	tw_opt_add(options);
 	tw_init(&argc, &argv);
-
 
 	auto cw = MPI_COMM_WORLD;
 	int w_size;

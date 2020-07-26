@@ -4,8 +4,8 @@
     "ns_cores_per_chip": 4096,
     "total_chips": 1,
     "save_nos_stats": true,
-    "save_all_spikes": false,
-    "save_membrane_pots": false,
+    "save_all_spikes": true,
+    "save_membrane_pots": true,
     "neurons_per_core": 256,
     "output_system": 0,
     "output_spike_file": "model_output.csv",
@@ -19,8 +19,8 @@
       "do_neuro_os": true,
       "use_non_nengo_sched": true,
       "use_nengo_dl": false,
-      "precompute_nengo": false,
-      "use_cached_scheduler_data": true,
+      "precompute_nengo": true,
+      "use_cached_scheduler_data": false,
       "precomputed_scheduler_file": "../config/sched_pc1.json",
       "sched_type": "RR"
     }
@@ -31,39 +31,7 @@
       "needed_cores": 0,
       "model_file_path": "/Users/plaggm/dev/nemo2_models/models/cifar_100_model.json",
       "spike_file_path": "/Users/plaggm/dev/nemo2_models/models/cifar_100_spike.json",
-      "requested_time": 1024,
-      "benchmark_model_name": "NONE"
-    },
-    {
-      "id": 1,
-      "needed_cores": 0,
-      "model_file_path": "/Users/plaggm/dev/nemo2_models/models/sar_model.json",
-      "spike_file_path": "/Users/plaggm/dev/nemo2_models/models/sar_model_spike.json",
-      "requested_time": 10,
-      "benchmark_model_name": "NONE"
-    },
-    {
-      "id": 2,
-      "needed_cores": 0,
-      "model_file_path": "/Users/plaggm/dev/nemo2_models/models/sar_model.json",
-      "spike_file_path": "/Users/plaggm/dev/nemo2_models/models/sar_model_spike.json",
-      "requested_time": 10,
-      "benchmark_model_name": "NONE"
-    },
-    {
-      "id": 3,
-      "needed_cores": 0,
-      "model_file_path": "/Users/plaggm/dev/nemo2_models/models/sar_model.json",
-      "spike_file_path": "/Users/plaggm/dev/nemo2_models/models/sar_model_spike.json",
-      "requested_time": 10,
-      "benchmark_model_name": "NONE"
-    },
-    {
-      "id": 4,
-      "needed_cores": 0,
-      "model_file_path": "/Users/plaggm/dev/nemo2_models/models/cifar_100_model.json",
-      "spike_file_path": "/Users/plaggm/dev/nemo2_models/models/cifar_100_spike.json",
-      "requested_time": 1024,
+      "requested_time": -1,
       "benchmark_model_name": "NONE"
     }
   ],
@@ -72,16 +40,6 @@
       "start_time": 0,
       "task_id": 0,
       "model_id": 0
-    },
-    {
-      "start_time": 0,
-      "task_id": 1,
-      "model_id": 0
-    },
-    {
-      "start_time": 1024,
-      "task_id": 2,
-      "model_id": 2
     }
   ]
 }

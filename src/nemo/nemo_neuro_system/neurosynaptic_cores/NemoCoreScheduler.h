@@ -4,6 +4,7 @@
 
 #ifndef NEMOTNG_NEMOCORESCHEDULER_H
 #define NEMOTNG_NEMOCORESCHEDULER_H
+#include "../../../libs/neuro_os/src/NemoSchedulerInterface.h"
 #include "../../nemo_io/ModelFile.h"
 #include "../../nemo_io/SpikeFile.h"
 #include "NemoNeuroCoreBase.h"
@@ -11,7 +12,6 @@
 #include <neuro_os.h>
 #include <visit_struct/visit_struct.hpp>
 #include <visit_struct/visit_struct_intrusive.hpp>
-
 
 namespace nemo {
 	extern neuro_os::NengoInterface *nengo_scheduler;
@@ -94,8 +94,12 @@ namespace nemo {
 			std::ofstream debug_log;
 			double last_active_time = 0;
 
+			std::unique_ptr<NemoSelfContainedScheduler> self_contained_scheduler;
+			std::map<int,std::vector<bool>> job_list_status;
+
 			neuro_os::sim_proc::SimProcessQueue process_queue;
 			std::vector<std::shared_ptr<nemo::config::ScheduledTask>> task_list;
+			std::vector<neuro_os::ProcEvent> event_list;
 			unsigned long current_scheduler_time = 0;
 			unsigned long time_slice = 1000;
 			TaskProcessMap core_process_map; // Keeps track of what cores are running what processes.
@@ -217,19 +221,17 @@ namespace nemo {
 			int precached_get_waiting_at_time();
 			int precached_get_proc_list();
 
-
+			// This class gets directly init'ed by ROSS through these functions:
+			static void sched_core_init(NemoCoreScheduler * s, tw_lp* lp);
+			//void sched_core_init(void* s, tw_lp* lp);
+			static void sched_pre_run(NemoCoreScheduler * s, tw_lp* lp);
+			static void sched_forward_event(NemoCoreScheduler * s, tw_bf* bf, nemo_message* m, tw_lp* lp);
+			static void sched_reverse_event(NemoCoreScheduler * s, tw_bf* bf, nemo_message* m, tw_lp* lp);
+			static void sched_core_commit(NemoCoreScheduler * s, tw_bf* bf, nemo_message* m, tw_lp* lp);
+			static void sched_core_finish(NemoCoreScheduler * s, tw_lp* lp);
+			static void init_non_nengo_sched(NemoCoreScheduler* s, tw_lp* lp);
+			static void init_scheduler_system(NemoCoreScheduler* s, tw_lp* lp);
 		};
-		// This class gets directly init'ed by ROSS through these functions:
-		void sched_core_init(NemoCoreScheduler * s, tw_lp* lp);
-		//void sched_core_init(void* s, tw_lp* lp);
-		void sched_pre_run(NemoCoreScheduler * s, tw_lp* lp);
-		void sched_forward_event(NemoCoreScheduler * s, tw_bf* bf, nemo_message* m, tw_lp* lp);
-		void sched_reverse_event(NemoCoreScheduler * s, tw_bf* bf, nemo_message* m, tw_lp* lp);
-		void sched_core_commit(NemoCoreScheduler * s, tw_bf* bf, nemo_message* m, tw_lp* lp);
-		void sched_core_finish(NemoCoreScheduler * s, tw_lp* lp);
-
-
-
 
 
 

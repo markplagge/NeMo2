@@ -42,18 +42,24 @@ namespace nemo {
 			}
 
 		}else{
-			while(time){
+
+			time -= this->spike_offset;
+			while(time > this->current_time){
 				if (input_spikes.count(time) >= 1){
 					auto spx = input_spikes[time];
 					//spikes.vector1.insert( vector1.end(), vector2.begin(), vector2.end() );
 					spikes.insert(spikes.end(),spx.begin(),spx.end());
 				}
-				time --;
+
 				current_time ++;
 			}
 
 		}
 		return std::move(spikes);
 	}
+	void SpikeFile::parent_process_wait() {
+		this->spike_offset ++;
+	}
+
 
 }

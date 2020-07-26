@@ -11,7 +11,7 @@
 #include "../../nemo_io/NemoCoreOutput.h"
 #include "../../nemo_io/SpikeFile.h"
 #include "../neuron_models/NemoNeuronGeneric.h"
-
+#include <vector>
 #include <configuru.hpp>
 #include <neuro_os.h>
 #include <ross.h>
@@ -65,7 +65,9 @@ namespace nemo {
 				/* @note using standard POSIX output - one file per PE */
 
 			}
+			int init_id_DBG = 0;
 			static void s_core_init_from_vcore(NemoNeuroCoreBase* s, tw_lp* lp, int model_id){
+				s->init_id_DBG = model_id;
 				for (const auto& model : global_config->models){
 					if (model.id == model_id){
 						s->models[model_id] = model;
@@ -87,6 +89,9 @@ namespace nemo {
 				auto core = static_cast<NemoNeuroCoreBase*>(s);
 				auto ms = static_cast<nemo_message*>(m);
 				core->forward_event(bf, ms, lp);
+				if( is_output_spike_sent(core->evt_stat)){
+					std::cout << "SENT SPIKES";
+				}
 			}
 
 			static void s_reverse_event(void* s, tw_bf* bf, void* m, tw_lp* lp) {
@@ -155,7 +160,8 @@ namespace nemo {
 			/**
 * The last time that this core had activity. This refers to any  message.
 */
-			long current_neuro_tick = 0;
+
+			unsigned long current_neuro_tick = 0;
 			long previous_neuro_tick = -1;
 			/**
 * The last time this core computed the leak.
@@ -212,6 +218,7 @@ namespace nemo {
 			static std::vector<ModelFile> model_files;
 			std::vector<SpikeFile> spike_files;
 			void init_model_files();
+			void init_load_model_into_core(int model_id);
 			core_types my_core_type = NO_CORE_TYPE;
 
 			/**

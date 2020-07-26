@@ -186,8 +186,9 @@ bool nemo::neuro_system::NemoNeuronTrueNorth::fire_floor_ceiling_reset() {
  *  @param st     the neuron state
  */
 void nemo::neuro_system::NemoNeuronTrueNorth::stochastic_integrate(int weight) {
+	unsigned int check_weight = IABS(weight);
 
-	if (BINCOMP(weight, ns->drawn_random_number)) {
+	if (BINCOMP(check_weight, ns->drawn_random_number)) {
 		ns->membrane_potential += 1;
 		this->membrane_pot = ns->membrane_potential;
 	}
@@ -408,7 +409,7 @@ void nemo::neuro_system::NemoNeuronTrueNorth::init_from_json_string(std::string 
 	auto vr = (short)ncfg["VR"];
 	bool kappa = (unsigned int)ncfg["kappa"];
 	auto signal_delay = (int)ncfg["signalDelay"];
-	auto dest_core = (int)ncfg["destCore"];
+	auto dest_core = (long)ncfg["destCore"];
 	auto dest_local = (int)ncfg["destLocal"];
 	bool is_output_neuron = (unsigned int)ncfg["outputNeuron"];
 	bool is_self_firing = (unsigned int)ncfg["selfFiring"];
@@ -445,6 +446,9 @@ void nemo::neuro_system::NemoNeuronTrueNorth::init_from_json_string(std::string 
 	}
 	this->dest_axon = dest_axon;
 	this->dest_core = dest_core;
+	if(this->dest_core > 4096){
+		tw_error(TW_LOC,"INVALID CORE DEST SET");
+	}
 }
 /**
  * @brief Direct value constructor for TN Neurons. Use when you have a pre-existing data structure!
@@ -492,7 +496,7 @@ nemo::neuro_system::NemoNeuronTrueNorth::NemoNeuronTrueNorth(tw_lp* cur_lp, int 
 }
 void nemo::neuro_system::NemoNeuronTrueNorth::init_ns_structures() {
 
-	for(int i = 0; i < AXONS_IN_CORE; i ++){
+	for(unsigned int i = 0; i < AXONS_IN_CORE; i ++){
 		if (i < NUM_NEURON_WEIGHTS){
 			ns->synaptic_weight.push_back(0);
 			ns->weight_selection.push_back(0);

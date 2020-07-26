@@ -50,6 +50,7 @@ namespace neuro_system
 	 * @param js_string neuron parameters
 	 */
 	void NemoNeuronGeneric::init_from_json_string(std::string js_string) {
+
 		auto cfg = configuru::parse_string(js_string.c_str(),configuru::FORGIVING,"NEMO_GENERIC_INIT");
 		configuru::deserialize(this,cfg,nemo::config::error_reporter);
 	}
