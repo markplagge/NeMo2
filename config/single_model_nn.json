@@ -31,7 +31,7 @@
       "needed_cores": 0,
       "model_file_path": "/Users/plaggm/dev/nemo2_models/models/cifar_100_model.json",
       "spike_file_path": "/Users/plaggm/dev/nemo2_models/models/cifar_100_spike.json",
-      "requested_time": -1,
+      "requested_time": 5000,
       "benchmark_model_name": "NONE"
     }
   ],
