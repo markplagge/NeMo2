@@ -134,10 +134,10 @@ namespace nemo {
 
 			auto now = tw_now(my_lp);
 			//auto next_tick = get_next_neurosynaptic_tick(tw_now(my_lp));
-			auto next_tick = 1.0;
+			auto next_tick = 1.0 + JITTER(my_lp->rng);
 			tw_event* heartbeat_event = tw_event_new(my_lp->gid, next_tick, my_lp);
 			nemo_message* msg = (nemo_message*)tw_event_data(heartbeat_event);
-			msg->intended_neuro_tick = next_tick;
+			msg->intended_neuro_tick = now + 1;
 			msg->message_type = HEARTBEAT;
 			msg->debug_time = now;
 			msg->nemo_event_status = as_integer(this->evt_stat);
@@ -205,14 +205,14 @@ namespace nemo {
 				//if(g_tw_mynode > 0){
 				init_model_files();
 				//}
+#ifdef DEBUG
 
-				if (config::NemoConfig::DEBUG_FLAG) {
 					std::stringstream s;
 					s << "debug_rank_" << g_tw_mynode << ".json";
 					auto gsv = (unsigned int)(global_config->ns_cores_per_chip / global_config->world_size);
 					debug_handler = new NemoDebugJSONHandler(s.str(),gsv);
 					nemo::neuro_system::NemoNeuroCoreBase::debug_system = debug_handler;
-				}
+#endif
 
 				/** @note: only posix IO right now */
 				if (global_config->output_system == config::POSIX) {
@@ -230,11 +230,11 @@ namespace nemo {
 
 				is_init = true;
 			}
-			if (config::NemoConfig::DEBUG_FLAG) {
+#ifdef DEBUG
 				auto core_debug = std::make_pair(core_local_id, std::make_shared<NemoDebugRecord>(core_local_id));
 				debug_system->core_records.emplace(core_debug);
+#endif
 			}
-		}
 		/**
 		 * This function sets the state of the core based on the selected model_id nubmer
 		 * It loads and initializes new neuron states. Scheduler core sends this message
@@ -305,8 +305,10 @@ namespace nemo {
 					for (const auto& item : neuron_array) {
 						item->integrate(m->dest_axon);
 					}
+					std::cout <<"CORE " << this->core_local_id << " Spike at " << tw_now(my_lp) <<"\n";
 				}
 				else if (m->message_type == HEARTBEAT) {
+					std::cout <<"CORE " << this->core_local_id << "Heartbeat at " <<tw_now(my_lp) << "\n";
 					//LEAK
 					run_leaks();
 					//Fire
@@ -345,7 +347,7 @@ namespace nemo {
 			if (is_heartbeat_rec(this->evt_stat) && global_config->save_membrane_pots) {
 				f_save_mpots(lp);
 			}
-			if (global_config->DEBUG_FLAG) {
+#ifdef DEBUG
 				auto cr = this->debug_system->core_records[core_local_id];
 				for (int i = 0; i < neuron_array.size(); ++i) {
 					//auto n = neuron_array[i];
@@ -364,7 +366,7 @@ namespace nemo {
 						cr->neurons[i].active_time_msg_rcv.push_back(m->message_type);
 					}
 				}
-			}
+#endif
 		}
 #undef nrec
 
@@ -375,9 +377,10 @@ namespace nemo {
 		void NemoNeuroCoreBase::core_finish(tw_lp* lp) {
 			if (this->is_init) {
 				this->output_system->output_handler->close_comms();
-				if (global_config->DEBUG_FLAG) {
+#ifdef DEBUG
+
 					this->debug_system->write_data();
-				}
+#endif
 				delete nemo::neuro_system::NemoNeuroCoreBase::debug_system;
 				delete NemoNeuroCoreBase::output_system;
 				this->is_init = false;
@@ -491,21 +494,21 @@ namespace nemo {
 					auto new_core_type = get_core_enum_from_json((std::string)core_stat_cfg["type"]);
 					this->my_core_type = new_core_type;
 					create_blank_neurons();
-					if (global_config->DEBUG_FLAG) {
-						int nid = 0;
-						for (const auto& item : this->neuron_array) {
-							auto stat = NemoTNNeuronStats(nid, item->dest_core, item->dest_axon);
-							this->debug_system->core_records[core_local_id]->neurons.push_back(stat);
-							int ws;
-							auto cw = MPI_COMM_WORLD;
-							int w_size;
-							MPI_Comm_size(cw, &w_size);
-							if(item->dest_core > g_tw_nlp * w_size){
-								//tw_error(TW_LOC, "DEST CORE %i IS OUTSIZE WORLD SIZE\n FROM Line: \n %s", item->dest_core,line.c_str());
-								item->dest_core = this->core_local_id;
-							}
-						}
-					}
+//					if (global_config->DEBUG_FLAG) {
+//						int nid = 0;
+//						for (const auto& item : this->neuron_array) {
+//							auto stat = NemoTNNeuronStats(nid, item->dest_core, item->dest_axon);
+//							this->debug_system->core_records[core_local_id]->neurons.push_back(stat);
+//							int ws;
+//							auto cw = MPI_COMM_WORLD;
+//							int w_size;
+//							MPI_Comm_size(cw, &w_size);
+//							if(item->dest_core > g_tw_nlp * w_size){
+//								//tw_error(TW_LOC, "DEST CORE %i IS OUTSIZE WORLD SIZE\n FROM Line: \n %s", item->dest_core,line.c_str());
+//								item->dest_core = this->core_local_id;
+//							}
+//						}
+//					}
 
 					check++;
 				}

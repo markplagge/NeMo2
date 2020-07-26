@@ -1,8 +1,9 @@
 //
 // Created by Mark Plagge on 6/24/20.
 //
-#include "NemoCoreScheduler.h"
+
 #include <vector>
+#include "TaskProcessMap.h"
 namespace nemo{
 	namespace neuro_system{
 

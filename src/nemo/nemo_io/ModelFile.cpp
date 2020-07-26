@@ -38,23 +38,21 @@ namespace nemo {
 	ModelFile::ModelFile(std::string  model_file_path) : model_file_path(std::move(model_file_path)) {
 		//load up the model:
 		load_model();
-		if(g_tw_mynode ==0 && nemo::global_config->DEBUG_FLAG) {
-			std::string first_core;
-			std::string last_core;
-			int core_id;
-			for(core_id = 0; core_id <get_num_needed_cores(); core_id ++){
-				auto cinfo = this->get_core_settings(core_id);
-				if (cinfo.size() > 0){
-					first_core = cinfo;
-					break;
+#ifdef DEBUG//{
+			if(g_tw_mynode ==0 ) {
+				std::string first_core;
+				std::string last_core;
+				int core_id;
+				for(core_id = 0; core_id <get_num_needed_cores(); core_id ++){
+					auto cinfo = this->get_core_settings(core_id);
+					if (cinfo.size() > 0){
+						first_core = cinfo;
+						break;
+					}
 				}
+				last_core = this->get_core_settings(get_num_needed_cores());
 			}
-			last_core = this->get_core_settings(get_num_needed_cores());
-
-
-
-
-		}
+#endif	//}
 	}
 
 

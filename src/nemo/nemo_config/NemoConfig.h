@@ -92,7 +92,7 @@ namespace nemo {
 			int world_size = 0;
 
 
-			static bool DEBUG_FLAG;
+
 			static tw_petype main_pe[4];
 			static tw_optdef nemo_tw_options[];
 			static u_long test;

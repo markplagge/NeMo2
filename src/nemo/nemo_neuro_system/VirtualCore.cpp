@@ -24,6 +24,7 @@ namespace nemo {
 			auto model_id = m->model_id;
 			auto core = get_core_for_job(model_id);
 			core->forward_event(bf, m, lp);
+
 		}
 		void VirtualCore::handle_end_message(tw_bf* bf, nemo_message* m, tw_lp* lp) const {
 			auto model_id = m->model_id;

@@ -19,6 +19,7 @@
 #include <vector>
 #include <visit_struct/visit_struct.hpp>
 #include <visit_struct/visit_struct_intrusive.hpp>
+#include "../../nemo_io/NemoCoreDebugOutput.h"
 namespace nemo {
 	extern config::NemoConfig* global_config;
 	namespace neuro_system {
@@ -29,31 +30,32 @@ namespace nemo {
 		 * uses the external pybind11 bindings to manage scheduler arbiter logic
 		 * @ingroup nemo_cores
 		 */
-		class NemoCoreSchedulerLight {
+		class NemoCoreSchedulerLight : public NemoCoreDebugOutput<NemoCoreSchedulerLight> {
 			/* Debug fields */
 			std::ofstream debug_log;
 			double last_active_time = 0;
 			unsigned int current_scheduler_time = 0;
+			unsigned long _dbg_dest_gid = -1;
+
+
 			/* end debug fields
 			 * Start of scheduler specific items */
+			/* config flags and settings and state management */
 			tw_lp *my_lp;
-			tw_bf my_bf;
+			tw_bf *my_bf;
 			long rng_count = 0;
 			unsigned int num_cores_in_sim;
 			std::map<int, ModelFile> model_files;
 			std::map<int, SpikeFile> spike_files;
 
 
-
-
-
 			std::unique_ptr<neuro_os::NemoNosScheduler> main_arbiter;
-			/* config flags and settings */
+
 
 			/* Arbiter management */
-			void scheduler_tick(tw_bf bf, nemo_message *m);
-			void send_start_messages(std::vector<ProcEvent> starts);
-			void send_stop_messages(std::vector<ProcEvent> stops);
+			void scheduler_tick(tw_bf *bf, nemo_message *m);
+			void send_start_messages(const std::vector<ProcEvent>& starts);
+			void send_stop_messages(const std::vector<ProcEvent>& stops);
 			void send_input_spikes_to_cores(int model_id,int task_id);
 			void init_models_and_scheduler();
 			neuro_os::NemoNosScheduler *nos_scheduler;
@@ -65,12 +67,13 @@ namespace nemo {
 			void send_scheduler_tick();
 
 			/*helper functions */
-			void send_nos_control_message(nemo_message_type TYPE, int offset, unsigned int dest_gid, int task_id, int model_id);
+			void send_nos_control_message(nemo_message_type message_type, double offset, unsigned int dest_gid, int task_id, int model_id);
 
 
 
 
-		public:/*static scheduler interfaces to ROSS */
+		public:
+			/*static scheduler interfaces to ROSS */
 			static void sched_core_init(void * s, tw_lp* lp);
 			static void sched_pre_run(void * s, tw_lp* lp);
 			static void sched_forward_event(void * s, tw_bf* bf, nemo_message* m, tw_lp* lp);
@@ -78,8 +81,20 @@ namespace nemo {
 			static void sched_core_commit(void * s, tw_bf* bf, nemo_message* m, tw_lp* lp);
 			static void sched_core_finish(void * s, tw_lp* lp);
 
+			unsigned long get_dbg_dest_gid() const;
+			void set_dbg_dest_gid(unsigned long dbg_dest_gid);
+
+			/* debug functions */
+			void i_save_spike_record(int model_id, int task_id);
+			template <typename EVT_TYPE>
+			void i_save_control_event(EVT_TYPE event);
+			void i_start_debug_io();
+			void i_end_debug_io();
+			void i_save_input_spike_range(int model_id, int task_id, int num_spikes_sent);
+			/* end debug functions */
 
 		};
+
 	}
 }
 

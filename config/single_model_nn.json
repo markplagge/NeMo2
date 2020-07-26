@@ -28,7 +28,7 @@
   "models": [
     {
       "id": 0,
-      "needed_cores": 0,
+      "needed_cores": 4038,
       "model_file_path": "/Users/plaggm/dev/nemo2_models/models/cifar_100_model.json",
       "spike_file_path": "/Users/plaggm/dev/nemo2_models/models/cifar_100_spike.json",
       "requested_time": 5000,

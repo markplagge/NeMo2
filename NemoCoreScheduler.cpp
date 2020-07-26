@@ -95,11 +95,11 @@ namespace nemo {
 			if (!global_config->do_neuro_os && num_states_sent > global_config->ns_cores_per_chip * global_config->total_chips) {
 				tw_error(TW_LOC, "SENT %ui events - check it \n", num_states_sent);
 			}
-			if (config::NemoConfig::DEBUG_FLAG) {
+#ifdef DEBUG
 
 				auto msg_type = 'M';
 				debug_log << debug_csv(msg_type, model_id, set_state->recv_ts, get_gid_from_core_local(dest_core, 0));
-			}
+#endif
 		}
 		void NemoCoreScheduler::reverse_scheduler_event(tw_bf* bf, nemo::nemo_message* m, tw_lp* lp) {
 		}
@@ -484,10 +484,10 @@ namespace nemo {
 			msg->debug_time = tw_now(lp);
 			msg->random_call_count = lp->rng->count;
 			tw_event_send(os_tick);
-			if (config::NemoConfig::DEBUG_FLAG) {
+#ifdef DEBUG
 				s->debug_log = std::ofstream("core_debug.txt");
 				s->debug_log << "msg_type,model_id,dest_time,dest_core\n";
-			}
+#endif
 			s->init_process_models();
 			//Initialize and set up the nengo scheduler
 			init_scheduler_system(s, lp);

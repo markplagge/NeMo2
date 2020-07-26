@@ -27,6 +27,7 @@ get_neurosynaptic_tick (double now)
 {
   return (unsigned long)now;
 }
+/** Use this XARG wherever you need string representation of the message type */
 nemo_message_type x;
 #define X(a) #a,
 	static const char *nemo_message_type_strings[] = { NEMO_MESSAGE_TYPES };

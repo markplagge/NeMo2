@@ -70,6 +70,7 @@ namespace nemo {
 			  * @param lp
 			  */
 			static void s_virtual_forward_event(void* s, tw_bf* bf, void* m, tw_lp* lp) {
+				std::cout << "Virtual Core fwd \n";
 				auto vcore = cast_from(s);
 				auto v = (nemo_message*)m;
 				if (v->message_type == NOS_LOAD_MODEL) {
@@ -89,6 +90,7 @@ namespace nemo {
 				else if (v->message_type == NEURON_SPIKE || v->message_type == HEARTBEAT) {
 					if(g_tw_synchronization_protocol != NO_SYNCH && g_tw_synchronization_protocol != SEQUENTIAL && g_tw_synchronization_protocol != CONSERVATIVE)
 						vcore->save_state(lp);
+					vcore->current_model_id = v->model_id;
 					auto core =vcore->get_core_for_job(vcore->current_model_id);
 					((nemo_message *)m)->model_id = v->model_id;
 					core->s_forward_event(core, bf, m, lp);

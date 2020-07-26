@@ -10,9 +10,6 @@
 #include <iostream>
 #include <ross.h>
 #include <sstream>
-
-#include <utility>
-
 #include <codecvt>
 #include <visit_struct/visit_struct.hpp>
 #define CONFIGURU_IMPLEMENTATION 1
@@ -119,7 +116,7 @@ namespace nemo {
 			}
 
 
-			DEBUG_FLAG = ((bool)cgbl["GLOBAL_DEBUG"]);
+
 
 			if (this->do_neuro_os) {
 				auto sched_type = (std::string)cgbl["scheduler_config"]["sched_type"];
@@ -148,7 +145,7 @@ namespace nemo {
 			lps_per_pe = (ns_cores_per_chip * total_chips) / world_size;
 		}
 		NemoConfig::NemoConfig() = default;
-		bool NemoConfig::DEBUG_FLAG;
+
 		std::string NemoConfig::main_config_file = "../config/example_config.json";
 		u_long NemoConfig::test = 0;
 		std::vector<std::string> NemoConfig::stat_files() const {
@@ -217,4 +214,3 @@ namespace nemo {
 	}// namespace config
 }// namespace nemo
 
-#pragma clang diagnostic pop

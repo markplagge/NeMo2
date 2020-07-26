@@ -192,7 +192,6 @@ void print_sim_config() {
 	pr_e("Save N.O.S. Stats?", global_config->save_nos_stats);
 	pr_v("Stat File Locs:", global_config->stat_files());
 	pr_v("Core Types: ", global_config->core_type_ids);
-	pr_e("Debug mode? ", config::NemoConfig::DEBUG_FLAG);
 	pr_e("Save all spikes? ", global_config->save_all_spikes);
 	pr_e("Save membrane potentials? ", global_config->save_membrane_pots);
 	pr_e("Save N.O.S. scheduler stats? ", global_config->save_nos_stats);
@@ -207,7 +206,6 @@ void print_sim_config() {
 char primary_config_file[4096] = {'\0'};
 tw_optdef loc_nemo_tw_options[] = {
 		TWOPT_GROUP("NeMo 2 - TNG Runtime Options"),
-		TWOPT_FLAG("debug", nemo::config::NemoConfig::DEBUG_FLAG, "Debug mode?"),
 		TWOPT_ULONG("mean", nemo::config::NemoConfig::test, "test_value"),
 		TWOPT_CHAR("cfg", primary_config_file, "Main configuration file"),
 		TWOPT_END()};
@@ -242,6 +240,8 @@ void test_new_iface() {
 	}
 	std::cout << "\n";
 }
+
+
 int main(int argc, char* argv[]) {
 
 	//primary_config_file = (char*)calloc(sizeof(char), 1024);

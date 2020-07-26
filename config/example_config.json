@@ -1,6 +1,5 @@
 {
   "nemo_global": {
-    "GLOBAL_DEBUG": true,
     "ns_cores_per_chip": 4096,
     "total_chips": 1,
     "save_nos_stats": true,
@@ -19,7 +18,7 @@
       "do_neuro_os": true,
       "use_non_nengo_sched": true,
       "use_nengo_dl": false,
-      "precompute_nengo": false,
+      "precompute_nengo": true,
       "use_cached_scheduler_data": true,
       "precomputed_scheduler_file": "../config/sched_pc1.json",
       "sched_type": "RR"
@@ -31,7 +30,7 @@
       "needed_cores": 4038,
       "model_file_path": "/Users/plaggm/dev/nemo2_models/models/cifar_100_model.json",
       "spike_file_path": "/Users/plaggm/dev/nemo2_models/models/cifar_100_spike.json",
-      "requested_time": 1024,
+      "requested_time": 4000,
       "benchmark_model_name": "NONE"
     },
     {
@@ -39,7 +38,7 @@
       "needed_cores": 3794,
       "model_file_path": "/Users/plaggm/dev/nemo2_models/models/sar_model.json",
       "spike_file_path": "/Users/plaggm/dev/nemo2_models/models/sar_model_spike.json",
-      "requested_time": 10,
+      "requested_time": 4000,
       "benchmark_model_name": "NONE"
     },
     {
@@ -47,7 +46,7 @@
       "needed_cores": 3794,
       "model_file_path": "/Users/plaggm/dev/nemo2_models/models/sar_model.json",
       "spike_file_path": "/Users/plaggm/dev/nemo2_models/models/sar_model_spike.json",
-      "requested_time": 10,
+      "requested_time": 1000,
       "benchmark_model_name": "NONE"
     },
     {
@@ -55,7 +54,7 @@
       "needed_cores": 4038,
       "model_file_path": "/Users/plaggm/dev/nemo2_models/models/sar_model.json",
       "spike_file_path": "/Users/plaggm/dev/nemo2_models/models/sar_model_spike.json",
-      "requested_time": 10,
+      "requested_time": 1000,
       "benchmark_model_name": "NONE"
     },
     {
@@ -63,7 +62,7 @@
       "needed_cores": 0,
       "model_file_path": "/Users/plaggm/dev/nemo2_models/models/cifar_100_model.json",
       "spike_file_path": "/Users/plaggm/dev/nemo2_models/models/cifar_100_spike.json",
-      "requested_time": 1024,
+      "requested_time": 4000,
       "benchmark_model_name": "NONE"
     }
   ],
@@ -79,14 +78,19 @@
       "model_id": 1
     },
     {
-      "start_time": 1024,
+      "start_time": 2048,
       "task_id": 2,
       "model_id": 2
     },
     {
-      "start_time": 1024,
+      "start_time": 2048,
       "task_id": 3,
       "model_id": 3
+    },
+    {
+      "start_time": 2048,
+      "task_id": 4,
+      "model_id": 4
     }
   ]
 }

@@ -3,21 +3,31 @@
 //
 
 #include "NemoCoreSchedulerLight.h"
+#include <nemo_build_options.h>
 namespace nemo {
 	namespace neuro_system {
-		void NemoCoreSchedulerLight::send_nos_control_message(nemo_message_type TYPE, int offset, unsigned int dest_gid, int task_id, int model_id) {
+
+
+		void NemoCoreSchedulerLight::send_nos_control_message(nemo_message_type message_type, double offset,
+															  unsigned int dest_gid, int task_id, int model_id) {
 			auto dest_time =  JITTER(my_lp->rng) + offset;
 			//int dest_core = get_gid_from_core_local(i, 1);
 			auto evt = (tw_event *) tw_event_new(dest_gid, dest_time, my_lp );
 			auto msg = (nemo_message *) tw_event_data(evt);
-			msg->message_type = TYPE;
+			msg->message_type = message_type;
 			msg->debug_time = tw_now(my_lp);
 			msg->model_id = model_id;
 			msg->task_id = task_id;
 			msg->random_call_count = my_lp->rng->count;
 			tw_event_send(evt);
-		}
-		void NemoCoreSchedulerLight::scheduler_tick(tw_bf bf, nemo_message* m) {
+#if NEMO_DEBUG()
+			this->set_dbg_dest_gid(dest_gid);
+
+			save_control_event(message_type);
+			this->set_dbg_dest_gid(-1);
+#endif
+			}
+		void NemoCoreSchedulerLight::scheduler_tick(tw_bf *bf, nemo_message* m) {
 			this->my_bf = bf;
 			if (m->message_type != NOS_TICK){
 				tw_error(TW_LOC, "GOT NON NOS TICK IN LIGHT SCHEDULER");
@@ -35,20 +45,23 @@ namespace nemo {
 			send_scheduler_tick();
 			current_scheduler_time ++;
 		}
-		void NemoCoreSchedulerLight::send_start_messages(std::vector<ProcEvent> starts) {
+		void NemoCoreSchedulerLight::send_start_messages(const std::vector<ProcEvent>& starts) {
 			for (const auto& evt : starts) {
 
-				for (unsigned int i = 0; i < num_cores_in_sim; i ++){
+				for (unsigned int i = 0; i < num_cores_in_sim-1; i ++){
 					auto dest_gid = get_gid_from_core_local(i, 1);
-					send_nos_control_message(NOS_START, 0, dest_gid, evt.task_id,evt.model_id);
+					send_nos_control_message(NOS_START, 0.9, dest_gid, evt.task_id,evt.model_id);
 				}
 			}
 		}
-		void NemoCoreSchedulerLight::send_stop_messages(std::vector<ProcEvent> stops) {
+		void NemoCoreSchedulerLight::send_stop_messages(const std::vector<ProcEvent>& stops) {
 		}
 		void NemoCoreSchedulerLight::send_input_spikes_to_cores(int model_id,int task_id) {
 			auto spikes_at_tick = nos_scheduler->get_spikes_for_model_next_time(model_id);
 			auto rng_start = my_lp->rng->count;
+#if NEMO_DEBUG()
+			int num_spikes_sent = 0;
+#endif
 			for (const auto& spike : spikes_at_tick) {
 				auto dest_core = spike.dest_core;
 				auto dest_axon = spike.dest_axon;
@@ -58,14 +71,20 @@ namespace nemo {
 				auto msg = (nemo_message *) tw_event_data(evt);
 				msg->dest_axon = dest_axon;
 				msg->model_id = model_id;
+				msg->task_id = task_id;
 				msg->message_type = NEURON_SPIKE;
 				msg->source_core = 0;
 				msg->debug_time = sched_time;
 				auto rng_msg = my_lp->rng->count - rng_start;
 				msg->random_call_count = rng_msg;
 				tw_event_send(evt);
-
+#if NEMO_DEBUG()
+				num_spikes_sent ++;
+#endif
 			}
+#if NEMO_DEBUG()
+			this->save_input_spike_range(model_id,task_id, num_spikes_sent);
+#endif
 		}
 		void NemoCoreSchedulerLight::rev_scheduler_tick(tw_bf* bf, nemo_message* m) {
 		}
@@ -140,14 +159,29 @@ namespace nemo {
 			auto num_cores = global_config->ns_cores_per_chip * global_config->total_chips;
 			auto arbiter = new neuro_os::NemoNosScheduler(static_cast<scheduler_mode>(sched_mode),
 														  global_config->rr_time_slice, num_cores,
-														  global_config->main_config_file, false);
-			nos_scheduler = std::move(arbiter);
+														  config::NemoConfig::main_config_file, false);
+			auto init_models = arbiter->get_waiting_procs();
+			for (const auto& model : init_models) {
+				for(unsigned int i = 0; i < num_cores_in_sim; i ++) {
+					auto init_event = tw_event_new(my_lp->gid,JITTER(my_lp->rng) + .9,my_lp);
+					auto message = (nemo_message *) tw_event_data(init_event);
+					message->model_id = model.model_id;
+					message->message_type = NOS_LOAD_MODEL;
+					tw_event_send(init_event);
+				}
+			}
+			nos_scheduler = arbiter;
 			num_cores_in_sim = num_cores;
 		}
 
 		void NemoCoreSchedulerLight::sched_core_init(void* s, tw_lp* lp) {
 			auto core = static_cast<NemoCoreSchedulerLight*>(s);
 			new (core) NemoCoreSchedulerLight();
+#if NEMO_DEBUG()
+			std::cout << "SYSTEM DEBUG ENABLED \n";
+			core->start_debug_io("scheduler_core_debug.csv","","SCHEDULER_CORE");
+#endif
+
 			if (g_tw_mynode != 0) {
 				tw_error(TW_LOC, "Neuromorphic scheduler core was init'ed from non 0 pe: PEID: %i", g_tw_mynode);
 			}
@@ -159,6 +193,9 @@ namespace nemo {
 		void NemoCoreSchedulerLight::sched_pre_run(void* s, tw_lp* lp) {
 		}
 		void NemoCoreSchedulerLight::sched_forward_event(void* s, tw_bf* bf, nemo_message* m, tw_lp* lp) {
+			auto core = static_cast<NemoCoreSchedulerLight*>(s);
+			core->my_lp = lp;
+			core->scheduler_tick(bf, m);
 		}
 		void NemoCoreSchedulerLight::sched_reverse_event(void* s, tw_bf* bf, nemo_message* m, tw_lp* lp) {
 			auto core = static_cast<NemoCoreSchedulerLight*>(s);
@@ -166,11 +203,15 @@ namespace nemo {
 			core->rev_scheduler_tick(bf, m);
 		}
 		void NemoCoreSchedulerLight::sched_core_commit(void* s, tw_bf* bf, nemo_message* m, tw_lp* lp) {
-			auto core = static_cast<NemoCoreSchedulerLight*>(s);
-			core->my_lp = lp;
-			core->scheduler_tick(reinterpret_cast<const tw_bf&>(bf), m);
+//			auto core = static_cast<NemoCoreSchedulerLight*>(s);
+//			core->my_lp = lp;
+//			core->scheduler_tick(reinterpret_cast<const tw_bf&>(bf), m);
 		}
 		void NemoCoreSchedulerLight::sched_core_finish(void* s, tw_lp* lp) {
+#if NEMO_DEBUG()
+			auto core = static_cast<NemoCoreSchedulerLight*>(s);
+			core->end_debug_io();
+#endif
 		}
 
 		void NemoCoreSchedulerLight::send_scheduler_tick() {
@@ -182,6 +223,75 @@ namespace nemo {
 //			msg->debug_time = tw_now(my_lp);
 //			msg->random_call_count = rng_count;
 //			tw_event_send(os_tick);
+		}
+		unsigned long NemoCoreSchedulerLight::get_dbg_dest_gid() const {
+			return _dbg_dest_gid;
+		}
+		void NemoCoreSchedulerLight::set_dbg_dest_gid(unsigned long dbg_dest_gid) {
+			_dbg_dest_gid = dbg_dest_gid;
+		}
+
+	/** Debug functions below */
+	constexpr const char *proc_event_str(uint16_t event_type){
+		switch(event_type){
+		case SCH_INTERRUPT:
+			return "INTERR";
+		case SCH_PRE_WAIT:
+			return "PRE_WAIT";
+		case SCH_DONE:
+			return "DONE";
+		case SCH_RUNNING:
+			return "RUNNING";
+		case SCH_START_RUNNING:
+			return "START_RUNNING";
+		case SCH_START_WAIT:
+			return "START_WAIT";
+		case SCH_WAIT:
+			return "WAIT";
+		default:
+			return "DEFT";
+		}
+
+	}
+		nemo_message_type x;
+#define X(a) #a,
+		static const char *nemo_message_type_strings[] = { NEMO_MESSAGE_TYPES };
+#undef X
+
+		void NemoCoreSchedulerLight::i_end_debug_io() {
+		}
+		void NemoCoreSchedulerLight::i_start_debug_io() {
+			this->output_file << "LIGHT SCHED DEBUG \n" << "TIME,EVENT_TYPE,EVENT_DEST_GID,MODEL_ID,TASK_ID\n";
+		}
+
+
+		template<>
+		void NemoCoreSchedulerLight::i_save_control_event<ProcEvent>(ProcEvent event) {
+			auto msg = util::assemble_csv_elements(tw_now(my_lp),proc_event_str(event.event_type),
+					get_dbg_dest_gid(),event.model_id, event.task_id);
+			this->output_file << msg << "\n";
+//			this->output_file << tw_now(my_lp) <<"," << proc_event_str(event.event_type) << ","
+		}
+		template<typename EVT_TYPE>
+		void NemoCoreSchedulerLight::i_save_control_event(EVT_TYPE event) {
+			auto msg = util::assemble_csv_elements(event);
+			msg = "UNK_TP:," + msg;
+			this->output_file << msg << "\n";
+		}
+		template<>
+		void NemoCoreSchedulerLight::i_save_control_event<nemo_message *>(nemo_message * event) {
+			auto msg = util::assemble_csv_elements(tw_now(my_lp), nemo_message_type_strings[event->message_type],
+					get_dbg_dest_gid(), event->model_id, event->task_id);
+			this->output_file << msg << "\n";
+
+		}
+		void NemoCoreSchedulerLight::i_save_spike_record(int model_id, int task_id) {
+			auto msg = util::assemble_csv_elements(tw_now(my_lp), "INPUT_SPIKE_SEND", get_dbg_dest_gid(),model_id,task_id);
+			this->output_file << msg << "\n";
+		}
+		void NemoCoreSchedulerLight::i_save_input_spike_range(int model_id, int task_id, int num_spikes_sent) {
+			auto msg = util::assemble_csv_elements(tw_now(my_lp), "INPUT_SPIKE_GRP-TOTALM:", num_spikes_sent, model_id, task_id);
+			this->output_file << msg << "\n";
 		}
 
 	}// namespace neuro_system
