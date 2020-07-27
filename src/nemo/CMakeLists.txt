@@ -17,6 +17,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mtune=native -O3 -flto"
 
 ## COMPILE-TIME FLAGS: Debugs, etc.
 option(NeMo_DEBUG  "Enable debug messages" On)
+set(NOS_MAX_TIME 10)
 configure_file("nemo_build_options.h.in"
         "include/nemo_build_options.h")
 

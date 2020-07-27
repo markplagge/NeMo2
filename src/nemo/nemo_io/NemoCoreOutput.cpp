@@ -21,6 +21,7 @@ void nemo::NemoCoreOutput::save_spike(long source_neuron, long dest_core, long d
 	s.sched_spike_time = sched_spike_time;
 	s.interchip = is_interchip;
 	output_handler->add_data(s);
+	output_handler->write();
 }
 void nemo::NemoCoreOutput::save_spike(long source_neuron, long dest_core, long dest_axon, double sched_spike_time,
 									  double cur_time) const {

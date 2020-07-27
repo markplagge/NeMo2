@@ -46,7 +46,11 @@ namespace nemo {
 
 			if (!heartbeat_sent && cur_message->message_type == HEARTBEAT) {
 				tw_error(TW_LOC, "Got a heartbeat when no heartbeat was expected.\n"
-								 "");
+								 "MyCore: %i, MessageTime: %i, CurTime: %d,  MessageDsrc: %i,\n"
+								 "MessageTask: %d, MessageTaskID: %d, MessageModelID %d, MessageDBGTime: %d, "
+								 "MessageType: %d\n",
+						 core_local_id,cur_message->intended_neuro_tick,tw_now(my_lp), cur_message->source_core,
+						 cur_message->task_id, cur_message->model_id,cur_message->debug_time,cur_message->message_type);
 			}
 			auto heartbeat_rng = my_lp->rng->count;
 
@@ -54,7 +58,7 @@ namespace nemo {
 
 			// Spikes are where heartbeats are generated. If no heartbeat has been sent this tick, and this is a spike,
 			// then we need to send a heartbeat scheduled for the end of this current epoch.
-			if (cur_message->message_type == NEURON_SPIKE) {
+			if (cur_message->message_type == NEURON_SPIKE || cur_message->message_type == NOS_SPIKE) {
 
 				if (heartbeat_sent && cur_message->intended_neuro_tick > current_neuro_tick) {
 				}
@@ -72,7 +76,7 @@ namespace nemo {
 				}
 				else {
 					my_bf->c0 = 0;
-					cur_message->intended_neuro_tick = current_neuro_tick;
+					cur_message->intended_neuro_tick = current_neuro_tick; // input from outside world
 				}
 
 				this->evt_stat = BF_Event_Status::Spike_Rec | this->evt_stat;
@@ -85,7 +89,7 @@ namespace nemo {
 					this->send_heartbeat();
 				}
 				else {// some error conditions:
-					if (cur_message->intended_neuro_tick != this->current_neuro_tick) {
+					if (cur_message->intended_neuro_tick != this->current_neuro_tick && cur_message->message_type != NOS_SPIKE) {
 						tw_error(TW_LOC,
 								 "Got a spike intended for t %d, but heartbeat has been sent and LP is active at time %d.\n"
 								 "Details:\n"
@@ -146,6 +150,9 @@ namespace nemo {
 			// Add some extra info to the messagE:
 			msg->source_core = core_local_id;
 			msg->dest_axon = -1;
+			msg->task_id = 42;
+			msg->model_id = this->model_id;
+			msg->dest_axon = -1;
 
 			RNG_END(my_lp);
 			tw_event_send(heartbeat_event);
@@ -172,8 +179,8 @@ namespace nemo {
 				}
 				bool does_model_have_known_runtime = true;
 
-				auto model_id = model.id;
-				models.emplace(model_id, model);
+				auto new_model_id = model.id;
+				models.emplace(new_model_id, model);
 				if (model.model_file_path.length() != 0) {
 					if (g_tw_mynode == 0)
 						tw_printf(TW_LOC, "Loading Model #%i: %s \n", model_counter, model.model_file_path.c_str());
@@ -199,7 +206,7 @@ namespace nemo {
 		 * @param lp
 		 */
 		void NemoNeuroCoreBase::pre_run(tw_lp* lp) {
-
+			this->my_lp = lp;
 			if (!this->is_init) {
 				NemoOutputHandler* output_handler;
 				NemoDebugJSONHandler* debug_handler;
@@ -240,11 +247,11 @@ namespace nemo {
 		/**
 		 * This function sets the state of the core based on the selected model_id nubmer
 		 * It loads and initializes new neuron states. Scheduler core sends this message
-		 * @param model_id
+		 * @param new_model_id
 		 */
-		void NemoNeuroCoreBase::init_load_model_into_core(int model_id){
+		void NemoNeuroCoreBase::init_load_model_into_core(int new_model_id){
 
-			this->current_model = this->models[model_id];
+			this->current_model = this->models[new_model_id];
 			auto update_data = this->model_files[this->current_model.id].get_core_settings(this->core_local_id);
 			if (update_data.length()) {
 				this->init_current_model(update_data);
@@ -290,7 +297,7 @@ namespace nemo {
 				this->interrupt_running_model();
 			}else {
 				this->forward_heartbeat_handler();
-				if ((m->message_type == NEURON_SPIKE && this->is_model_running ) || m->message_type == 0) {
+				if ((m->message_type == NEURON_SPIKE && this->is_model_running ) || m->message_type == 0 || m->message_type == NOS_SPIKE) {
 					if (neuron_array.size() == 0){
 						this->init_load_model_into_core(m->model_id);
 
@@ -305,7 +312,21 @@ namespace nemo {
 //						}
 					}
 					for (const auto& item : neuron_array) {
-						item->integrate(m->dest_axon);
+						if(m->message_type == NOS_SPIKE){
+							for(int i = 0; i < m->num_grp_spikes; i ++){
+								short dest = m->spike_dest_axons[i];
+								item->integrate(dest);
+							}
+//							short *dests = m->spike_dest_axons;
+//							short spike_dest = *dests;
+//							while(spike_dest > 0){
+//								item->integrate(spike_dest);
+//								dests ++;
+//								spike_dest = *dests;
+//							}
+						}else {
+							item->integrate(m->dest_axon);
+						}
 					}
 
 				}
@@ -338,6 +359,8 @@ namespace nemo {
 		 * @param lp
 		 */
 		void NemoNeuroCoreBase::core_commit(tw_bf* bf, nemo_message* m, tw_lp* lp) {
+			this->my_lp = lp;
+			this->my_bf = bf;
 #define nrec cr->neurons[i]
 			if (m->message_type == HEARTBEAT && !is_heartbeat_rec(this->evt_stat)) {
 				tw_error(TW_LOC, "Error - heartbeat flag not set? ");
@@ -377,6 +400,7 @@ namespace nemo {
 		 * @param lp
 		 */
 		void NemoNeuroCoreBase::core_finish(tw_lp* lp) {
+			this->my_lp = lp;
 			if (this->is_init) {
 				this->output_system->output_handler->close_comms();
 #ifdef DEBUG
@@ -398,7 +422,7 @@ namespace nemo {
 #ifdef OPEN_MP
 #pragma omp parallel for
 #endif
-			for (int neuron_id = 0; neuron_id < global_config->neurons_per_core; neuron_id++) {
+			for (unsigned int neuron_id = 0; neuron_id < global_config->neurons_per_core; neuron_id++) {
 				for (int leak_num = 0; leak_num < leak_needed_count; leak_num++) {
 					neuron_array[neuron_id]->leak();
 				}
@@ -493,7 +517,7 @@ namespace nemo {
 //			if (neurons_init) {
 //				neuron_stack.push_back(neuron_array);
 //			}
-			for (int i = 0; i < global_config->neurons_per_core; i++) {
+			for (unsigned int i = 0; i < global_config->neurons_per_core; i++) {
 				std::unique_ptr<NemoNeuronGeneric> neuron = get_new_neuron<std::unique_ptr<NemoNeuronGeneric>>(this->my_core_type, this->my_lp, i, this->core_local_id);
 				this->neuron_array.push_back(std::move(neuron));
 			}

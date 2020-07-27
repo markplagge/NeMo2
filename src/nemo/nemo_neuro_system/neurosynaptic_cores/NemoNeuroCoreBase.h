@@ -218,7 +218,7 @@ namespace nemo {
 			static std::vector<ModelFile> model_files;
 			std::vector<SpikeFile> spike_files;
 			void init_model_files();
-			void init_load_model_into_core(int model_id);
+			void init_load_model_into_core(int new_model_id);
 			core_types my_core_type = NO_CORE_TYPE;
 
 			/**

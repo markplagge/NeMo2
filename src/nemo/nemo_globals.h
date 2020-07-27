@@ -24,7 +24,7 @@ namespace nemo {
  *
  *
  */
-#define JITTER_SCALE 1000
+#define JITTER_SCALE 100
 #define JITTER(rng) tw_rand_unif(rng) / JITTER_SCALE
 /** @} */
 
@@ -138,8 +138,8 @@ namespace nemo {
 	X(NOS_TICK)            \
 	X(NOS_START)           \
 	X(NOS_STOP)            \
-	X(NOS_STATUS)
-
+	X(NOS_STATUS)             \
+	X(NOS_SPIKE)
 #define X(a) a,
 	enum nemo_message_type { NEMO_MESSAGE_TYPES };
 #undef X
@@ -183,25 +183,25 @@ namespace nemo {
 	sgn(T1 x) {
 		return ((x > 0) - (x < 0));
 	}
-
+#define G_GROUPED_SPIKE_NUM 2048
 	/**
  * Main message data structure.
  *
  */
 	typedef struct NemoMessage {
 
+
 		int message_type;
 		uint32_t nemo_event_status;
-
 		int source_core;
 		int dest_axon;
 		unsigned long intended_neuro_tick;
-
 		unsigned int random_call_count;
 		double debug_time;
-
 		unsigned int model_id;
 		unsigned int task_id;
+		short spike_dest_axons [G_GROUPED_SPIKE_NUM] = {-1};
+		int num_grp_spikes;
 		//char update_message[NEMO_MAX_CHAR_DATA_SIZE];
 
 	} nemo_message;

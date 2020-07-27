@@ -86,7 +86,7 @@ namespace nemo {
 				else if (v->message_type == NOS_STOP) {
 					//vcore->handle_end_message(bf, v, lp);
 				}
-				else if (v->message_type == NEURON_SPIKE || v->message_type == HEARTBEAT) {
+				else if (v->message_type == NEURON_SPIKE || v->message_type == HEARTBEAT || v->message_type == NOS_SPIKE) {
 					if(g_tw_synchronization_protocol != NO_SYNCH && g_tw_synchronization_protocol != SEQUENTIAL && g_tw_synchronization_protocol != CONSERVATIVE)
 						vcore->save_state(lp);
 					vcore->current_model_id = v->model_id;

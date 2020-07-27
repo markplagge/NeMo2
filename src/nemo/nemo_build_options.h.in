@@ -6,6 +6,9 @@
 #pragma once
 
 #cmakedefine01 NeMo_DEBUG
+#cmakedefine  NOS_MAX_TIME @NOS_MAX_TIME@
+
+
 #if NeMo_DEBUG
 #define DEBUG NeMo_Debug
 #endif
@@ -14,6 +17,7 @@
 struct BuildOptions {
 	/**@remark This technique is much cleaner but requires gcc > 7 or clang, but XL_C is not supported - Waiting for C++14/17! */
 	constexpr static bool debug_mode = static_cast<bool>(NeMo_DEBUG);
+	constexpr static bool nos_max_time = static_cast<bool>(NOS_MAX_TIME);
 };
 constexpr BuildOptions build_options;
 
