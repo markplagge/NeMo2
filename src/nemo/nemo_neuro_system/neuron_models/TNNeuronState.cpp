@@ -141,7 +141,7 @@ namespace nemo {
 				//n->synaptic_weight[i] = sigma[i]*S[i];
 				//n->weight_selection[i] = b[i];
 			}
-			for (int i = 0; i < G_NEURONS_IN_CORE; i++) {
+			for (unsigned int i = 0; i < G_NEURONS_IN_CORE; i++) {
 				n->synaptic_connectivity.push_back(synaptic_connectivity[i]);
 				n->axon_types.push_back(G_i[i]);
 			}

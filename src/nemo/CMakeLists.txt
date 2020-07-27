@@ -70,7 +70,7 @@ set(nemo_lib_srcs
         nemo_neuro_system/neuron_models/NemoBenchmarkModels.cpp
         nemo_neuro_system/neurosynaptic_cores/NemoCoreSchedulerLight.cpp
         nemo_io/NemoCoreDebugOutput.cpp
-        nemo_neuro_system/neurosynaptic_cores/TaskProcessMap.h)
+        nemo_neuro_system/neurosynaptic_cores/TaskProcessMap.h include/utils.h)
 
 
 add_library(nemo2_lib ${nemo_lib_hdrs} ${nemo_lib_srcs})
@@ -86,7 +86,7 @@ set_property(TARGET nemo2_lib PROPERTY CXX_STANDARD 14)
 message("-------------------------------- ${EIGEN_INCLUDE_FLDR}")
 target_include_directories(nemo2_lib PUBLIC  ${NL_JSON_DIR}  ../../external/configuru ../../external/visit_struct/include ../libs/neuro_os/include ../libs/neuro_os/extern/pybind11/include "${CMAKE_CURRENT_BINARY_DIR}/include")
 target_include_directories(nemo2_lib PRIVATE
-        "${CMAKE_CURRENT_BINARY_DIR}/include"    )
+        "${CMAKE_CURRENT_BINARY_DIR}/include"   "${CMAKE_CURRENT_SOURCE_DIR}}/include" )
 target_link_libraries(nemo2_lib  neuro_os ROSS m)
 target_include_directories(nemo2 PUBLIC nemo2_lib ${SQL_FOLDER})
 target_link_libraries(nemo2 nemo2_lib ROSS m)

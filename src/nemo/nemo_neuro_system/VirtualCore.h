@@ -70,7 +70,6 @@ namespace nemo {
 			  * @param lp
 			  */
 			static void s_virtual_forward_event(void* s, tw_bf* bf, void* m, tw_lp* lp) {
-				std::cout << "Virtual Core fwd \n";
 				auto vcore = cast_from(s);
 				auto v = (nemo_message*)m;
 				if (v->message_type == NOS_LOAD_MODEL) {

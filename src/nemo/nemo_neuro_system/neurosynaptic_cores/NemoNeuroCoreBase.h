@@ -89,9 +89,9 @@ namespace nemo {
 				auto core = static_cast<NemoNeuroCoreBase*>(s);
 				auto ms = static_cast<nemo_message*>(m);
 				core->forward_event(bf, ms, lp);
-				if( is_output_spike_sent(core->evt_stat)){
-					std::cout << "SENT SPIKES";
-				}
+//				if( is_output_spike_sent(core->evt_stat)){
+//					std::cout << "SENT SPIKES";
+//				}
 			}
 
 			static void s_reverse_event(void* s, tw_bf* bf, void* m, tw_lp* lp) {

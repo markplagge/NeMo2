@@ -21,17 +21,23 @@ unsigned int nemo::neuro_system::DT(T x) {
  * Main integration function. Calls TN specific functions
  * @param source_id axon ID source for weight computations
  */
-void nemo::neuro_system::NemoNeuronTrueNorth::integrate(unsigned int source_id) {
+void nemo::neuro_system::NemoNeuronTrueNorth::integrate(int source_id) {
 	//auto st = this->ns;
-	auto wt = ns->synaptic_weight[ns->axon_types[source_id]];
-	if (wt) {
-		if (ns->weight_selection[ns->axon_types[source_id]]) {// zero if this is
-			// normal, else
-			stochastic_integrate(wt);
-		}
-		else {
-			ns->membrane_potential += wt;
-			this->membrane_pot = ns->membrane_potential;
+	if (source_id < 0 || source_id > ns->axon_types.size()){
+		source_id = 0;
+	}
+	auto ax_type = ns->axon_types[source_id];
+	if(ax_type <= ns->synaptic_weight.size()) {
+		auto wt = ns->synaptic_weight[ns->axon_types[source_id]];
+		if (wt) {
+			if (ns->weight_selection[ns->axon_types[source_id]]) {// zero if this is
+				// normal, else
+				stochastic_integrate(wt);
+			}
+			else {
+				ns->membrane_potential += wt;
+				this->membrane_pot = ns->membrane_potential;
+			}
 		}
 	}
 }

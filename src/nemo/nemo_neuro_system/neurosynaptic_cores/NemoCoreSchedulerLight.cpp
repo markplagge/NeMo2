@@ -19,6 +19,9 @@ namespace nemo {
 			msg->model_id = model_id;
 			msg->task_id = task_id;
 			msg->random_call_count = my_lp->rng->count;
+			if(dest_gid > global_config->ns_cores_per_chip){
+				tw_error(TW_LOC, "SEND FROM SCHEDULER TO NON-EXIST CHIP");
+			}
 			tw_event_send(evt);
 #if NEMO_DEBUG()
 			this->set_dbg_dest_gid(dest_gid);
@@ -77,6 +80,9 @@ namespace nemo {
 				msg->debug_time = sched_time;
 				auto rng_msg = my_lp->rng->count - rng_start;
 				msg->random_call_count = rng_msg;
+				if(dest_gid > global_config->ns_cores_per_chip){
+					tw_error(TW_LOC, "SEND FROM SCHEDULER TO NON-EXIST CHIP");
+				}
 				tw_event_send(evt);
 #if NEMO_DEBUG()
 				num_spikes_sent ++;
@@ -167,6 +173,7 @@ namespace nemo {
 					auto message = (nemo_message *) tw_event_data(init_event);
 					message->model_id = model.model_id;
 					message->message_type = NOS_LOAD_MODEL;
+
 					tw_event_send(init_event);
 				}
 			}
@@ -272,12 +279,18 @@ namespace nemo {
 			this->output_file << msg << "\n";
 //			this->output_file << tw_now(my_lp) <<"," << proc_event_str(event.event_type) << ","
 		}
-		template<typename EVT_TYPE>
-		void NemoCoreSchedulerLight::i_save_control_event(EVT_TYPE event) {
-			auto msg = util::assemble_csv_elements(event);
-			msg = "UNK_TP:," + msg;
+		template <>
+		void NemoCoreSchedulerLight::i_save_control_event<nemo_message_type>(nemo::nemo_message_type event) {
+			auto msg = util::assemble_csv_elements(tw_now(my_lp), nemo_message_type_strings[event],
+												   get_dbg_dest_gid(), 0,0);
 			this->output_file << msg << "\n";
 		}
+//		template<typename EVT_TYPE>
+//		void NemoCoreSchedulerLight::i_save_control_event(EVT_TYPE event) {
+//			auto msg = util::assemble_csv_elements(event);
+//			msg = "UNK_TP:," + msg;
+//			this->output_file << msg << "\n";
+//		}
 		template<>
 		void NemoCoreSchedulerLight::i_save_control_event<nemo_message *>(nemo_message * event) {
 			auto msg = util::assemble_csv_elements(tw_now(my_lp), nemo_message_type_strings[event->message_type],

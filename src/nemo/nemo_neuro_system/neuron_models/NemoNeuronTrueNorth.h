@@ -18,12 +18,13 @@ namespace nemo {
 		 * Bit widths in this version are not dynamic (ditched the typedefs)
 		 * */
 		class NemoNeuronTrueNorth final : public NemoNeuronGeneric {
-			std::unique_ptr<TNNeuronState> ns;
+
 
 		public:
+			std::unique_ptr<TNNeuronState> ns;
 			NemoNeuronTrueNorth();
 			NemoNeuronTrueNorth(double membrane_pot, const std::vector<double>& weights, double leak_v, double threshold, double reset_val, tw_lp* lp);
-			void integrate(unsigned int source_id) final;
+			void integrate(int source_id) final;
 			bool fire() final;
 			void leak() final;
 			void leak_n(int n_leaks) final;

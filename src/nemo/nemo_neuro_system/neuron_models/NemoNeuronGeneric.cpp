@@ -7,7 +7,7 @@ namespace nemo
 namespace neuro_system
 {
 
-	void NemoNeuronGeneric::integrate(unsigned int source_id) {
+	void NemoNeuronGeneric::integrate(int source_id) {
 		membrane_pot = membrane_pot + weights[source_id];
 	}
 	void NemoNeuronGeneric::leak() {

@@ -54,7 +54,7 @@ namespace nemo {
 			virtual void init_from_json_string(std::string js_string) ;
 
 			virtual void
-			integrate(unsigned int source_id);
+			integrate(int source_id);
 
 			virtual void leak();
 			virtual void leak_n(int n_leaks);

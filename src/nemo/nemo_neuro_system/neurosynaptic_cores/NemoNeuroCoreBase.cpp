@@ -45,7 +45,8 @@ namespace nemo {
 			// Generic error checking:
 
 			if (!heartbeat_sent && cur_message->message_type == HEARTBEAT) {
-				tw_error(TW_LOC, "Got a heartbeat when no heartbeat was expected.\n");
+				tw_error(TW_LOC, "Got a heartbeat when no heartbeat was expected.\n"
+								 "");
 			}
 			auto heartbeat_rng = my_lp->rng->count;
 
@@ -53,7 +54,8 @@ namespace nemo {
 
 			// Spikes are where heartbeats are generated. If no heartbeat has been sent this tick, and this is a spike,
 			// then we need to send a heartbeat scheduled for the end of this current epoch.
-			if (cur_message->message_type == NEURON_SPIKE) {// this if statement is a double check on the calling function
+			if (cur_message->message_type == NEURON_SPIKE) {
+
 				if (heartbeat_sent && cur_message->intended_neuro_tick > current_neuro_tick) {
 				}
 				evt_stat = BF_Event_Status::Spike_Rec;
@@ -69,8 +71,8 @@ namespace nemo {
 					my_bf->c0 = 0;
 				}
 				else {
-					tw_error(TW_LOC, "Invalid tick times: \n current_neuro_tick: %d \n",
-							 this->current_neuro_tick);
+					my_bf->c0 = 0;
+					cur_message->intended_neuro_tick = current_neuro_tick;
 				}
 
 				this->evt_stat = BF_Event_Status::Spike_Rec | this->evt_stat;
@@ -150,8 +152,8 @@ namespace nemo {
 		}
 
 		void NemoNeuroCoreBase::save_spike(nemo_message* m, long dest_core, long neuron_id, double current_time) const {
-			this->output_system->save_spike(m->source_core, dest_core, m->dest_axon, m->debug_time, current_time);
-			this->output_system->output_handler->write();
+			//this->output_system->save_spike(m->source_core, dest_core, m->dest_axon, m->debug_time, current_time);
+			//this->output_system->output_handler->write();
 		}
 		void NemoNeuroCoreBase::init_model_files(){
 			int model_counter = 0;
@@ -305,10 +307,10 @@ namespace nemo {
 					for (const auto& item : neuron_array) {
 						item->integrate(m->dest_axon);
 					}
-					std::cout <<"CORE " << this->core_local_id << " Spike at " << tw_now(my_lp) <<"\n";
+
 				}
 				else if (m->message_type == HEARTBEAT) {
-					std::cout <<"CORE " << this->core_local_id << "Heartbeat at " <<tw_now(my_lp) << "\n";
+					//std::cout <<"CORE " << this->core_local_id << "Heartbeat at " <<tw_now(my_lp) << "\n";
 					//LEAK
 					run_leaks();
 					//Fire
@@ -347,7 +349,7 @@ namespace nemo {
 			if (is_heartbeat_rec(this->evt_stat) && global_config->save_membrane_pots) {
 				f_save_mpots(lp);
 			}
-#ifdef DEBUG
+/*#ifdef DEBUG
 				auto cr = this->debug_system->core_records[core_local_id];
 				for (int i = 0; i < neuron_array.size(); ++i) {
 					//auto n = neuron_array[i];
@@ -366,7 +368,7 @@ namespace nemo {
 						cr->neurons[i].active_time_msg_rcv.push_back(m->message_type);
 					}
 				}
-#endif
+#endif*/
 		}
 #undef nrec
 
@@ -380,8 +382,9 @@ namespace nemo {
 #ifdef DEBUG
 
 					this->debug_system->write_data();
+					delete nemo::neuro_system::NemoNeuroCoreBase::debug_system;
 #endif
-				delete nemo::neuro_system::NemoNeuroCoreBase::debug_system;
+
 				delete NemoNeuroCoreBase::output_system;
 				this->is_init = false;
 			}
@@ -412,27 +415,44 @@ namespace nemo {
 				if (did_fire) {
 					if (item->dest_axon < 0 || item->dest_core < 0) {
 						this->evt_stat = add_evt_status(this->evt_stat, BF_Event_Status::Output_Spike_Sent);
-					}
-					this->evt_stat = add_evt_status(this->evt_stat, BF_Event_Status::Spike_Sent);
-					if (global_config->save_all_spikes || item->dest_core < 0) {
-						this->neuron_spike_record.push_back(nid);
-					}
-					if (is_dest_interchip(nid)) {
-						/** @todo: add cross chip communication recording here */
-						this->evt_stat  = add_evt_status(this->evt_stat, BF_Event_Status::Spike_Sent_Interchip);
-					}
+					}else {
+						this->evt_stat = add_evt_status(this->evt_stat, BF_Event_Status::Spike_Sent);
+						if (global_config->save_all_spikes || item->dest_core < 0) {
+							this->neuron_spike_record.push_back(nid);
+						}
+						if (is_dest_interchip(nid)) {
+							/** @todo: add cross chip communication recording here */
+							this->evt_stat = add_evt_status(this->evt_stat, BF_Event_Status::Spike_Sent_Interchip);
+						}
 
-					if (not item->is_self_manage_spike_events()) {
-						auto dest_gid = get_gid_from_core_local(neuron_dest_cores[nid], neuron_dest_axons[nid]);
-						struct tw_event* spike = tw_event_new(dest_gid, get_neurosynaptic_tick(tw_now(my_lp)), my_lp);
-						auto* msg = (nemo_message*)tw_event_data(spike);
-						msg->intended_neuro_tick = this->current_neuro_tick + 1;
-						msg->message_type = NEURON_SPIKE;
-						msg->nemo_event_status = as_integer(this->evt_stat);
-						msg->source_core = this->core_local_id;
-						msg->dest_axon = -1;
-						msg->debug_time = tw_now(my_lp);
-						tw_event_send(spike);
+						if (not item->is_self_manage_spike_events()) {
+							auto nix = static_cast<NemoNeuronTrueNorth*>(item.get());
+							//auto dest_gid = get_gid_from_core_local(neuron_dest_cores[nid], neuron_dest_axons[nid]);
+							auto dest_gid = get_gid_from_core_local(item->dest_core, item->dest_axon);
+							if (item->dest_core < 0 || item->dest_axon < 0 || dest_gid > global_config->ns_cores_per_chip) {
+
+								this->output_system->save_spike(nix->ns->my_local_id, nix->dest_core, item->dest_axon, tw_now(my_lp), tw_now(my_lp) + 1);
+							}
+							else {
+
+								if (dest_gid >= 4094) {
+									int x = 42;
+								}
+								struct tw_event* spike = tw_event_new(dest_gid, get_neurosynaptic_tick(tw_now(my_lp)), my_lp);
+								auto* msg = (nemo_message*)tw_event_data(spike);
+								msg->intended_neuro_tick = this->current_neuro_tick + 1;
+								msg->message_type = NEURON_SPIKE;
+								msg->nemo_event_status = as_integer(this->evt_stat);
+								msg->source_core = this->core_local_id;
+
+								msg->dest_axon = nix->dest_axon;
+								msg->debug_time = tw_now(my_lp);
+								if (dest_gid > global_config->ns_cores_per_chip) {
+									tw_error(TW_LOC, "SEND FROM SCHEDULER TO NON-EXIST CHIP");
+								}
+								tw_event_send(spike);
+							}
+						}
 					}
 					nid++;
 				}
@@ -486,31 +506,14 @@ namespace nemo {
 			std::istringstream mdl_string(model_def);
 
 
-			int check = 1;
+			int blank_neuron_init = 1;
 			for (std::string line; std::getline(mdl_string, line);) {
-
 				auto core_stat_cfg = configuru::parse_string(line.c_str(), configuru::FORGIVING, "CORE_INIT");
-				if (check) {
+				if (blank_neuron_init) {
 					auto new_core_type = get_core_enum_from_json((std::string)core_stat_cfg["type"]);
 					this->my_core_type = new_core_type;
 					create_blank_neurons();
-//					if (global_config->DEBUG_FLAG) {
-//						int nid = 0;
-//						for (const auto& item : this->neuron_array) {
-//							auto stat = NemoTNNeuronStats(nid, item->dest_core, item->dest_axon);
-//							this->debug_system->core_records[core_local_id]->neurons.push_back(stat);
-//							int ws;
-//							auto cw = MPI_COMM_WORLD;
-//							int w_size;
-//							MPI_Comm_size(cw, &w_size);
-//							if(item->dest_core > g_tw_nlp * w_size){
-//								//tw_error(TW_LOC, "DEST CORE %i IS OUTSIZE WORLD SIZE\n FROM Line: \n %s", item->dest_core,line.c_str());
-//								item->dest_core = this->core_local_id;
-//							}
-//						}
-//					}
-
-					check++;
+					blank_neuron_init--;
 				}
 				auto neuron_id = (unsigned int)core_stat_cfg["localID"];
 
