@@ -43,12 +43,11 @@ namespace nemo {
 		struct NemoConfig {
 			unsigned int ns_cores_per_chip = 4096;
 			unsigned int neurons_per_core = 256;
-			unsigned int total_chips = 2;
+			unsigned int total_chips = 1;
 			// computed:
 			unsigned int total_sim_size = 0; //!< Total simulation size - DOES NOT INCLUDE SCHEDULER CORE. Number of compute neurosynaptic cores
 			unsigned int lps_per_pe = 0; //!< LPs per PE in sim. DOES NOT INCLUDE SCHEDULER CORE
 			unsigned int total_lps = 0;
-
 			u_int64_t total_neurons_in_sim = 0;
 
 			bool save_all_spikes = false;

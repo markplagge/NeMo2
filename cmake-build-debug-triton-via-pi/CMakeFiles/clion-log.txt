@@ -1,0 +1,36 @@
+/usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/usr/bin/make -G "CodeBlocks - Unix Makefiles" /home/plaggm/dev/remote
+/home/plaggm/dev/remote/cmake/home/plaggm/dev/remote/external/catch2/contrib
+MPI C: . MPICXX: TRUE
+MPI C: /usr/bin/mpicc, flags:  || -pthread || -Wl,-rpath -Wl,/usr/lib/openmpi -Wl,--enable-new-dtags -pthread
+/home/plaggm/dev/remote/cmake/home/plaggm/dev/remote/external/catch2/contrib
+/home/plaggm/dev/remote/cmake/home/plaggm/dev/remote/external/catch2/contrib
+-- System architecture detected: x86_64
+-- Using C_FLAGS: 
+-- Using CLOCK: amd64
+-- Found MPI: TRUE (found version "3.1")  
+-- MPI C Compile Flags:  -pthread
+-- MPI C Include Path:   /usr/include
+-- MPI C Link Flags:     -Wl,-rpath -Wl,/usr/lib/openmpi -Wl,--enable-new-dtags -pthread
+-- MPI C Libraries:      /usr/lib/openmpi/libmpi.so
+-- MPI CXX Compile Flags: -pthread
+-- MPI CXX Include Path:  /usr/include
+-- MPI CXX Link Flags:    -Wl,-rpath -Wl,/usr/lib/openmpi -Wl,--enable-new-dtags -pthread
+-- MPI CXX Libraries:     /usr/lib/openmpi/libmpi_cxx.so;/usr/lib/openmpi/libmpi.so
+-- MPI Executable:       /usr/bin/mpiexec
+-- MPI Num Proc Flag:    -n
+-- Found MPI: TRUE (found version "3.1")  
+-------------------------------- 
+-- pybind11 v2.5.0
+NOS inside nemo
+Current src fldr: /home/plaggm/dev/remote/src/libs/neuro_os
+Src fldr: /home/plaggm/dev/remote
+PB FLDR: /home/plaggm/dev/remote/src/libs/neuro_os/extern/pybind11/include
+OFF
+Testing Enabled
+/home/plaggm/dev/remote/test/catch
+Adding test folders
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/plaggm/dev/remote/cmake-build-debug-triton-via-pi
+Cannot read /Users/plaggm/dev/nemo-codes/cmake-build-debug-triton-via-pi/CMakeFiles/TargetDirectories.txt
+Cannot read CMake dependency information from /Users/plaggm/dev/nemo-codes/cmake-build-debug-triton-via-pi/CMakeFiles/Makefile.cmake

@@ -148,7 +148,8 @@ void init_nemo(nemo::config::NemoConfig* cfg) {
 	auto nlp = cfg->lps_per_pe;
 	//	if (g_tw_mynode == 0) {
 	//		nlp++;
-	//	}
+	//	} avg per write
+
 	g_tw_nlp = nlp;
 	g_tw_lookahead = cfg->lookahead;
 	g_tw_lp_types = ne_lps;

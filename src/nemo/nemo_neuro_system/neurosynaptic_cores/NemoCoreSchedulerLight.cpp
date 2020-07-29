@@ -45,7 +45,9 @@ namespace nemo {
 			auto stopped = nos_scheduler->get_waiting_procs(current_time);
 			send_start_messages(starts);
 			send_stop_messages(stops);
-			if(tw_now(my_lp) <= BuildOptions::nos_max_time || current_time<=BuildOptions::nos_max_time ) {
+			auto now = tw_now(my_lp);
+			auto nos_end = BuildOptions::nos_max_time;
+			if(now<= BuildOptions::nos_max_time  ) {
 				for (const auto& run_evt : running) {
 					send_input_spikes_to_cores(run_evt.model_id, run_evt.task_id);
 				}
@@ -83,6 +85,9 @@ namespace nemo {
 				auto dest_core = spike_dat.first;
 				auto spike_list = spike_dat.second;
 				auto dest_gid = get_gid_from_core_local(dest_core, 1);
+				if (dest_gid == 3092){
+					std::cout << "CAME FROM 89\n";
+				}
 				double offset = .01;
 				if (g_tw_synchronization_protocol == CONSERVATIVE) {
 					offset += g_tw_lookahead;
@@ -200,12 +205,17 @@ namespace nemo {
 			auto init_models = arbiter->get_waiting_procs();
 			for (const auto& model : init_models) {
 				for (unsigned int i = 0; i < num_cores_in_sim; i++) {
-					auto init_event = tw_event_new(my_lp->gid, JITTER(my_lp->rng) + .9, my_lp);
-					auto message = (nemo_message*)tw_event_data(init_event);
-					message->model_id = model.model_id;
-					message->message_type = NOS_LOAD_MODEL;
+					if(i == 3092){
+						std::cout << " 209 happened \n";
+					}else {
+						auto init_event = tw_event_new(i + 1, JITTER(my_lp->rng) + .9, my_lp);
+						auto message = (nemo_message*)tw_event_data(init_event);
+						message->model_id = model.model_id;
+						message->message_type = NOS_LOAD_MODEL;
 
-					tw_event_send(init_event);
+						tw_event_send(init_event);
+					}
+
 				}
 			}
 			nos_scheduler = arbiter;
