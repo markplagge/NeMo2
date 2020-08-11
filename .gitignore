@@ -77,3 +77,5 @@ cmake-build-debug_triton_remote/CMakeFiles/clion-log.txt
 cmake-build-debug-triton-pi/
 
 config/sched_pc1.json
+
+cmake-build-debug-triton-via-pi/
