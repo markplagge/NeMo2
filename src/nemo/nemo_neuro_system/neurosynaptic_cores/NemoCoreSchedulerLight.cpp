@@ -34,6 +34,7 @@ namespace nemo {
 #endif
 		}
 		void NemoCoreSchedulerLight::scheduler_tick(tw_bf* bf, nemo_message* m) {
+			static int announce = 0;
 			this->my_bf = bf;
 			if (m->message_type != NOS_TICK) {
 				tw_error(TW_LOC, "GOT NON NOS TICK IN LIGHT SCHEDULER");
@@ -45,14 +46,16 @@ namespace nemo {
 			auto stopped = nos_scheduler->get_waiting_procs(current_time);
 			send_start_messages(starts);
 			send_stop_messages(stops);
+			//individual check files to ensure correct run
 			auto now = tw_now(my_lp);
 			auto nos_end = BuildOptions::nos_max_time;
-			if(now<= BuildOptions::nos_max_time  ) {
+			if(now<= nos_end  ) {
 				for (const auto& run_evt : running) {
 					send_input_spikes_to_cores(run_evt.model_id, run_evt.task_id);
 				}
-			}else{
-//				std::cout <<"Scheduler at time " << current_scheduler_time << " stopped.\n";
+			}else if (announce == 0){
+				std::cout <<"Scheduler at time " << current_scheduler_time << " stopped.\n";
+				announce = 1;
 			}
 			send_scheduler_tick();
 			current_scheduler_time++;
