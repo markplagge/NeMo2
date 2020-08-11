@@ -81,7 +81,10 @@ set(NL_JSON_DIR ${CMAKE_SOURCE_DIR}/external/nlohmann)
 configure_file(config/example_config.json config/example_config.json COPYONLY)
 configure_file(config/single_model_config.json config/single_model_config.json COPYONLY)
 ###### ROSS EXTERNAL PROJECT
+set(CFLAGS_CUR $CMAKE_C_FLAGS)
+set(CFLAGS_ROSS $CMAKE_C_FLAGS -O3)
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/ROSS)
+set_target_properties(ROSS PROPERTIES CMAKE_C_FLAGS "$CFLAGS_ROSS" )
 
 ##### NEMO OS EXTERNAL PROJECT
 
